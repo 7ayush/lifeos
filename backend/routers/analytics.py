@@ -44,10 +44,10 @@ def get_leaderboard(db: Session = Depends(get_db)):
             habit_index_score = (sum(ratios) / len(ratios)) * 100
 
         # 3. Task Efficiency Score
-        tasks = db.query(models.Task).filter(models.Task.user_id == user.id, models.Task.timeframe_view == "Daily").all()
-        total_daily_tasks = len(tasks)
-        done_daily_tasks = len([t for t in tasks if t.status == "Done"])
-        task_efficiency = (done_daily_tasks / total_daily_tasks * 100) if total_daily_tasks > 0 else 0
+        tasks = db.query(models.Task).filter(models.Task.user_id == user.id).all()
+        total_tasks = len(tasks)
+        done_tasks = len([t for t in tasks if t.status == "Done"])
+        task_efficiency = (done_tasks / total_tasks * 100) if total_tasks > 0 else 0
 
         # 4. Growth Score Algorithm
         growth_score = (

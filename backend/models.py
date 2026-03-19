@@ -6,9 +6,11 @@ from .database import Base
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True)
+    google_id = Column(String, unique=True, nullable=True, index=True)
+    avatar_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     goals = relationship("Goal", back_populates="user")
@@ -60,7 +62,6 @@ class Task(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     status = Column(String, default="Todo") # "Todo", "InProgress", "Done"
-    timeframe_view = Column(String, default="Daily") # "Daily", "Monthly", "Annual"
     target_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

@@ -36,35 +36,36 @@
 
 @layer base {
   :root {
-    --background: 240 10% 4%;
+    /* Pure deep space background for stark contrast */
+    --background: 240 10% 2%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 6%;
+    --card: 240 10% 4%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 6%;
+    --popover: 240 10% 4%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 142 71% 45%;
+    --primary: 160 84% 39%; /* Emerald Base */
     --primary-foreground: 144 100% 11%;
 
-    --secondary: 240 4% 16%;
+    --secondary: 240 5% 12%; /* Deeper Zinc/Slate */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 4% 16%;
+    --muted: 240 5% 15%;
     --muted-foreground: 240 5% 65%;
 
-    --accent: 240 4% 16%;
+    --accent: 190 90% 45%; /* Cyan Accent */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 142 71% 45%;
+    --border: 240 5% 12%;
+    --input: 240 5% 12%;
+    --ring: 160 84% 39%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 }
 
@@ -73,36 +74,59 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary-foreground;
-    background-image: radial-gradient(circle at top center, rgba(16, 185, 129, 0.03), transparent 70%);
+    @apply bg-background text-foreground antialiased font-sans selection:bg-cyan-500/30 selection:text-white;
+    position: relative;
+    /* Soft mesh gradient underlay */
+    background-image: 
+      radial-gradient(ellipse at top left, rgba(16, 185, 129, 0.05), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.05), transparent 60%),
+      radial-gradient(ellipse at center, rgba(139, 92, 246, 0.02), transparent 80%);
   }
 }
 
 /* Custom Scrollbar for a premium feel */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--muted));
-  border-radius: 4px;
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
 
-/* Glassmorphism hooks */
-.glass-panel {
-  @apply bg-black/40 backdrop-blur-xl border border-white/5 shadow-2xl;
-}
-.glass-button {
-  @apply bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300;
-}
+@layer components {
+  /* Glassmorphism hooks v2 */
+  .glass-panel {
+    @apply bg-white/[0.015] backdrop-blur-2xl border border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] relative overflow-hidden;
+  }
 
-/* Fluid Gradients */
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400;
+  /* Inner subtle rim light effect for glass panels */
+  .glass-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(to bottom right, rgba(255,255,255,0.08), rgba(255,255,255,0.01));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .glass-button {
+    @apply bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] shadow-sm hover:shadow-md transition-all duration-300 active:scale-95;
+  }
+
+  /* Fluid Gradients */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400;
+  }
 }

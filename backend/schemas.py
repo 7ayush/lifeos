@@ -1,8 +1,39 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+
+# ============================
+# AUTH SCHEMAS
+# ============================
+
+class GoogleAuthRequest(BaseModel):
+    credential: str  # Google ID token
+
+
+class UserProfile(BaseModel):
+    id: int
+    username: str
+    email: str
+    avatar_url: Optional[str] = None
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileUpdate(BaseModel):
+    username: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserProfile
+
+
+# ============================
+# USER SCHEMAS
+# ============================
 
 class UserBase(BaseModel):
     username: str
@@ -13,8 +44,14 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
+    avatar_url: Optional[str] = None
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
+# GOAL SCHEMAS
+# ============================
 
 class GoalBase(BaseModel):
     title: str
@@ -31,6 +68,24 @@ class Goal(GoalBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
+
+class HabitLogBase(BaseModel):
+    log_date: date
+    status: str
+
+class HabitLogCreate(HabitLogBase):
+    pass
+
+class HabitLog(HabitLogBase):
+    id: int
+    habit_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
+# HABIT SCHEMAS
+# ============================
+
 class HabitBase(BaseModel):
     title: str
     target_x: int
@@ -40,21 +95,39 @@ class HabitBase(BaseModel):
 class HabitCreate(HabitBase):
     goal_id: Optional[int] = None
 
+class HabitUpdate(BaseModel):
+    title: Optional[str] = None
+    target_x: Optional[int] = None
+    target_y_days: Optional[int] = None
+    start_date: Optional[date] = None
+    goal_id: Optional[int] = None
+
 class Habit(HabitBase):
     id: int
     user_id: int
     goal_id: Optional[int]
     current_streak: int
+    logs: Optional[List[HabitLog]] = []
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
+# TASK SCHEMAS
+# ============================
 
 class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
-    timeframe_view: str = "Daily"
     target_date: Optional[date] = None
 
 class TaskCreate(TaskBase):
     pass
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    target_date: Optional[date] = None
 
 class Task(TaskBase):
     id: int
@@ -62,6 +135,11 @@ class Task(TaskBase):
     status: str
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
+# JOURNAL SCHEMAS
+# ============================
 
 class JournalEntryBase(BaseModel):
     entry_date: date

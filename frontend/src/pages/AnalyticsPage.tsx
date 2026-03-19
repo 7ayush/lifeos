@@ -1,147 +1,132 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api/config';
+import { getLeaderboard } from '../api';
 import type { LeaderboardEntry } from '../types';
-import { cn } from '../lib/utils';
-import { Trophy, TrendingUp, Target, Flame, CheckCircle2 } from 'lucide-react';
+import { Trophy, Medal, TrendingUp, Target, Zap, CheckSquare } from 'lucide-react';
 
 export function AnalyticsPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  const loadLeaderboard = async () => {
+    try {
+      setLoading(true);
+      const data = await getLeaderboard();
+      setLeaderboard(data);
+    } catch (err) {
+      console.error('Failed to load leaderboard', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const response = await api.get<LeaderboardEntry[]>('/analytics/leaderboard');
-        if (response.data && response.data.length > 0) {
-          setLeaderboard(response.data);
-        } else {
-          // Fallback static data to show off the UI if DB is empty
-          setLeaderboard([
-            { user_id: 1, username: "AlexV", growth_score: 92.4, goal_rate: 80, snap_streaks: 14, habit_index: 95, task_efficiency: 88 },
-            { user_id: 2, username: "SarahJ", growth_score: 88.1, goal_rate: 75, snap_streaks: 11, habit_index: 84, task_efficiency: 92 },
-            { user_id: 3, username: "MikeD", growth_score: 75.9, goal_rate: 60, snap_streaks: 5, habit_index: 80, task_efficiency: 75 },
-            { user_id: 4, username: "ElenaR", growth_score: 64.2, goal_rate: 45, snap_streaks: 2, habit_index: 60, task_efficiency: 50 },
-          ]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch leaderboard:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchLeaderboard();
+    loadLeaderboard();
   }, []);
 
+  if (loading && leaderboard.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="w-8 h-8 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const getRankBadge = (index: number) => {
+    if (index === 0) return <Medal className="w-6 h-6 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />;
+    if (index === 1) return <Medal className="w-6 h-6 text-stone-300 drop-shadow-[0_0_8px_rgba(214,211,209,0.5)]" />;
+    if (index === 2) return <Medal className="w-6 h-6 text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]" />;
+    return <span className="text-neutral-500 font-bold text-lg w-6 text-center">{index + 1}</span>;
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto w-full">
-      <header className="flex flex-col border-b border-white/10 pb-6">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/30">
-            <Trophy className="w-6 h-6 text-indigo-400" />
-          </div>
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 tracking-tight">
-            Leaderboard
-          </h1>
+    <div className="max-w-5xl mx-auto animate-in fade-in duration-500 pb-10">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+          <Trophy className="w-6 h-6 text-amber-400" />
         </div>
-        <p className="text-lg text-neutral-400 font-medium font-[Inter] max-w-2xl">
-          The Growth Contest evaluates users across goal completion, habit consistency, streak building, and task efficiency. Who is dominating this week?
-        </p>
-      </header>
+        <div>
+          <h1 className="text-3xl font-extrabold text-white font-['Outfit'] tracking-tight">Global Leaderboard</h1>
+          <p className="text-neutral-500 font-medium mt-1">Ranked by overall Growth Score.</p>
+        </div>
+      </div>
 
-      {/* Main Stats Area */}
-      <div className="flex-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-        {/* Background Decorative Glow */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full pointer-events-none" />
-
-        {isLoading ? (
-          <div className="h-64 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
-          </div>
-        ) : leaderboard.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center text-neutral-500">
-            <Trophy className="w-12 h-12 mb-4 opacity-20" />
-            <p>No active users on the leaderboard yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-4 relative z-10">
-            {/* Headers */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-widest border-b border-white/5">
-              <div className="col-span-1 text-center">Rank</div>
-              <div className="col-span-3">User</div>
-              <div className="col-span-2 text-right flex items-center justify-end gap-1"><TrendingUp className="w-3 h-3"/> Score</div>
-              <div className="col-span-2 text-right hidden sm:flex items-center justify-end gap-1"><Target className="w-3 h-3"/> Goals</div>
-              <div className="col-span-2 text-right hidden md:flex items-center justify-end gap-1"><Flame className="w-3 h-3"/> Streaks</div>
-              <div className="col-span-2 text-right hidden lg:flex items-center justify-end gap-1"><CheckCircle2 className="w-3 h-3"/> Tasks</div>
-            </div>
-
-            {/* List */}
-            {leaderboard.map((user, index) => {
-              const isTop = index === 0;
-              const isSecond = index === 1;
-              const isThird = index === 2;
-              
-              return (
-                <div 
-                  key={user.user_id}
-                  className={cn(
-                    "grid grid-cols-12 gap-4 items-center p-4 rounded-2xl transition-all duration-300 border",
-                    isTop ? "bg-gradient-to-r from-yellow-500/10 to-amber-500/5 hover:from-yellow-500/20 hover:to-amber-500/10 border-yellow-500/20 hover:border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.1)]" :
-                    isSecond ? "bg-neutral-800/40 hover:bg-neutral-800/60 border-neutral-400/20 hover:border-neutral-400/40" :
-                    isThird ? "bg-amber-900/10 hover:bg-amber-900/20 border-amber-700/20 hover:border-amber-700/40" :
-                    "bg-black/30 hover:bg-white/5 border-white/5 hover:border-white/10"
-                  )}
-                >
-                  <div className="col-span-1 flex justify-center">
-                    <span className={cn(
-                      "text-xl font-bold font-[Outfit]",
-                      isTop ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)] text-3xl" : 
-                      isSecond ? "text-neutral-300 text-2xl" : 
-                      isThird ? "text-amber-600 text-xl" : 
-                      "text-neutral-600"
-                    )}>
-                      #{index + 1}
-                    </span>
+      <div className="glass-panel rounded-3xl border border-white/10 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/[0.02] border-b border-white/10">
+                <th className="p-4 pl-6 text-xs font-semibold text-neutral-400 uppercase tracking-wider w-16 text-center">Rank</th>
+                <th className="p-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">User</th>
+                <th className="p-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                    <Target className="w-3.5 h-3.5" /> Goals
                   </div>
-                  
-                  <div className="col-span-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-inner">
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className={cn("font-medium", isTop ? "text-yellow-100 font-bold" : "text-neutral-200")}>
-                        {user.username}
-                      </h3>
-                      {isTop && <p className="text-xs text-yellow-400/80 uppercase tracking-widest mt-0.5">Rank 1</p>}
-                    </div>
+                </th>
+                <th className="p-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                    <CheckSquare className="w-3.5 h-3.5" /> Tasks
                   </div>
+                </th>
+                <th className="p-4 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                    <Zap className="w-3.5 h-3.5" /> Streaks
+                  </div>
+                </th>
+                <th className="p-4 pr-6 text-xs font-semibold text-amber-400 uppercase tracking-wider text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5" /> Growth Score
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {leaderboard.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-neutral-500">
+                    No data available.
+                  </td>
+                </tr>
+              ) : (
+                leaderboard.map((entry, idx) => {
+                  let rowStyles = "hover:bg-white/[0.02] transition-colors group border-l-2 border-transparent";
+                  if (idx === 0) rowStyles = "bg-gradient-to-r from-yellow-500/[0.08] to-transparent hover:from-yellow-500/[0.12] border-l-2 border-yellow-400 transition-colors group";
+                  else if (idx === 1) rowStyles = "bg-gradient-to-r from-stone-300/[0.08] to-transparent hover:from-stone-300/[0.12] border-l-2 border-stone-300 transition-colors group";
+                  else if (idx === 2) rowStyles = "bg-gradient-to-r from-amber-600/[0.08] to-transparent hover:from-amber-600/[0.12] border-l-2 border-amber-600 transition-colors group";
 
-                  <div className="col-span-2 text-right">
-                    <div className={cn(
-                      "text-2xl font-bold font-[Outfit]", 
-                      isTop ? "text-yellow-400" : "text-white"
-                    )}>
-                      {user.growth_score.toFixed(1)}
-                    </div>
-                  </div>
-
-                  <div className="col-span-2 text-right hidden sm:block">
-                    <div className="text-sm font-medium text-neutral-300">{user.goal_rate.toFixed(0)}%</div>
-                  </div>
-
-                  <div className="col-span-2 text-right hidden md:block">
-                    <div className="text-sm font-medium text-emerald-400">{user.snap_streaks} active</div>
-                  </div>
-
-                  <div className="col-span-2 text-right hidden lg:block">
-                    <div className="text-sm font-medium text-indigo-300">{user.task_efficiency.toFixed(0)}%</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                  return (
+                    <tr 
+                      key={entry.user_id} 
+                      className={rowStyles}
+                    >
+                      <td className="p-4 pl-6 text-center">
+                        <div className="flex justify-center">{getRankBadge(idx)}</div>
+                      </td>
+                      <td className="p-4">
+                        <div className="font-bold text-white text-base">{entry.username}</div>
+                      </td>
+                    <td className="p-4">
+                      <span className="text-neutral-400 font-medium">{Math.round(entry.goal_rate)}%</span>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-neutral-400 font-medium">{Math.round(entry.task_efficiency)}%</span>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-neutral-400 font-medium flex items-center gap-1">
+                        {entry.snap_streaks} <Zap className="w-3 h-3 text-yellow-400/50" />
+                      </span>
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      <span className="text-lg font-bold text-amber-400 font-['Outfit'] shadow-amber-400/20">
+                        {Math.round(entry.growth_score)}
+                      </span>
+                    </td>
+                  </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

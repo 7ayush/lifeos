@@ -41,3 +41,27 @@ def log_habit_status(
     
     # Return updated habit
     return habit
+
+@router.put("/{habit_id}", response_model=schemas.Habit)
+def update_habit(
+    user_id: int, habit_id: int, habit_update: schemas.HabitUpdate, db: Session = Depends(get_db)
+):
+    # Validate habit exists and belongs to user
+    habit = db.query(models.Habit).filter(models.Habit.id == habit_id, models.Habit.user_id == user_id).first()
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+    
+    return crud.update_user_habit(db=db, habit_id=habit_id, habit=habit_update)
+
+@router.delete("/{habit_id}")
+def delete_habit(user_id: int, habit_id: int, db: Session = Depends(get_db)):
+    # Validate habit exists and belongs to user
+    habit = db.query(models.Habit).filter(models.Habit.id == habit_id, models.Habit.user_id == user_id).first()
+    if not habit:
+        raise HTTPException(status_code=404, detail="Habit not found")
+    
+    success = crud.delete_user_habit(db=db, habit_id=habit_id)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete habit")
+    
+    return {"message": "Habit deleted successfully"}

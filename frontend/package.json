@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@tailwindcss/vite": "^4.2.1",
     "@types/tailwindcss": "^3.0.11",
     "axios": "^1.13.6",
