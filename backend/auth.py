@@ -1,5 +1,10 @@
 import os
+from pathlib import Path
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+# Load .env from the backend directory
+load_dotenv(Path(__file__).parent / ".env")
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status

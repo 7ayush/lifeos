@@ -1,7 +1,4 @@
-# Pyrefly configuration for Life OS backend
-# This tells the IDE where to find Python packages
-
 [project]
-search_path = ["."]
+search_path = ["backend"]
 site_package_path = ["backend/venv/lib/python3.9/site-packages"]
 python_version = "3.9"

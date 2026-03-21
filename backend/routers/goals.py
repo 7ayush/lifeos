@@ -20,3 +20,43 @@ def create_goal_for_user(
 def read_goals(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     goals = crud.get_user_goals(db, user_id=user_id, skip=skip, limit=limit)
     return goals
+
+@router.get("/{goal_id}")
+def get_goal_detail(user_id: int, goal_id: int, db: Session = Depends(get_db)):
+    detail = crud.get_goal_detail(db, goal_id=goal_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    if detail["user_id"] != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return detail
+
+@router.put("/{goal_id}", response_model=schemas.Goal)
+def update_goal(
+    user_id: int, goal_id: int, goal: schemas.GoalUpdate, db: Session = Depends(get_db)
+):
+    existing = crud.get_goal(db, goal_id=goal_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    if existing.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return crud.update_user_goal(db=db, goal_id=goal_id, goal=goal)
+
+@router.delete("/{goal_id}")
+def delete_goal(user_id: int, goal_id: int, db: Session = Depends(get_db)):
+    existing = crud.get_goal(db, goal_id=goal_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    if existing.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    crud.delete_user_goal(db=db, goal_id=goal_id)
+    return {"ok": True}
+
+@router.get("/{goal_id}/progress")
+def get_goal_progress(user_id: int, goal_id: int, db: Session = Depends(get_db)):
+    existing = crud.get_goal(db, goal_id=goal_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    if existing.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    progress = crud.compute_goal_progress(db, goal_id=goal_id)
+    return {"goal_id": goal_id, "progress": progress}

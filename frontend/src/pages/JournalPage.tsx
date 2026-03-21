@@ -1,9 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getJournalEntries, createJournalEntry, deleteJournalEntry, updateJournalEntry } from '../api';
 import type { JournalEntry, JournalEntryCreate } from '../types';
-import { BookOpen, Plus, Calendar, Trash2, Edit2, Save, X } from 'lucide-react';
+import { BookOpen, Plus, Calendar, Trash2, Save, X, Sparkles } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { ConfirmModal } from '../components/ConfirmModal';
+
+const MOOD_EMOJIS = [
+  { value: 1, emoji: '😔', label: 'Rough', color: 'from-rose-600 to-rose-400' },
+  { value: 2, emoji: '😕', label: 'Meh', color: 'from-orange-600 to-orange-400' },
+  { value: 3, emoji: '😐', label: 'Okay', color: 'from-amber-600 to-amber-400' },
+  { value: 4, emoji: '🙂', label: 'Good', color: 'from-emerald-600 to-emerald-400' },
+  { value: 5, emoji: '🤩', label: 'Amazing', color: 'from-violet-600 to-violet-400' },
+];
+
+const SMART_PROMPTS = [
+  "What was the highlight of my day?",
+  "What's one thing I learned today?",
+  "What am I grateful for right now?",
+  "What challenge did I overcome today?",
+  "How am I feeling and why?",
+  "What's one thing I want to improve tomorrow?",
+  "What made me smile today?",
+  "What progress did I make toward my goals?",
+  "What would I tell my future self about today?",
+  "What's draining my energy and what can I do about it?",
+];
+
+function getRandomPrompts(count: number): string[] {
+  const shuffled = [...SMART_PROMPTS].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
 
 export function JournalPage() {
   const { user } = useAuth();
@@ -15,8 +42,15 @@ export function JournalPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [currentContent, setCurrentContent] = useState('');
   const [currentDate, setCurrentDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [currentMood, setCurrentMood] = useState<number | undefined>(undefined);
+  const [showPrompts, setShowPrompts] = useState(false);
+  const [prompts, setPrompts] = useState<string[]>([]);
 
-  const loadEntries = async () => {
+  // Delete State
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
+
+  const loadEntries = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -27,11 +61,11 @@ export function JournalPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadEntries();
-  }, [user]);
+  }, [loadEntries]);
 
   const handleSave = async () => {
     if (!user || !currentContent.trim()) return;
@@ -40,6 +74,7 @@ export function JournalPage() {
       const payload: JournalEntryCreate = {
         content: currentContent,
         entry_date: currentDate,
+        mood: currentMood,
       };
 
       if (editingId) {
@@ -56,10 +91,18 @@ export function JournalPage() {
   };
 
   const handleDelete = async (entryId: number) => {
-    if (!user || !confirm('Are you sure you want to delete this entry?')) return;
+    setEntryToDelete(entryId);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!user || entryToDelete === null) return;
     try {
-      await deleteJournalEntry(user.id, entryId);
-      setEntries(prev => prev.filter(e => e.id !== entryId));
+      await deleteJournalEntry(user.id, entryToDelete);
+      setEntries(prev => prev.filter(e => e.id !== entryToDelete));
+      setIsDeleteConfirmOpen(false);
+      setEntryToDelete(null);
+      resetEditor();
     } catch (err) {
       console.error('Failed to delete journal entry', err);
     }
@@ -70,6 +113,8 @@ export function JournalPage() {
     setEditingId(entry.id);
     setCurrentContent(entry.content);
     setCurrentDate(entry.entry_date);
+    setCurrentMood(entry.mood ?? undefined);
+    setShowPrompts(false);
   };
 
   const startNew = () => {
@@ -77,12 +122,22 @@ export function JournalPage() {
     setEditingId(null);
     setCurrentContent('');
     setCurrentDate(format(new Date(), 'yyyy-MM-dd'));
+    setCurrentMood(undefined);
+    setPrompts(getRandomPrompts(3));
+    setShowPrompts(false);
   };
 
   const resetEditor = () => {
     setIsComposing(false);
     setEditingId(null);
     setCurrentContent('');
+    setCurrentMood(undefined);
+    setShowPrompts(false);
+  };
+
+  const applyPrompt = (prompt: string) => {
+    setCurrentContent(prev => prev ? `${prev}\n\n${prompt}\n` : `${prompt}\n`);
+    setShowPrompts(false);
   };
 
   if (loading && entries.length === 0) {
@@ -124,6 +179,7 @@ export function JournalPage() {
             entries.map(entry => {
               const dateObj = parseISO(entry.entry_date);
               const isActive = editingId === entry.id;
+              const moodEmoji = entry.mood ? MOOD_EMOJIS.find(m => m.value === entry.mood) : null;
               return (
                 <div 
                   key={entry.id}
@@ -137,9 +193,14 @@ export function JournalPage() {
                   {isActive && (
                     <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-gradient-to-b from-fuchsia-400 to-transparent rounded-r-full shadow-[0_0_10px_rgba(217,70,239,0.5)]" />
                   )}
-                  <p className={`font-bold text-sm mb-1 ${isActive ? 'text-fuchsia-400' : 'text-neutral-300'}`}>
-                    {format(dateObj, 'MMM d, yyyy')}
-                  </p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className={`font-bold text-sm ${isActive ? 'text-fuchsia-400' : 'text-neutral-300'}`}>
+                      {format(dateObj, 'MMM d, yyyy')}
+                    </p>
+                    {moodEmoji && (
+                      <span className="text-lg" title={moodEmoji.label}>{moodEmoji.emoji}</span>
+                    )}
+                  </div>
                   <p className="text-xs text-neutral-500 line-clamp-2">
                     {entry.content}
                   </p>
@@ -154,7 +215,8 @@ export function JournalPage() {
       <div className="w-full md:w-2/3 lg:w-3/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-white/10 overflow-hidden relative">
         {isComposing ? (
           <div className="flex flex-col h-full bg-black/40 p-6 md:p-8 relative z-10 custom-scrollbar overflow-y-auto">
-            <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/10">
+            {/* Header Row */}
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
               <div className="flex items-center gap-4">
                 <Calendar className="w-5 h-5 text-neutral-500" />
                 <input 
@@ -182,6 +244,72 @@ export function JournalPage() {
                 </button>
               </div>
             </div>
+
+            {/* Mood Selector */}
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs uppercase font-bold text-neutral-500 tracking-wider whitespace-nowrap">Mood</span>
+              <div className="flex items-center gap-1.5">
+                {MOOD_EMOJIS.map(mood => (
+                  <button
+                    key={mood.value}
+                    onClick={() => setCurrentMood(currentMood === mood.value ? undefined : mood.value)}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all duration-200 border ${
+                      currentMood === mood.value
+                        ? `bg-gradient-to-br ${mood.color} border-white/20 scale-110 shadow-lg`
+                        : 'bg-white/5 border-transparent hover:bg-white/10 hover:scale-105'
+                    }`}
+                    title={mood.label}
+                  >
+                    {mood.emoji}
+                  </button>
+                ))}
+              </div>
+              {currentMood && (
+                <span className="text-xs text-neutral-400 font-medium">
+                  {MOOD_EMOJIS.find(m => m.value === currentMood)?.label}
+                </span>
+              )}
+            </div>
+
+            {/* Smart Prompts Toggle  */}
+            <div className="mb-4">
+              <button
+                onClick={() => {
+                  setShowPrompts(!showPrompts);
+                  if (!showPrompts) setPrompts(getRandomPrompts(3));
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all border ${
+                  showPrompts 
+                    ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' 
+                    : 'bg-white/5 border-white/5 text-neutral-500 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Smart Prompts
+              </button>
+
+              {showPrompts && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {prompts.map((prompt, i) => (
+                    <button
+                      key={i}
+                      onClick={() => applyPrompt(prompt)}
+                      className="px-3 py-2 rounded-xl bg-white/5 hover:bg-violet-500/10 text-neutral-400 hover:text-violet-300 text-sm font-medium border border-white/5 hover:border-violet-500/20 transition-all"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setPrompts(getRandomPrompts(3))}
+                    className="px-3 py-2 rounded-xl text-neutral-600 hover:text-neutral-400 text-sm transition-colors"
+                  >
+                    ↻ Refresh
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Textarea */}
             <textarea
               value={currentContent}
               onChange={(e) => setCurrentContent(e.target.value)}
@@ -217,6 +345,14 @@ export function JournalPage() {
         )}
       </div>
       
+      <ConfirmModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Entry"
+        message="Are you sure you want to delete this journal entry? This action cannot be undone."
+        confirmText="Delete Entry"
+      />
     </div>
   );
 }

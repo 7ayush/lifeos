@@ -17,6 +17,7 @@ class User(Base):
     habits = relationship("Habit", back_populates="user")
     tasks = relationship("Task", back_populates="user")
     journal_entries = relationship("JournalEntry", back_populates="user")
+    notes = relationship("Note", back_populates="user")
 
 class Goal(Base):
     __tablename__ = "goals"
@@ -24,12 +25,15 @@ class Goal(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    status = Column(String, default="Active")
+    status = Column(String, default="Active")  # Active, Completed, Archived
+    category = Column(String, default="Project")  # P.A.R.A.: Project, Area, Resource, Archive
+    priority = Column(String, default="Medium")  # High, Medium, Low
     target_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="goals")
     habits = relationship("Habit", back_populates="goal")
+    tasks = relationship("Task", back_populates="goal")
 
 class Habit(Base):
     __tablename__ = "habits"
@@ -37,10 +41,18 @@ class Habit(Base):
     goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String, nullable=False)
-    target_x = Column(Integer, nullable=False)
-    target_y_days = Column(Integer, nullable=False)
+    target_x = Column(Integer, nullable=True)  # nullable for scheduled habits
+    target_y_days = Column(Integer, nullable=True)  # nullable for scheduled habits
     current_streak = Column(Integer, default=0)
     start_date = Column(Date, nullable=False)
+
+    # Recurrence fields
+    frequency_type = Column(String, default="flexible")  # flexible, daily, weekly, monthly, annually, custom
+    repeat_interval = Column(Integer, default=1)  # e.g. every 2 weeks
+    repeat_days = Column(String, nullable=True)  # comma-separated day numbers (0=Sun..6=Sat) for weekly
+    ends_type = Column(String, default="never")  # never, on, after
+    ends_on_date = Column(Date, nullable=True)
+    ends_after_occurrences = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="habits")
     goal = relationship("Goal", back_populates="habits")
@@ -59,13 +71,28 @@ class Task(Base):
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    status = Column(String, default="Todo") # "Todo", "InProgress", "Done"
+    status = Column(String, default="Todo")  # Todo, InProgress, Done
+    energy_level = Column(String, nullable=True)  # High, Medium, Low
+    estimated_minutes = Column(Integer, nullable=True)
+    actual_minutes = Column(Integer, nullable=True)
     target_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="tasks")
+    goal = relationship("Goal", back_populates="tasks")
+    subtasks = relationship("SubTask", back_populates="task", cascade="all, delete-orphan")
+
+class SubTask(Base):
+    __tablename__ = "subtasks"
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"))
+    title = Column(String, nullable=False)
+    is_complete = Column(Integer, default=0)  # 0 = incomplete, 1 = complete
+
+    task = relationship("Task", back_populates="subtasks")
 
 class JournalEntry(Base):
     __tablename__ = "journal_entries"
@@ -73,6 +100,7 @@ class JournalEntry(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     entry_date = Column(Date, nullable=False)
     content = Column(Text, nullable=False)
+    mood = Column(Integer, nullable=True)  # 1-5 scale
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="journal_entries")
@@ -86,3 +114,15 @@ class JournalTag(Base):
     entity_id = Column(Integer, nullable=False)
 
     journal_entry = relationship("JournalEntry", back_populates="tags")
+
+class Note(Base):
+    __tablename__ = "notes"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=True, default="")
+    folder = Column(String, default="Resource")  # Project, Area, Resource, Archive
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="notes")

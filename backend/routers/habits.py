@@ -1,7 +1,7 @@
 import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from .. import crud, models, schemas
 from ..database import get_db
@@ -24,10 +24,13 @@ def read_habits(user_id: int, skip: int = 0, limit: int = 100, db: Session = Dep
 
 @router.post("/{habit_id}/log", response_model=schemas.Habit)
 def log_habit_status(
-    user_id: int, habit_id: int, status: str, log_date: datetime.date = None, db: Session = Depends(get_db)
+    user_id: int, habit_id: int, status: str, log_date: Optional[datetime.date] = None, db: Session = Depends(get_db)
 ):
     if log_date is None:
         log_date = datetime.date.today()
+    
+    if log_date > datetime.date.today():
+        raise HTTPException(status_code=400, detail="Cannot log status for future dates")
     
     if status not in ["Done", "Missed"]:
         raise HTTPException(status_code=400, detail="Status must be 'Done' or 'Missed'")

@@ -1,14 +1,16 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, BookOpen, BarChart3, Activity } from 'lucide-react';
+import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProfileMenu } from './ProfileMenu';
 
 export function Sidebar() {
   const routes = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { name: 'Goals', icon: Target, path: '/goals' },
     { name: 'Tasks (Kanban)', icon: CheckSquare, path: '/tasks' },
     { name: 'Habits', icon: Activity, path: '/habits' },
     { name: 'Journal', icon: BookOpen, path: '/journal' },
+    { name: 'Vault', icon: FolderOpen, path: '/vault' },
     { name: 'Leaderboard', icon: BarChart3, path: '/analytics' },
   ];
 

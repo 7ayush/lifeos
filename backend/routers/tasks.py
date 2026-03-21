@@ -36,28 +36,50 @@ def read_tasks(
 def update_task(
     user_id: int, task_id: int, task_update: schemas.TaskUpdate, db: Session = Depends(get_db)
 ):
-    # Ensure task belongs to user
     task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user_id == user_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-        
-    updated_task = crud.update_task(
-        db, task_id=task_id, 
-        status=task_update.status, 
-        title=task_update.title,
-        description=task_update.description,
-        target_date=task_update.target_date
-    )
+    updated_task = crud.update_task(db, task_id=task_id, task_update=task_update)
     return updated_task
 
 @router.delete("/{task_id}")
 def delete_task(user_id: int, task_id: int, db: Session = Depends(get_db)):
-    # Ensure task belongs to user
     task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user_id == user_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-        
     success = crud.delete_task(db, task_id=task_id)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete task")
     return {"status": "success"}
+
+# ============================
+# SUBTASK ENDPOINTS
+# ============================
+
+@router.post("/{task_id}/subtasks", response_model=schemas.SubTask)
+def create_subtask(
+    user_id: int, task_id: int, subtask: schemas.SubTaskCreate, db: Session = Depends(get_db)
+):
+    task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user_id == user_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return crud.create_subtask(db=db, subtask=subtask, task_id=task_id)
+
+@router.patch("/{task_id}/subtasks/{subtask_id}/toggle", response_model=schemas.SubTask)
+def toggle_subtask(
+    user_id: int, task_id: int, subtask_id: int, db: Session = Depends(get_db)
+):
+    subtask = crud.toggle_subtask(db, subtask_id=subtask_id)
+    if not subtask:
+        raise HTTPException(status_code=404, detail="SubTask not found")
+    return subtask
+
+@router.delete("/{task_id}/subtasks/{subtask_id}")
+def delete_subtask(
+    user_id: int, task_id: int, subtask_id: int, db: Session = Depends(get_db)
+):
+    success = crud.delete_subtask(db, subtask_id=subtask_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="SubTask not found")
+    return {"status": "success"}
+
