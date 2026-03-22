@@ -1,4 +1,4 @@
-import { Task } from '../types';
+import type { Task } from '../types';
 
 export function filterByPriority(tasks: Task[], priority: string): Task[] {
   if (priority === 'All') return tasks;

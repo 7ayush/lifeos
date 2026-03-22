@@ -1,4 +1,4 @@
-import { Task } from '../types';
+import type { Task } from '../types';
 
 const PRIORITY_WEIGHT: Record<string, number> = {
   High: 0,
