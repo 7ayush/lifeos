@@ -4,6 +4,7 @@ from typing import List
 
 from .. import crud, models, schemas
 from ..database import get_db
+from ..progress_engine import batch_compute_progress, recalculate_goal_progress
 
 router = APIRouter(
     prefix="/users/{user_id}/goals",
@@ -16,18 +17,48 @@ def create_goal_for_user(
 ):
     return crud.create_user_goal(db=db, goal=goal, user_id=user_id)
 
-@router.get("/", response_model=List[schemas.Goal])
+@router.get("/", response_model=List[schemas.GoalWithProgress])
 def read_goals(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     goals = crud.get_user_goals(db, user_id=user_id, skip=skip, limit=limit)
-    return goals
+    goal_ids = [g.id for g in goals]
+    progress_map = batch_compute_progress(db, goal_ids)
+    result = []
+    for g in goals:
+        goal_data = schemas.GoalWithProgress.model_validate(g)
+        goal_data.progress = progress_map.get(g.id, 0)
+        result.append(goal_data)
+    return result
 
-@router.get("/{goal_id}")
+@router.get("/{goal_id}", response_model=schemas.GoalDetailWithHistory)
 def get_goal_detail(user_id: int, goal_id: int, db: Session = Depends(get_db)):
     detail = crud.get_goal_detail(db, goal_id=goal_id)
     if not detail:
         raise HTTPException(status_code=404, detail="Goal not found")
     if detail["user_id"] != user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Recalculate progress (triggers side effects: snapshot, milestones, auto-complete)
+    progress = recalculate_goal_progress(db, goal_id)
+
+    # Fetch milestones ordered by threshold
+    milestones = (
+        db.query(models.GoalMilestone)
+        .filter(models.GoalMilestone.goal_id == goal_id)
+        .order_by(models.GoalMilestone.threshold)
+        .all()
+    )
+
+    # Fetch progress history ordered by date descending
+    progress_history = (
+        db.query(models.ProgressSnapshot)
+        .filter(models.ProgressSnapshot.goal_id == goal_id)
+        .order_by(models.ProgressSnapshot.date.desc())
+        .all()
+    )
+
+    detail["progress"] = progress
+    detail["milestones"] = milestones
+    detail["progress_history"] = progress_history
     return detail
 
 @router.put("/{goal_id}", response_model=schemas.Goal)

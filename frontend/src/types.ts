@@ -16,6 +16,7 @@ export interface Goal {
   priority: string; // 'High', 'Medium', 'Low'
   target_date?: string;
   created_at: string;
+  progress?: number;
 }
 
 export interface GoalCreate {
@@ -35,10 +36,22 @@ export interface GoalUpdate {
   target_date?: string;
 }
 
+export interface ProgressSnapshot {
+  date: string;
+  progress: number;
+}
+
+export interface GoalMilestone {
+  threshold: number;
+  achieved_at: string;
+}
+
 export interface GoalDetail extends Goal {
   habits: Habit[];
   tasks: Task[];
   progress: number;
+  milestones: GoalMilestone[];
+  progress_history: ProgressSnapshot[];
 }
 
 export interface SubTask {
@@ -48,10 +61,24 @@ export interface SubTask {
   is_complete: number;
 }
 
+export interface Tag {
+  id: number;
+  name: string;
+  color: string | null;
+}
+
+export interface TagCreate {
+  name: string;
+  color?: string;
+}
+
 export interface Task {
   id: number;
   user_id: number;
   goal_id?: number;
+  habit_id?: number;
+  parent_task_id?: number | null;
+  task_type: string; // 'manual', 'habit', 'recurring'
   title: string;
   description?: string;
   status: string; // 'Todo', 'InProgress', 'Done'
@@ -61,6 +88,15 @@ export interface Task {
   target_date?: string;
   created_at: string;
   subtasks?: SubTask[];
+  priority?: string;
+  frequency_type?: string;
+  repeat_interval?: number;
+  repeat_days?: string;
+  ends_type?: string;
+  ends_on_date?: string;
+  ends_after_occurrences?: number;
+  sort_order?: number;
+  tags?: Tag[];
 }
 
 export interface TaskCreate {
@@ -68,8 +104,18 @@ export interface TaskCreate {
   description?: string;
   target_date?: string;
   goal_id?: number;
+  habit_id?: number;
+  task_type?: string;
   energy_level?: string;
   estimated_minutes?: number;
+  priority?: string;
+  frequency_type?: string;
+  repeat_interval?: number;
+  repeat_days?: string;
+  ends_type?: string;
+  ends_on_date?: string;
+  ends_after_occurrences?: number;
+  tag_ids?: number[];
 }
 
 export interface HabitLog {
@@ -148,11 +194,27 @@ export interface NoteUpdate {
   folder?: string;
 }
 
+export interface TaskEfficiencyBreakdown {
+  daily: number;
+  monthly: number;
+  annual: number;
+}
+
+export interface ActiveGoalSummary {
+  id: number;
+  title: string;
+  priority: string;
+  progress: number;
+  category: string;
+  target_date?: string | null;
+}
+
 export interface DashboardStats {
   active_streaks: number;
   goal_completion_percentage: number;
-  task_efficiency_percentage: number;
+  task_efficiency: TaskEfficiencyBreakdown;
   upcoming_deadlines: number;
+  active_goals?: ActiveGoalSummary[];
 }
 
 export interface DashboardToday {
@@ -197,4 +259,114 @@ export interface YearInPixelsData {
   pixels: PixelDay[];
   start_date: string;
   end_date: string;
+}
+
+export interface Notification {
+  id: number;
+  user_id: number;
+  task_id: number;
+  type: 'upcoming' | 'due_today' | 'overdue';
+  message: string;
+  is_read: boolean;
+  dismissed: boolean;
+  created_at: string;
+}
+
+export interface ReminderConfig {
+  user_id: number;
+  remind_days_before: number;
+  remind_on_due_date: boolean;
+  remind_when_overdue: boolean;
+}
+
+export interface NotificationSyncResponse {
+  created: number;
+}
+
+export interface WeeklyReflection {
+  id: number;
+  user_id: number;
+  week_identifier: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FocusTaskItem {
+  id: number;
+  user_id: number;
+  task_id: number;
+  week_identifier: string;
+  task_title: string;
+  task_status: string;
+  task_priority: string;
+  created_at: string;
+}
+
+export interface CompletedTaskItem {
+  id: number;
+  title: string;
+  priority: string;
+  goal_title: string | null;
+  completed_date: string;
+}
+
+export interface HabitWeekSummary {
+  habit_id: number;
+  title: string;
+  adherence_rate: number;
+  current_streak: number;
+  daily_status: Record<string, string>;
+}
+
+export interface GoalWeekProgress {
+  goal_id: number;
+  title: string;
+  priority: string;
+  current_progress: number;
+  progress_delta: number;
+  target_date: string | null;
+}
+
+export interface JournalEntrySummary {
+  id: number;
+  entry_date: string;
+  mood: number | null;
+  content_preview: string;
+}
+
+export interface DailyTaskCount {
+  day: string;
+  count: number;
+}
+
+export interface WeekComparisonStats {
+  completion_rate: number;
+  previous_completion_rate: number;
+  completion_rate_change: number;
+  habit_adherence_rate: number;
+  previous_habit_adherence_rate: number;
+  habit_adherence_rate_change: number;
+  total_estimated_minutes: number;
+  total_actual_minutes: number;
+  efficiency_ratio: number;
+}
+
+export interface WeeklyReviewData {
+  week_identifier: string;
+  week_start: string;
+  week_end: string;
+  completed_tasks: Record<string, CompletedTaskItem[]>;
+  total_tasks: number;
+  completed_task_count: number;
+  completion_rate: number;
+  habits: HabitWeekSummary[];
+  overall_habit_adherence: number;
+  goals: GoalWeekProgress[];
+  journal_entries: JournalEntrySummary[];
+  average_mood: number | null;
+  reflection: WeeklyReflection | null;
+  focus_tasks: FocusTaskItem[];
+  daily_task_counts: DailyTaskCount[];
+  comparison: WeekComparisonStats;
 }

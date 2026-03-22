@@ -4,7 +4,7 @@ import { getHabits, createHabit, logHabit, updateHabit, deleteHabit, getGoals } 
 import type { Habit, HabitCreate, HabitLog, Goal } from '../types';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { Plus, Activity, CheckCircle2, Flame, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Target, TrendingUp } from 'lucide-react';
-import { format, subDays, isSameDay, isAfter, isBefore, startOfDay } from 'date-fns';
+import { format, subDays, addDays, isSameDay, isAfter, isBefore, startOfDay } from 'date-fns';
 
 export function HabitsPage() {
   const { user } = useAuth();
@@ -86,7 +86,7 @@ export function HabitsPage() {
     if (!user || !newTitle.trim()) return;
     
     if (targetX > targetY) {
-      alert("Target (X) cannot be greater than Period (Y).");
+      alert("Target Days cannot be greater than Total Days.");
       return;
     }
 
@@ -452,7 +452,7 @@ export function HabitsPage() {
               
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-neutral-300 mb-2">Target (X days)</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Target Days</label>
                   <input
                     type="number"
                     min="1"
@@ -466,7 +466,7 @@ export function HabitsPage() {
                 </div>
                 <div className="pt-7 text-neutral-500 font-bold">in</div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-neutral-300 mb-2">Period (Y days)</label>
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">Total Days</label>
                   <input
                     type="number"
                     min="1"
@@ -488,6 +488,17 @@ export function HabitsPage() {
                   )}
                 </div>
               </div>
+
+              {/* Computed Last Date */}
+              {startDate && targetY > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                  <Calendar className="w-4 h-4 text-indigo-400" />
+                  <span className="text-xs text-neutral-400">Ends on:</span>
+                  <span className="text-xs font-bold text-indigo-300">
+                    {format(addDays(new Date(startDate), targetY), 'MMM d, yyyy')}
+                  </span>
+                </div>
+              )}
 
               {/* Goal Selector */}
               <div>

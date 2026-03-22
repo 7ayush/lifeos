@@ -1,10 +1,37 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Calendar, Shield, LogOut } from 'lucide-react';
+import { getReminderConfig, updateReminderConfig } from '../api';
+import type { ReminderConfig } from '../types';
+import { User, Mail, Calendar, Shield, LogOut, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function ProfilePage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [reminderConfig, setReminderConfig] = useState<ReminderConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configSuccess, setConfigSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    getReminderConfig(user.id)
+      .then(setReminderConfig)
+      .catch(err => console.error('Failed to load reminder config', err))
+      .finally(() => setConfigLoading(false));
+  }, [user]);
+
+  const handleConfigChange = async (updates: Partial<ReminderConfig>) => {
+    if (!user) return;
+    try {
+      const updated = await updateReminderConfig(user.id, updates);
+      setReminderConfig(updated);
+      setConfigSuccess(true);
+      setTimeout(() => setConfigSuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to update reminder config', err);
+    }
+  };
 
   if (!user) return null;
 
@@ -100,6 +127,92 @@ export function ProfilePage() {
             <p className="text-sm text-white">Google Account</p>
           </div>
         </div>
+      </div>
+
+      {/* Reminder Settings */}
+      <div className="glass-panel rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+            <Bell className="w-5 h-5 text-amber-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-neutral-300 uppercase tracking-wider">
+              Reminder Settings
+            </h3>
+            <p className="text-xs text-neutral-500 mt-0.5">Configure when you receive deadline reminders</p>
+          </div>
+          {configSuccess && (
+            <span className="ml-auto text-xs font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              Saved
+            </span>
+          )}
+        </div>
+
+        {configLoading ? (
+          <div className="flex justify-center py-6">
+            <div className="w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+          </div>
+        ) : reminderConfig ? (
+          <div className="space-y-5">
+            {/* Remind Days Before */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">Advance Notice</p>
+                <p className="text-xs text-neutral-500 mt-0.5">How many days before a deadline to remind you</p>
+              </div>
+              <select
+                value={reminderConfig.remind_days_before}
+                onChange={(e) => handleConfigChange({ remind_days_before: parseInt(e.target.value) })}
+                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 appearance-none cursor-pointer"
+              >
+                <option value="0" className="bg-neutral-900">None</option>
+                <option value="1" className="bg-neutral-900">1 day</option>
+                <option value="2" className="bg-neutral-900">2 days</option>
+                <option value="3" className="bg-neutral-900">3 days</option>
+                <option value="5" className="bg-neutral-900">5 days</option>
+                <option value="7" className="bg-neutral-900">7 days</option>
+              </select>
+            </div>
+
+            {/* Remind on Due Date */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">Due Date Reminder</p>
+                <p className="text-xs text-neutral-500 mt-0.5">Get notified on the day a task is due</p>
+              </div>
+              <button
+                onClick={() => handleConfigChange({ remind_on_due_date: !reminderConfig.remind_on_due_date })}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${
+                  reminderConfig.remind_on_due_date ? 'bg-amber-500' : 'bg-white/10'
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                  reminderConfig.remind_on_due_date ? 'translate-x-5' : ''
+                }`} />
+              </button>
+            </div>
+
+            {/* Remind When Overdue */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">Overdue Reminder</p>
+                <p className="text-xs text-neutral-500 mt-0.5">Get notified when a task is past its deadline</p>
+              </div>
+              <button
+                onClick={() => handleConfigChange({ remind_when_overdue: !reminderConfig.remind_when_overdue })}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer ${
+                  reminderConfig.remind_when_overdue ? 'bg-amber-500' : 'bg-white/10'
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                  reminderConfig.remind_when_overdue ? 'translate-x-5' : ''
+                }`} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-neutral-500 text-sm">Unable to load reminder settings.</p>
+        )}
       </div>
 
       {/* Danger Zone */}

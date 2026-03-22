@@ -1,0 +1,7 @@
+
+Features to be implemented and Bugs to be Fixed
+1. On Goals section create a tool tip for user to understand what exactly does each one of PARA mean
+2. On the home page, Task efficiency should show, Monthly(current month), Daily (Today’s) and Annual(current year) items progress in % separately have have all these items in a rotating circular list carousal and also provide an arrow (left and right) for users to navigate as well.
+3. In custom schedule creation as well, I should be having the facility of having X/Y feasibility. But in this case last date of the habit should be determined as per the schedule and Y value. The last date understanding should also be there in case of X/Y case as well.
+4. Rename Flexible(X/Y) to Daily, Target (X days) label to Target Days, Period (Y days) to Total Days.
+5. Whenever any habit is created, it should create a daily/monthly/weekly task for that habit if needed as soon for the current date/week/month as needed. Similarly we should update/delete the task if the habit is modified. Furthermore, when the application loads for a given user, we need to sync Task and Habits for the user for current day (if it is a daily task), current week ( if it is once a week/bi weekly habit ), month (if it is a once a month habit). This essentially means that there will be a strong relationship between Task and Habit. This essentially means we are do away with habit_logs table most likely.

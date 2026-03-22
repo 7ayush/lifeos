@@ -5,6 +5,8 @@ import type { JournalEntry, JournalEntryCreate } from '../types';
 import { BookOpen, Plus, Calendar, Trash2, Save, X, Sparkles } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { MarkdownEditor } from '../components/MarkdownEditor';
+import { stripMarkdown } from '../utils/stripMarkdown';
 
 const MOOD_EMOJIS = [
   { value: 1, emoji: '😔', label: 'Rough', color: 'from-rose-600 to-rose-400' },
@@ -202,7 +204,7 @@ export function JournalPage() {
                     )}
                   </div>
                   <p className="text-xs text-neutral-500 line-clamp-2">
-                    {entry.content}
+                    {stripMarkdown(entry.content)}
                   </p>
                 </div>
               );
@@ -309,13 +311,13 @@ export function JournalPage() {
               )}
             </div>
 
-            {/* Textarea */}
-            <textarea
+            {/* Markdown Editor */}
+            <MarkdownEditor
               value={currentContent}
-              onChange={(e) => setCurrentContent(e.target.value)}
+              onChange={setCurrentContent}
               placeholder="What's on your mind today?"
-              className="flex-1 w-full bg-transparent resize-none border-none text-neutral-200 text-lg leading-relaxed focus:outline-none focus:ring-0 placeholder:text-neutral-700"
               autoFocus
+              className="flex-1"
             />
           </div>
         ) : (

@@ -3,8 +3,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { getGoals, createGoal, updateGoal, deleteGoal, getGoalDetail } from '../api';
 import type { Goal, GoalCreate, GoalDetail } from '../types';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { Target, Plus, Pencil, Trash2, ChevronRight, Calendar, Flame, CheckCircle2, Circle, Activity, CheckSquare, X, TrendingUp } from 'lucide-react';
+import { Target, Plus, Pencil, Trash2, ChevronRight, Calendar, Flame, CheckCircle2, Circle, Activity, CheckSquare, X, TrendingUp, Trophy } from 'lucide-react';
 import { format } from 'date-fns';
+import { ProgressBar } from '../components/ProgressBar';
 
 const CATEGORIES = ['Project', 'Area', 'Resource', 'Archive'] as const;
 const PRIORITIES = ['High', 'Medium', 'Low'] as const;
@@ -15,6 +16,13 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string
   Area: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
   Resource: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
   Archive: { bg: 'bg-neutral-500/10', text: 'text-neutral-400', border: 'border-neutral-500/20' },
+};
+
+const PARA_DESCRIPTIONS: Record<string, string> = {
+  Project: 'A goal with a clear deadline and deliverable outcome',
+  Area: 'An ongoing area of responsibility to maintain over time',
+  Resource: 'A topic or interest for future reference and learning',
+  Archive: 'Completed or paused items no longer active',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -195,6 +203,7 @@ export function GoalsPage() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
+              title={PARA_DESCRIPTIONS[cat] || 'Show all goals'}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 filter === cat
                   ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
@@ -254,6 +263,11 @@ export function GoalsPage() {
                       )}
                     </div>
                     <ChevronRight className={`w-4 h-4 shrink-0 mt-1 transition-transform ${isSelected ? 'text-indigo-400 translate-x-0' : 'text-neutral-600 -translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mt-3">
+                    <ProgressBar progress={goal.progress ?? 0} showLabel size="sm" />
                   </div>
 
                   {/* Footer */}
@@ -428,6 +442,47 @@ export function GoalsPage() {
                   )}
                 </div>
 
+                {/* Milestones */}
+                {selectedGoal.milestones && selectedGoal.milestones.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Milestones</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedGoal.milestones.map(m => (
+                        <div key={m.threshold} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                          <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="text-sm font-bold text-amber-400">{m.threshold}%</span>
+                          <span className="text-[11px] text-neutral-500">
+                            {format(new Date(m.achieved_at), 'MMM d, yyyy')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Progress History */}
+                {selectedGoal.progress_history && selectedGoal.progress_history.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <TrendingUp className="w-4 h-4 text-purple-400" />
+                      <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Progress History</h3>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                      {selectedGoal.progress_history.map(snap => (
+                        <div key={snap.date} className="flex items-center justify-between p-3 rounded-xl bg-white/2 border border-white/5">
+                          <span className="text-xs text-neutral-500 font-medium">
+                            {format(new Date(snap.date), 'MMM d, yyyy')}
+                          </span>
+                          <span className="text-sm font-bold text-white">{snap.progress}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Deadline Info */}
                 {selectedGoal.target_date && (
                   <div className="p-4 rounded-xl bg-white/2 border border-white/5">
@@ -490,9 +545,12 @@ export function GoalsPage() {
                   className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none"
                 >
                   {CATEGORIES.map(c => (
-                    <option key={c} value={c} className="bg-neutral-900">{c}</option>
+                    <option key={c} value={c} className="bg-neutral-900" title={PARA_DESCRIPTIONS[c]}>{c}</option>
                   ))}
                 </select>
+                {formCategory && PARA_DESCRIPTIONS[formCategory] && (
+                  <p className="text-[10px] text-neutral-500 mt-1 italic">{PARA_DESCRIPTIONS[formCategory]}</p>
+                )}
               </div>
               <div>
                 <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5 block">Priority</label>

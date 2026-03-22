@@ -1,46 +1,64 @@
-# Walkthrough: Habit Schedules (Google Calendar-Style Recurrence)
+# Multi-Feature Enhancement Walkthrough
 
-## Summary
+I have implemented five key features to enhance the LifeOS habit tracking and task management experience.
 
-Added Google Calendar-style recurring schedules to the habit tracker. Users can now create habits that repeat on specific days of the week, with customizable intervals and end conditions.
+---
 
-## Changes Made
+## 🚀 Implemented Features
+
+### 1. PARA Tooltips on Goals Section
+Added informative tooltips to PARA category filters and selection modals.
+- **File:** [GoalsPage.tsx](file:///Users/aykaushi2401/Documents/Projects/Github/lifeos/frontend/src/pages/GoalsPage.tsx)
+- **Verification:** Hover over category buttons (Project, Area, Resource, Archive) to see descriptions.
+
+### 2. Task Efficiency Carousel
+Replaced the static KPI card with a dynamic, auto-rotating carousel on the Dashboard.
+- **Backend:** [dashboard.py](file:///Users/aykaushi2401/backend/routers/dashboard.py) now yields daily/monthly/annual breakdowns.
+- **Frontend:** [Dashboard.tsx](file:///Users/aykaushi2401/frontend/src/pages/Dashboard.tsx) features a circular SVG progress ring with manual controls and auto-rotation.
+
+### 3. Habit "Ends on" Calculation
+Automatically computes the end date for habits based on start date and total days (Y).
+- **File:** [HabitsPage.tsx](file:///Users/aykaushi2401/Documents/Projects/Github/lifeos/frontend/src/pages/HabitsPage.tsx)
+- **Verification:** Open habit creation modal, enter "Total Days", and see the "Ends on" date update live.
+
+### 4. Label Renames
+Renamed fields in the habit creation interface for better clarity.
+- **Changes:** "Target (X days)" → "Target Days", "Period (Y days)" → "Total Days".
+- **File:** [HabitsPage.tsx](file:///Users/aykaushi2401/Documents/Projects/Github/lifeos/frontend/src/pages/HabitsPage.tsx).
+
+### 5. Habit↔Task Synchronization
+Established a robust link between habits and tasks.
+- **Backend:**
+    - Updated `Task` model with `habit_id` and `task_type`.
+    - Added `sync_habit_tasks` logic to ensure every habit has a corresponding task.
+    - Auto-create tasks upon habit creation.
+    - Built a dedicated `/sync` router.
+- **Frontend:**
+    - Dashboard now triggers a sync on load.
+    - Kanban Board displays a 🔄 badge on habit-managed tasks and prevents their manual deletion to maintain integrity.
+
+---
+
+## 🛠 Technical Changes (Summary)
 
 ### Backend
-- **`models.py`** — Added 6 recurrence fields to `Habit`: `frequency_type`, `repeat_interval`, `repeat_days`, `ends_type`, `ends_on_date`, `ends_after_occurrences`
-- **`schemas.py`** — Updated Pydantic schemas (`HabitBase`, `HabitCreate`, `HabitUpdate`, `Habit`) with the new fields
-- **`crud.py`** — Updated `create_user_habit` to handle nullable `target_x`/`target_y_days`, and rewrote `recalculate_habit_streak` to skip non-scheduled days when computing streaks
-- **`migrate_habits_recurrence.py`** — Migration script to add columns to the `habits` table
+- [models.py](file:///Users/aykaushi2401/backend/models.py): Added `Task.habit_id`, `Task.task_type`, and bidirectional relationships.
+- [schemas.py](file:///Users/aykaushi2401/backend/schemas.py): Added sync-related fields to Pydantic models.
+- [crud.py](file:///Users/aykaushi2401/backend/crud.py): Implemented `sync_habit_tasks` and auto-task generation.
+- [sync.py](file:///Users/aykaushi2401/backend/routers/sync.py) [NEW]: Sync endpoint router.
 
 ### Frontend
-- **`types.ts`** — Updated `Habit` and `HabitCreate` interfaces with recurrence fields
-- **`HabitsPage.tsx`** — Major UI update:
-  - Added **Frequency Mode toggle** (Flexible X/Y vs Scheduled)
-  - Added **Repeats dropdown** (Daily, Weekly, Monthly, Annually, Custom)
-  - Added **Custom Recurrence panel** with day selector circles and Ends options
-  - Updated habit cards with a **schedule badge** showing the recurrence type
-  - Updated **progress bar** to use effective scheduled days as the target
-  - **Greyed out non-scheduled days** in the activity history view
+- [types.ts](file:///Users/aykaushi2401/frontend/src/types.ts): Updated `Task` and `DashboardStats`.
+- [api/index.ts](file:///Users/aykaushi2401/frontend/src/api/index.ts): Added `syncHabits` API call.
+- [Dashboard.tsx](file:///Users/aykaushi2401/frontend/src/pages/Dashboard.tsx): Integrated efficiency carousel and sync trigger.
+- [KanbanBoard.tsx](file:///Users/aykaushi2401/frontend/src/pages/KanbanBoard.tsx): Added habit badges and protected sync'd tasks.
 
-## UI Verification
+---
 
-### Flexible Mode (Default)
-![Flexible mode with X/Y inputs](file:///Users/administrator/.gemini/antigravity/brain/48a5bf0b-5923-475d-a466-f01d86becdbc/frequency_mode_modal_1774079365945.png)
+## ✅ Verification Steps
 
-### Scheduled Mode
-![Scheduled mode with Repeats dropdown](file:///Users/administrator/.gemini/antigravity/brain/48a5bf0b-5923-475d-a466-f01d86becdbc/scheduled_mode_modal_1774079377023.png)
-
-### Custom Recurrence Panel
-![Custom recurrence with day selector and Ends options](file:///Users/administrator/.gemini/antigravity/brain/48a5bf0b-5923-475d-a466-f01d86becdbc/custom_recurrence_panel_1774079395882.png)
-
-### Days Selected (M/W/F)
-![Monday, Wednesday, Friday selected in cyan](file:///Users/administrator/.gemini/antigravity/brain/48a5bf0b-5923-475d-a466-f01d86becdbc/custom_recurrence_final_selection_1774079412253.png)
-
-### Browser Recording
-![Habit schedule UI walkthrough](file:///Users/administrator/.gemini/antigravity/brain/48a5bf0b-5923-475d-a466-f01d86becdbc/habit_schedule_ui_-62135596800000.webp)
-
-## API Verification
-- ✅ `GET /users/1/habits/` returns habits with new recurrence fields
-- ✅ `POST /users/1/habits/` successfully creates scheduled habits with `frequency_type`, `repeat_days`, etc.
-- ✅ `DELETE /users/1/habits/{id}` works for scheduled habits
-- ✅ Streak logic correctly skips non-scheduled days
+1. **Start the backend** and verify the `/sync` endpoint is registered.
+2. **Open the Dashboard**: Verify the carousel auto-rotates and displays correct progress circles.
+3. **Go to Habits**: Create a new habit and verify the "Ends on" date.
+4. **Go to Kanban**: Check if a task corresponding to the new habit appeared with a 🔄 badge.
+5. **Delete/Modify**: Try to delete the habit task (should be prevented) or delete the habit itself (should remove the task on next sync).

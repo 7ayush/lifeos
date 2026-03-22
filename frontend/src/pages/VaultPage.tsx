@@ -5,6 +5,8 @@ import type { Note, NoteCreate, NoteUpdate } from '../types';
 import { FolderOpen, Plus, FileText, Trash2, Save, X, Archive, Briefcase, Compass, Layers, Search } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { MarkdownEditor } from '../components/MarkdownEditor';
+import { stripMarkdown } from '../utils/stripMarkdown';
 
 const PARA_FOLDERS = [
   { key: 'all', label: 'All Notes', icon: Layers, color: 'text-white', bg: 'bg-white/10' },
@@ -240,7 +242,7 @@ export function VaultPage() {
                         </p>
                       </div>
                       <p className="text-xs text-neutral-600 line-clamp-1 pl-5.5">
-                        {note.content || 'Empty note'}
+                        {stripMarkdown(note.content) || 'Empty note'}
                       </p>
                       <p className="text-[10px] text-neutral-700 mt-1 pl-5.5">
                         {format(parseISO(note.updated_at), 'MMM d, h:mm a')}
@@ -305,15 +307,13 @@ export function VaultPage() {
             </div>
 
             {/* Content Editor */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <textarea
-                value={editContent}
-                onChange={e => handleContentChange(e.target.value)}
-                placeholder="Start writing..."
-                className="w-full h-full p-6 md:p-8 bg-transparent resize-none border-none text-neutral-200 text-base leading-relaxed focus:outline-none focus:ring-0 placeholder:text-neutral-700"
-                autoFocus
-              />
-            </div>
+            <MarkdownEditor
+              value={editContent}
+              onChange={handleContentChange}
+              placeholder="Start writing..."
+              autoFocus
+              className="flex-1"
+            />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50 select-none">

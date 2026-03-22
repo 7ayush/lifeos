@@ -1,6 +1,8 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
+from pydantic import BaseModel, ConfigDict, field_validator
+from typing import Optional, List, Literal
 from datetime import date, datetime
+
+PriorityLevel = Literal["High", "Medium", "Low", "None"]
 
 
 # ============================
@@ -85,6 +87,23 @@ class GoalDetail(Goal):
     progress: float = 0.0
 
 
+class ProgressSnapshotOut(BaseModel):
+    date: date
+    progress: int
+
+class GoalMilestoneOut(BaseModel):
+    threshold: int
+    achieved_at: datetime
+
+class GoalWithProgress(Goal):
+    progress: int = 0
+
+class GoalDetailWithHistory(GoalDetail):
+    progress: int = 0
+    milestones: List[GoalMilestoneOut] = []
+    progress_history: List[ProgressSnapshotOut] = []
+
+
 class HabitLogBase(BaseModel):
     log_date: date
     status: str
@@ -146,6 +165,71 @@ class Habit(HabitBase):
 
 
 # ============================
+# TAG SCHEMAS
+# ============================
+
+TAG_COLORS = [
+    "#ef4444",  # red
+    "#f97316",  # orange
+    "#eab308",  # yellow
+    "#22c55e",  # green
+    "#06b6d4",  # cyan
+    "#3b82f6",  # blue
+    "#8b5cf6",  # purple
+    "#ec4899",  # pink
+]
+
+class TagBase(BaseModel):
+    name: str
+    color: Optional[str] = None
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Tag name must not be empty or whitespace-only")
+        if len(v) > 30:
+            raise ValueError("Tag name must be 30 characters or fewer")
+        return v
+
+    @field_validator("color")
+    @classmethod
+    def validate_color(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in TAG_COLORS:
+            raise ValueError(f"Color must be one of {TAG_COLORS}")
+        return v
+
+class TagCreate(TagBase):
+    pass
+
+class TagUpdate(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            if not v.strip():
+                raise ValueError("Tag name must not be empty or whitespace-only")
+            if len(v) > 30:
+                raise ValueError("Tag name must be 30 characters or fewer")
+        return v
+
+    @field_validator("color")
+    @classmethod
+    def validate_color(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in TAG_COLORS:
+            raise ValueError(f"Color must be one of {TAG_COLORS}")
+        return v
+
+class TagOut(TagBase):
+    id: int
+    user_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
 # TASK SCHEMAS
 # ============================
 
@@ -154,12 +238,21 @@ class TaskBase(BaseModel):
     description: Optional[str] = None
     target_date: Optional[date] = None
     goal_id: Optional[int] = None
+    habit_id: Optional[int] = None
+    task_type: Optional[str] = "manual"  # manual, habit, recurring
     energy_level: Optional[str] = None  # High, Medium, Low
     estimated_minutes: Optional[int] = None
     actual_minutes: Optional[int] = None
+    priority: Optional[PriorityLevel] = "None"
 
 class TaskCreate(TaskBase):
-    pass
+    frequency_type: Optional[str] = None  # daily, weekly, monthly, annually, custom
+    repeat_interval: Optional[int] = 1
+    repeat_days: Optional[str] = None  # comma-separated day numbers (0=Sun..6=Sat)
+    ends_type: Optional[str] = None  # never, on, after
+    ends_on_date: Optional[date] = None
+    ends_after_occurrences: Optional[int] = None
+    tag_ids: Optional[List[int]] = None
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
@@ -167,9 +260,19 @@ class TaskUpdate(BaseModel):
     status: Optional[str] = None
     target_date: Optional[date] = None
     goal_id: Optional[int] = None
+    habit_id: Optional[int] = None
+    task_type: Optional[str] = None
     energy_level: Optional[str] = None
     estimated_minutes: Optional[int] = None
     actual_minutes: Optional[int] = None
+    priority: Optional[PriorityLevel] = None
+    frequency_type: Optional[str] = None
+    repeat_interval: Optional[int] = None
+    repeat_days: Optional[str] = None
+    ends_type: Optional[str] = None
+    ends_on_date: Optional[date] = None
+    ends_after_occurrences: Optional[int] = None
+    tag_ids: Optional[List[int]] = None
 
 class SubTaskBase(BaseModel):
     title: str
@@ -188,8 +291,29 @@ class Task(TaskBase):
     user_id: int
     status: str
     created_at: datetime
+    habit_id: Optional[int] = None
+    task_type: Optional[str] = "manual"
+    parent_task_id: Optional[int] = None
+    frequency_type: Optional[str] = None
+    repeat_interval: Optional[int] = 1
+    repeat_days: Optional[str] = None
+    ends_type: Optional[str] = None
+    ends_on_date: Optional[date] = None
+    ends_after_occurrences: Optional[int] = None
+    sort_order: Optional[int] = 0
     subtasks: Optional[List[SubTask]] = []
+    tags: Optional[List[TagOut]] = []
     model_config = ConfigDict(from_attributes=True)
+
+class RecurringSyncResponse(BaseModel):
+    created: int
+    active_templates: int
+
+
+class ReorderRequest(BaseModel):
+    status: str
+    ordered_task_ids: List[int]
+
 
 
 # ============================
@@ -234,3 +358,134 @@ class Note(NoteBase):
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
+# NOTIFICATION SCHEMAS
+# ============================
+
+class NotificationOut(BaseModel):
+    id: int
+    user_id: int
+    task_id: int
+    type: str
+    message: str
+    is_read: bool
+    dismissed: bool
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class NotificationSyncResponse(BaseModel):
+    created: int
+
+class UnreadCountResponse(BaseModel):
+    count: int
+
+
+# ============================
+# REMINDER CONFIG SCHEMAS
+# ============================
+
+class ReminderConfigOut(BaseModel):
+    user_id: int
+    remind_days_before: int
+    remind_on_due_date: bool
+    remind_when_overdue: bool
+    model_config = ConfigDict(from_attributes=True)
+
+class ReminderConfigUpdate(BaseModel):
+    remind_days_before: Optional[int] = None
+    remind_on_due_date: Optional[bool] = None
+    remind_when_overdue: Optional[bool] = None
+
+
+# ============================
+# WEEKLY REVIEW SCHEMAS
+# ============================
+
+class WeeklyReflectionIn(BaseModel):
+    content: str
+
+class WeeklyReflectionOut(BaseModel):
+    id: int
+    user_id: int
+    week_identifier: str
+    content: str
+    created_at: datetime
+    updated_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class FocusTaskIn(BaseModel):
+    task_id: int
+
+class FocusTaskOut(BaseModel):
+    id: int
+    user_id: int
+    task_id: int
+    week_identifier: str
+    task_title: str
+    task_status: str
+    task_priority: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class CompletedTaskOut(BaseModel):
+    id: int
+    title: str
+    priority: str
+    goal_title: Optional[str] = None
+    completed_date: date
+
+class HabitWeekSummary(BaseModel):
+    habit_id: int
+    title: str
+    adherence_rate: float
+    current_streak: int
+    daily_status: dict[str, str]
+
+class GoalWeekProgress(BaseModel):
+    goal_id: int
+    title: str
+    priority: str
+    current_progress: int
+    progress_delta: int
+    target_date: Optional[date] = None
+
+class JournalEntrySummary(BaseModel):
+    id: int
+    entry_date: date
+    mood: Optional[int] = None
+    content_preview: str
+
+class DailyTaskCount(BaseModel):
+    day: str
+    count: int
+
+class WeekComparisonStats(BaseModel):
+    completion_rate: float
+    previous_completion_rate: float
+    completion_rate_change: float
+    habit_adherence_rate: float
+    previous_habit_adherence_rate: float
+    habit_adherence_rate_change: float
+    total_estimated_minutes: int
+    total_actual_minutes: int
+    efficiency_ratio: float
+
+class WeeklyReviewResponse(BaseModel):
+    week_identifier: str
+    week_start: date
+    week_end: date
+    completed_tasks: dict[str, list[CompletedTaskOut]]
+    total_tasks: int
+    completed_task_count: int
+    completion_rate: float
+    habits: list[HabitWeekSummary]
+    overall_habit_adherence: float
+    goals: list[GoalWeekProgress]
+    journal_entries: list[JournalEntrySummary]
+    average_mood: Optional[float] = None
+    reflection: Optional[WeeklyReflectionOut] = None
+    focus_tasks: list[FocusTaskOut]
+    daily_task_counts: list[DailyTaskCount]
+    comparison: WeekComparisonStats

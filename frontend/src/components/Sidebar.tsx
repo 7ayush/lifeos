@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen } from 'lucide-react';
+import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen, CalendarDays, Download } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProfileMenu } from './ProfileMenu';
 
@@ -11,6 +11,8 @@ export function Sidebar() {
     { name: 'Habits', icon: Activity, path: '/habits' },
     { name: 'Journal', icon: BookOpen, path: '/journal' },
     { name: 'Vault', icon: FolderOpen, path: '/vault' },
+    { name: 'Weekly Review', icon: CalendarDays, path: '/weekly-review' },
+    { name: 'Export Data', icon: Download, path: '/export' },
     { name: 'Leaderboard', icon: BarChart3, path: '/analytics' },
   ];
 

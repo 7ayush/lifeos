@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getTasks, updateTask, createTask, deleteTask, getGoals, createSubTask, toggleSubTask, deleteSubTask } from '../api';
-import type { Task, Goal } from '../types';
+import { getTasks, updateTask, createTask, deleteTask, getGoals, createSubTask, toggleSubTask, deleteSubTask, syncRecurringTasks, getTaskById, syncNotifications, reorderTasks, getTags } from '../api';
+import type { Task, Goal, TaskCreate, Tag } from '../types';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Plus, Trash2, Calendar, GripVertical, ChevronLeft, ChevronRight, CalendarDays, LayoutTemplate, Archive, Check, Target, Zap, Clock, ListChecks, X as XIcon, CheckCircle2, Pencil } from 'lucide-react';
+import { Plus, Trash2, Calendar, GripVertical, ChevronLeft, ChevronRight, CalendarDays, LayoutTemplate, Archive, Check, Target, Zap, Clock, ListChecks, X as XIcon, CheckCircle2, Pencil, RefreshCw } from 'lucide-react';
 import { CustomDropdown } from '../components/CustomDropdown';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { PriorityBadge } from '../components/PriorityBadge';
+import { TagChip } from '../components/TagChip';
+import { TagSelector } from '../components/TagSelector';
+import { filterByPriority } from '../utils/priorityFilter';
+import { sortByPriority } from '../utils/prioritySort';
+import { filterByTags } from '../utils/tagFilter';
 
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getDaysInMonth, addDays, addMonths, addYears } from 'date-fns';
 
@@ -47,9 +53,23 @@ export function KanbanBoard() {
   const [newTaskDate, setNewTaskDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
   const [newTaskGoalId, setNewTaskGoalId] = useState<number | undefined>(undefined);
   const [newTaskEnergy, setNewTaskEnergy] = useState<string>('');
+  const [newTaskPriority, setNewTaskPriority] = useState<string>('None');
   const [newTaskEstMins, setNewTaskEstMins] = useState<string>('');
   const [goals, setGoals] = useState<Goal[]>([]);
   const [energyFilter, setEnergyFilter] = useState<string>('All');
+  const [priorityFilter, setPriorityFilter] = useState<string>('All');
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedTagFilter, setSelectedTagFilter] = useState<number[]>([]);
+  const [newTaskTagIds, setNewTaskTagIds] = useState<number[]>([]);
+
+  // Recurrence state
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [freqType, setFreqType] = useState<string>('daily');
+  const [repeatInterval, setRepeatInterval] = useState<number>(1);
+  const [repeatDays, setRepeatDays] = useState<string[]>([]);
+  const [endsType, setEndsType] = useState<string>('never');
+  const [endsOnDate, setEndsOnDate] = useState<string>('');
+  const [endsAfterOccurrences, setEndsAfterOccurrences] = useState<string>('');
 
   // Subtask inline state
   const [subtaskInput, setSubtaskInput] = useState<Record<number, string>>({});
@@ -57,6 +77,10 @@ export function KanbanBoard() {
   // Delete State
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
+
+  // Sync state
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const hasSynced = useRef(false);
 
   const loadTasks = useCallback(async () => {
     if (!user) return;
@@ -72,6 +96,20 @@ export function KanbanBoard() {
     }
   }, [user, selectedDate, view]);
 
+  // Sync recurring tasks on mount before loading tasks
+  useEffect(() => {
+    if (!user || hasSynced.current) return;
+    hasSynced.current = true;
+    syncRecurringTasks(user.id).catch((err) => {
+      console.error('Failed to sync recurring tasks', err);
+      setSyncError('Recurring task sync failed');
+      setTimeout(() => setSyncError(null), 4000);
+    });
+    syncNotifications(user.id).catch((err) => {
+      console.error('Failed to sync notifications', err);
+    });
+  }, [user]);
+
   useEffect(() => {
     loadTasks();
     if (view !== 'All') {
@@ -81,6 +119,7 @@ export function KanbanBoard() {
     }
     if (user) {
       getGoals(user.id).then(setGoals).catch(console.error);
+      getTags(user.id).then(setTags).catch(console.error);
     }
   }, [user, view, selectedDate, loadTasks]);
 
@@ -108,22 +147,102 @@ export function KanbanBoard() {
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
     const taskId = parseInt(draggableId);
-    const newStatus = destination.droppableId as string;
 
+    // Same-column reorder
+    if (source.droppableId === destination.droppableId) {
+      const columnTasks = getTasksByStatus(source.droppableId);
+      const snapshot = [...tasks];
+
+      // Reorder within the column
+      const reordered = [...columnTasks];
+      const [moved] = reordered.splice(source.index, 1);
+      reordered.splice(destination.index, 0, moved);
+
+      // Optimistically update local state with new sort_order values
+      const reorderedIds = reordered.map(t => t.id);
+      setTasks(prev => {
+        const updated = [...prev];
+        reordered.forEach((task, idx) => {
+          const taskIndex = updated.findIndex(t => t.id === task.id);
+          if (taskIndex > -1) {
+            updated[taskIndex] = { ...updated[taskIndex], sort_order: idx };
+          }
+        });
+        return updated;
+      });
+
+      try {
+        await reorderTasks(user.id, source.droppableId, reorderedIds);
+      } catch (err) {
+        console.error('Failed to reorder tasks', err);
+        setTasks(snapshot);
+        loadTasks();
+      }
+      return;
+    }
+
+    // Cross-column drag with position preservation
+    const newStatus = destination.droppableId as string;
+    const snapshot = [...tasks];
+
+    // Get destination column tasks and insert the dragged task at the drop index
+    const destColumnTasks = getTasksByStatus(newStatus);
+    const movedTask = tasks.find(t => t.id === taskId);
+    if (!movedTask) return;
+
+    // Build new destination column order with the moved task inserted
+    const newDestOrder = [...destColumnTasks];
+    newDestOrder.splice(destination.index, 0, { ...movedTask, status: newStatus });
+    const destOrderedIds = newDestOrder.map(t => t.id);
+
+    // Optimistically update local state
     setTasks(prev => {
       const updated = [...prev];
       const taskIndex = updated.findIndex(t => t.id === taskId);
       if (taskIndex > -1) {
         updated[taskIndex] = { ...updated[taskIndex], status: newStatus };
       }
+      // Update sort_order for destination column
+      newDestOrder.forEach((task, idx) => {
+        const i = updated.findIndex(t => t.id === task.id);
+        if (i > -1) {
+          updated[i] = { ...updated[i], sort_order: idx };
+        }
+      });
       return updated;
     });
 
+    let statusUpdated = false;
     try {
       await updateTask(user.id, taskId, { status: newStatus });
+      statusUpdated = true;
+      await reorderTasks(user.id, newStatus, destOrderedIds);
     } catch (err) {
-      console.error('Failed to update task', err);
+      console.error('Failed to move task', err);
+      // Partial failure: if status was updated on server but reorder failed, revert the status change
+      if (statusUpdated) {
+        try {
+          await updateTask(user.id, taskId, { status: movedTask.status });
+        } catch (revertErr) {
+          console.error('Failed to revert status', revertErr);
+        }
+      }
+      setTasks(snapshot);
       loadTasks();
+    }
+  };
+
+  // Template editing state
+
+  const handleOpenEditTemplate = async (parentTaskId: number) => {
+    if (!user) return;
+    try {
+      const template = await getTaskById(user.id, parentTaskId);
+      if (template) {
+        handleOpenEditModal(template);
+      }
+    } catch (err) {
+      console.error('Failed to fetch template', err);
     }
   };
 
@@ -132,9 +251,18 @@ export function KanbanBoard() {
     setNewTaskTitle('');
     setNewTaskDesc('');
     setNewTaskEnergy('');
+    setNewTaskPriority('None');
     setNewTaskEstMins('');
     setNewTaskGoalId(undefined);
     setNewTaskDate(format(new Date(), 'yyyy-MM-dd'));
+    setIsRecurring(false);
+    setFreqType('daily');
+    setRepeatInterval(1);
+    setRepeatDays([]);
+    setEndsType('never');
+    setEndsOnDate('');
+    setEndsAfterOccurrences('');
+    setNewTaskTagIds([]);
     setIsModalOpen(true);
   };
 
@@ -143,9 +271,21 @@ export function KanbanBoard() {
     setNewTaskTitle(task.title);
     setNewTaskDesc(task.description || '');
     setNewTaskEnergy(task.energy_level || '');
+    setNewTaskPriority(task.priority || 'None');
     setNewTaskEstMins(task.estimated_minutes?.toString() || '');
     setNewTaskGoalId(task.goal_id);
     setNewTaskDate(task.target_date || format(new Date(), 'yyyy-MM-dd'));
+    // Populate recurrence fields
+    const isTemplate = task.task_type === 'recurring' && !task.parent_task_id;
+    const isInstance = task.task_type === 'recurring' && !!task.parent_task_id;
+    setIsRecurring(isTemplate || isInstance);
+    setFreqType(task.frequency_type || 'daily');
+    setRepeatInterval(task.repeat_interval || 1);
+    setRepeatDays(task.repeat_days ? task.repeat_days.split(',') : []);
+    setEndsType(task.ends_type || 'never');
+    setEndsOnDate(task.ends_on_date || '');
+    setEndsAfterOccurrences(task.ends_after_occurrences?.toString() || '');
+    setNewTaskTagIds(task.tags?.map(t => t.id) || []);
     setIsModalOpen(true);
   };
 
@@ -154,19 +294,49 @@ export function KanbanBoard() {
     if (!user || !newTaskTitle.trim()) return;
 
     try {
-      const taskData: Partial<Task> = {
-        title: newTaskTitle,
-        description: newTaskDesc,
-        target_date: newTaskDate,
-        goal_id: newTaskGoalId,
-        energy_level: newTaskEnergy || undefined,
-        estimated_minutes: newTaskEstMins ? parseInt(newTaskEstMins) : undefined,
-      };
-
       if (editingTask) {
+        const taskData: Partial<Task> & { tag_ids?: number[] } = {
+          title: newTaskTitle,
+          description: newTaskDesc,
+          target_date: newTaskDate,
+          goal_id: newTaskGoalId,
+          energy_level: newTaskEnergy || undefined,
+          estimated_minutes: newTaskEstMins ? parseInt(newTaskEstMins) : undefined,
+          priority: newTaskPriority,
+          tag_ids: newTaskTagIds,
+        };
+        // If editing a template, include recurrence fields
+        const isTemplate = editingTask.task_type === 'recurring' && !editingTask.parent_task_id;
+        if (isTemplate) {
+          taskData.frequency_type = freqType;
+          taskData.repeat_interval = repeatInterval;
+          taskData.repeat_days = freqType === 'weekly' ? repeatDays.join(',') : undefined;
+          taskData.ends_type = endsType;
+          taskData.ends_on_date = endsType === 'on' ? endsOnDate : undefined;
+          taskData.ends_after_occurrences = endsType === 'after' ? parseInt(endsAfterOccurrences) || undefined : undefined;
+        }
         await updateTask(user.id, editingTask.id, taskData);
       } else {
-        await createTask(user.id, taskData as any);
+        const taskData: TaskCreate = {
+          title: newTaskTitle,
+          description: newTaskDesc,
+          target_date: newTaskDate,
+          goal_id: newTaskGoalId,
+          energy_level: newTaskEnergy || undefined,
+          estimated_minutes: newTaskEstMins ? parseInt(newTaskEstMins) : undefined,
+          priority: newTaskPriority,
+          tag_ids: newTaskTagIds,
+        };
+        if (isRecurring) {
+          taskData.task_type = 'recurring';
+          taskData.frequency_type = freqType;
+          taskData.repeat_interval = repeatInterval;
+          taskData.repeat_days = freqType === 'weekly' ? repeatDays.join(',') : undefined;
+          taskData.ends_type = endsType;
+          taskData.ends_on_date = endsType === 'on' ? endsOnDate : undefined;
+          taskData.ends_after_occurrences = endsType === 'after' ? parseInt(endsAfterOccurrences) || undefined : undefined;
+        }
+        await createTask(user.id, taskData);
       }
 
       setNewTaskTitle('');
@@ -202,9 +372,22 @@ export function KanbanBoard() {
     );
   };
 
-  const getTasksByStatus = (status: string) => tasks
-    .filter(t => t.status === status)
-    .filter(t => energyFilter === 'All' || t.energy_level === energyFilter);
+  const getTasksByStatus = (status: string) => {
+    const filtered = filterByTags(
+      filterByPriority(
+        tasks
+          .filter(t => t.status === status)
+          .filter(t => energyFilter === 'All' || t.energy_level === energyFilter),
+        priorityFilter
+      ),
+      selectedTagFilter
+    );
+    const hasCustomOrder = filtered.some(t => (t.sort_order ?? 0) !== 0);
+    if (hasCustomOrder) {
+      return [...filtered].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    }
+    return sortByPriority(filtered);
+  };
 
   const updateDate = (fields: { year?: number; month?: number; date?: number }) => {
     setSelectedDate(prev => {
@@ -233,6 +416,9 @@ export function KanbanBoard() {
   };
 
   const currentWeekIndex = Math.floor((selectedDate.getDate() - 1) / 7);
+
+  // Today's date string for deadline badge comparisons
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   const colStyles: Record<string, { bg: string; border: string; glow: string; text: string; topGlare: string }> = {
     Todo: { bg: 'bg-neutral-900/40', border: 'border-white/10 hover:border-white/20', glow: 'shadow-[0_0_40px_rgba(255,255,255,0.02)]', text: 'text-white', topGlare: 'via-white/30' },
@@ -429,6 +615,59 @@ export function KanbanBoard() {
             );
           })}
         </div>
+
+        {/* Priority Filter */}
+        <div className="flex items-center gap-1 bg-white/3 p-1 rounded-xl border border-white/5">
+          <Target className="w-3.5 h-3.5 text-neutral-500 ml-2" />
+          {['All', 'High', 'Medium', 'Low', 'None'].map(p => {
+            const pColors: Record<string, string> = { High: 'text-rose-400 bg-rose-500/15', Medium: 'text-amber-400 bg-amber-500/15', Low: 'text-blue-400 bg-blue-500/15', None: 'text-neutral-400 bg-neutral-500/15', All: '' };
+            return (
+              <button
+                key={p}
+                onClick={() => setPriorityFilter(p)}
+                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
+                  priorityFilter === p
+                    ? (p === 'All' ? 'bg-cyan-500 text-black' : pColors[p] || 'bg-cyan-500 text-black')
+                    : 'text-neutral-500 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {p}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tag Filter */}
+        {tags.length > 0 && (
+          <div className="flex items-center gap-1 bg-white/3 p-1 rounded-xl border border-white/5 flex-wrap">
+            {tags.map(tag => {
+              const isSelected = selectedTagFilter.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  onClick={() =>
+                    setSelectedTagFilter(prev =>
+                      isSelected ? prev.filter(id => id !== tag.id) : [...prev, tag.id]
+                    )
+                  }
+                  className={`rounded-lg transition-all duration-200 ${
+                    isSelected ? 'ring-1 ring-cyan-500/50 scale-105' : 'opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <TagChip tag={tag} size="sm" />
+                </button>
+              );
+            })}
+            {selectedTagFilter.length > 0 && (
+              <button
+                onClick={() => setSelectedTagFilter([])}
+                className="px-2 py-1 rounded-lg text-[10px] font-bold text-neutral-500 hover:text-white hover:bg-white/5 transition-all duration-200"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -485,9 +724,65 @@ export function KanbanBoard() {
                                       <GripVertical className="w-4 h-4" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className={`font-semibold text-sm ${style.text} ${style.line}`}>
-                                        {task.title}
-                                      </p>
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <p className={`font-semibold text-sm flex-1 ${style.text} ${style.line}`}>
+                                          {task.title}
+                                        </p>
+                                        {task.task_type === 'habit' && (
+                                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 shadow-sm shrink-0" title="Managed by habit">
+                                            <RefreshCw className="w-2.5 h-2.5 text-indigo-400 animate-[spin_3s_linear_infinite]" />
+                                            <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-tighter">Habit</span>
+                                          </div>
+                                        )}
+                                        {task.parent_task_id && (
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); handleOpenEditTemplate(task.parent_task_id!); }}
+                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 shadow-sm shrink-0 hover:bg-violet-500/20 transition-colors"
+                                            title="Recurring task — click to edit template"
+                                          >
+                                            <span className="text-[10px]">🔁</span>
+                                            <span className="text-[8px] font-bold text-violet-400 uppercase tracking-tighter">Recurring</span>
+                                          </button>
+                                        )}
+                                        <PriorityBadge priority={task.priority} />
+                                        {/* Deadline badges */}
+                                        {task.target_date && task.status !== 'Done' && (() => {
+                                          const daysUntil = Math.floor((new Date(task.target_date + 'T00:00:00').getTime() - new Date(todayStr + 'T00:00:00').getTime()) / (1000 * 60 * 60 * 24));
+                                          if (daysUntil < 0) {
+                                            return (
+                                              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 shadow-sm shrink-0">
+                                                <span className="text-[8px] font-bold text-rose-400 uppercase tracking-tighter">Overdue</span>
+                                              </span>
+                                            );
+                                          }
+                                          if (daysUntil === 0) {
+                                            return (
+                                              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 shadow-sm shrink-0">
+                                                <span className="text-[8px] font-bold text-amber-400 uppercase tracking-tighter">Due Today</span>
+                                              </span>
+                                            );
+                                          }
+                                          if (daysUntil > 0 && daysUntil <= 3) {
+                                            return (
+                                              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 shadow-sm shrink-0">
+                                                <span className="text-[8px] font-bold text-cyan-400 uppercase tracking-tighter">Due Soon</span>
+                                              </span>
+                                            );
+                                          }
+                                          return null;
+                                        })()}
+                                      </div>
+                                      {/* Tag Chips */}
+                                      {task.tags && task.tags.length > 0 && (
+                                        <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                                          {task.tags.slice(0, 3).map(tag => (
+                                            <TagChip key={tag.id} tag={tag} size="sm" />
+                                          ))}
+                                          {task.tags.length > 3 && (
+                                            <span className="text-[9px] font-bold text-neutral-500">+{task.tags.length - 3}</span>
+                                          )}
+                                        </div>
+                                      )}
                                       {task.description && (
                                         <p className="text-xs text-neutral-400/80 mt-1.5 line-clamp-2 leading-relaxed">
                                           {task.description}
@@ -610,12 +905,14 @@ export function KanbanBoard() {
                                           >
                                             <Pencil className="w-3.5 h-3.5" />
                                           </button>
-                                          <button
-                                            onClick={() => handleDeleteTask(task.id)}
-                                            className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 transition-all p-1.5 hover:bg-rose-500/10 rounded-lg"
-                                          >
-                                            <Trash2 className="w-4 h-4" />
-                                          </button>
+                                          {task.task_type !== 'habit' && (
+                                            <button
+                                              onClick={() => handleDeleteTask(task.id)}
+                                              className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 transition-all p-1.5 hover:bg-rose-500/10 rounded-lg"
+                                            >
+                                              <Trash2 className="w-4 h-4" />
+                                            </button>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
@@ -638,7 +935,7 @@ export function KanbanBoard() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => { setIsModalOpen(false); setEditingTask(null); }}>
-          <div className="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
+          <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-6 shadow-2xl border border-white/10 custom-scrollbar" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-2xl font-bold text-white mb-6 font-['Outfit']">{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
             <form onSubmit={handleSaveTask} className="space-y-4">
               <div>
@@ -734,6 +1031,173 @@ export function KanbanBoard() {
                 </div>
               </div>
 
+              {/* Priority */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-400 mb-1">Priority</label>
+                <select
+                  value={newTaskPriority}
+                  onChange={(e) => setNewTaskPriority(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
+                >
+                  <option value="None" className="bg-neutral-900">None</option>
+                  <option value="High" className="bg-neutral-900">🔴 High</option>
+                  <option value="Medium" className="bg-neutral-900">🟡 Medium</option>
+                  <option value="Low" className="bg-neutral-900">🔵 Low</option>
+                </select>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-400 mb-1">Tags</label>
+                <TagSelector
+                  allTags={tags}
+                  selectedTagIds={newTaskTagIds}
+                  onSelectionChange={setNewTaskTagIds}
+                  onTagCreated={(tag) => setTags(prev => [...prev, tag])}
+                  userId={user!.id}
+                />
+              </div>
+
+              {/* Recurrence Config */}
+              {(() => {
+                const isEditingInstance = editingTask?.task_type === 'recurring' && !!editingTask?.parent_task_id;
+                const isEditingTemplate = editingTask?.task_type === 'recurring' && !editingTask?.parent_task_id;
+                const recurrenceDisabled = isEditingInstance;
+
+                return (
+                  <div className="space-y-3">
+                    {/* Instance notice */}
+                    {isEditingInstance && (
+                      <div className="flex items-center justify-between p-3 bg-violet-500/10 border border-violet-500/20 rounded-xl">
+                        <span className="text-xs text-violet-300">This is a recurring task instance. Recurrence settings are managed on the template.</span>
+                        <button
+                          type="button"
+                          onClick={() => { if (editingTask?.parent_task_id) { setIsModalOpen(false); handleOpenEditTemplate(editingTask.parent_task_id); } }}
+                          className="text-xs font-bold text-violet-400 hover:text-violet-300 underline ml-2 shrink-0"
+                        >
+                          Edit Template
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Recurring toggle - only show for create or template edit */}
+                    {!isEditingInstance && (
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-neutral-400">Recurring</label>
+                        <button
+                          type="button"
+                          onClick={() => !recurrenceDisabled && setIsRecurring(!isRecurring)}
+                          disabled={recurrenceDisabled}
+                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isRecurring ? 'bg-violet-500' : 'bg-white/10'} ${recurrenceDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${isRecurring ? 'translate-x-5' : ''}`} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Recurrence fields */}
+                    {(isRecurring || isEditingTemplate) && !isEditingInstance && (
+                      <div className="space-y-3 p-3 bg-white/3 rounded-xl border border-white/5">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-1">Frequency</label>
+                            <select
+                              value={freqType}
+                              onChange={(e) => setFreqType(e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 appearance-none"
+                            >
+                              <option value="daily" className="bg-neutral-900">Daily</option>
+                              <option value="weekly" className="bg-neutral-900">Weekly</option>
+                              <option value="monthly" className="bg-neutral-900">Monthly</option>
+                              <option value="annually" className="bg-neutral-900">Annually</option>
+                              <option value="custom" className="bg-neutral-900">Custom</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-1">Every N periods</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={repeatInterval}
+                              onChange={(e) => setRepeatInterval(parseInt(e.target.value) || 1)}
+                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                            />
+                          </div>
+                        </div>
+
+                        {freqType === 'weekly' && (
+                          <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-1.5">Repeat on days</label>
+                            <div className="flex gap-1.5">
+                              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                                <button
+                                  key={day}
+                                  type="button"
+                                  onClick={() => setRepeatDays(prev => prev.includes(String(i)) ? prev.filter(d => d !== String(i)) : [...prev, String(i)])}
+                                  className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                                    repeatDays.includes(String(i))
+                                      ? 'bg-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
+                                      : 'bg-white/5 text-neutral-500 hover:bg-white/10'
+                                  }`}
+                                >
+                                  {day}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-xs font-medium text-neutral-500 mb-1.5">Ends</label>
+                          <div className="flex gap-2">
+                            {['never', 'on', 'after'].map(opt => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => setEndsType(opt)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
+                                  endsType === opt
+                                    ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
+                                    : 'bg-white/5 text-neutral-500 border border-transparent hover:bg-white/10'
+                                }`}
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {endsType === 'on' && (
+                          <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-1">End date</label>
+                            <input
+                              type="date"
+                              value={endsOnDate}
+                              onChange={(e) => setEndsOnDate(e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 scheme-dark"
+                            />
+                          </div>
+                        )}
+
+                        {endsType === 'after' && (
+                          <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-1">Number of occurrences</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={endsAfterOccurrences}
+                              onChange={(e) => setEndsAfterOccurrences(e.target.value)}
+                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                              placeholder="e.g. 10"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               <div className="flex justify-end gap-3 mt-8">
                 <button
                   type="button"
@@ -763,6 +1227,12 @@ export function KanbanBoard() {
         message="Are you sure you want to delete this task? This action cannot be undone."
         confirmText="Delete Task"
       />
+
+      {syncError && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 bg-rose-500/20 border border-rose-500/30 text-rose-300 rounded-xl text-sm font-medium shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {syncError}
+        </div>
+      )}
     </div>
   );
 }

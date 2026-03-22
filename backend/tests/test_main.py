@@ -54,17 +54,20 @@ def test_create_goal():
     assert response.json()["title"] == "Test Goal"
 
 def test_create_and_log_habit():
-    # 1. Create a habit
+    import datetime
+    today = datetime.date.today().isoformat()
+
+    # 1. Create a habit starting today
     response = client.post(
         "/users/1/habits/",
-        json={"title": "Test Habit", "target_x": 10, "target_y_days": 30, "start_date": "2025-01-01"},
+        json={"title": "Test Habit", "target_x": 10, "target_y_days": 30, "start_date": today},
     )
     assert response.status_code == 200
     habit_id = response.json()["id"]
 
-    # 2. Log habit as "Done"
+    # 2. Log habit as "Done" for today
     response_log = client.post(
-        f"/users/1/habits/{habit_id}/log?status=Done&log_date=2025-01-02",
+        f"/users/1/habits/{habit_id}/log?status=Done&log_date={today}",
     )
     assert response_log.status_code == 200
     assert response_log.json()["current_streak"] == 1

@@ -31,9 +31,11 @@ backend/__pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
 backend/venv/
 .pytest_cache/
 backend/.pytest_cache/
+.hypothesis/
 .coverage
 htmlcov/
 .mypy_cache/

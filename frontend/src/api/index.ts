@@ -1,5 +1,5 @@
 import api from './config';
-import type { Task, TaskCreate, Habit, HabitCreate, JournalEntry, JournalEntryCreate, DashboardStats, DashboardToday, LeaderboardEntry, Goal, GoalCreate, GoalUpdate, GoalDetail, SubTask, Note, NoteCreate, NoteUpdate, PersonalStats, YearInPixelsData } from '../types';
+import type { Task, TaskCreate, Habit, HabitCreate, JournalEntry, JournalEntryCreate, DashboardStats, DashboardToday, LeaderboardEntry, Goal, GoalCreate, GoalUpdate, GoalDetail, SubTask, Note, NoteCreate, NoteUpdate, PersonalStats, YearInPixelsData, Notification, ReminderConfig, NotificationSyncResponse, Tag, TagCreate } from '../types';
 
 // ============================
 // DASHBOARD API
@@ -65,14 +65,33 @@ export const createTask = async (userId: number, task: TaskCreate): Promise<Task
   return res.data;
 };
 
-export const updateTask = async (userId: number, taskId: number, updates: Partial<Task>): Promise<Task> => {
+export const updateTask = async (userId: number, taskId: number, updates: Partial<Task> & { tag_ids?: number[] }): Promise<Task> => {
   const res = await api.put(`/users/${userId}/tasks/${taskId}`, updates);
+  return res.data;
+};
+
+export const getTaskById = async (userId: number, taskId: number): Promise<Task> => {
+  // Use update with empty body to fetch a task by ID (returns the task unchanged)
+  const res = await api.put(`/users/${userId}/tasks/${taskId}`, {});
   return res.data;
 };
 
 export const deleteTask = async (userId: number, taskId: number): Promise<void> => {
   await api.delete(`/users/${userId}/tasks/${taskId}`);
 };
+
+export const reorderTasks = async (
+  userId: number,
+  status: string,
+  orderedTaskIds: number[]
+): Promise<Task[]> => {
+  const res = await api.put(`/users/${userId}/tasks/reorder`, {
+    status,
+    ordered_task_ids: orderedTaskIds,
+  });
+  return res.data;
+};
+
 
 // ============================
 // SUBTASK API
@@ -181,6 +200,112 @@ export const updateNote = async (userId: number, noteId: number, note: NoteUpdat
   return res.data;
 };
 
-export const deleteNote = async (userId: number, noteId: number): Promise<void> => {
-  await api.delete(`/users/${userId}/notes/${noteId}`);
+export const deleteNote = async (userId: number, note_id: number): Promise<void> => {
+  await api.delete(`/users/${userId}/notes/${note_id}`);
+};
+
+// ============================
+// TAGS API
+// ============================
+
+export const getTags = async (userId: number): Promise<Tag[]> => {
+  const res = await api.get(`/users/${userId}/tags`);
+  return res.data;
+};
+
+export const createTag = async (userId: number, tag: TagCreate): Promise<Tag> => {
+  const res = await api.post(`/users/${userId}/tags`, tag);
+  return res.data;
+};
+
+export const updateTag = async (userId: number, tagId: number, tag: Partial<TagCreate>): Promise<Tag> => {
+  const res = await api.put(`/users/${userId}/tags/${tagId}`, tag);
+  return res.data;
+};
+
+export const deleteTag = async (userId: number, tagId: number): Promise<void> => {
+  await api.delete(`/users/${userId}/tags/${tagId}`);
+};
+
+// ============================
+// SYNC API
+// ============================
+
+export const syncHabits = async (userId: number): Promise<{ created: number; removed: number; total_habits: number }> => {
+  const res = await api.post(`/sync/habits/${userId}`);
+  return res.data;
+};
+
+export const syncRecurringTasks = async (userId: number): Promise<{ created: number; active_templates: number }> => {
+  const res = await api.post(`/sync/recurring-tasks/${userId}`);
+  return res.data;
+};
+
+
+// ============================
+// NOTIFICATIONS API
+// ============================
+
+export const syncNotifications = async (userId: number): Promise<NotificationSyncResponse> => {
+  const res = await api.post(`/sync/notifications/${userId}`);
+  return res.data;
+};
+
+export const getNotifications = async (userId: number): Promise<Notification[]> => {
+  const res = await api.get(`/users/${userId}/notifications`);
+  return res.data;
+};
+
+export const getUnreadCount = async (userId: number): Promise<number> => {
+  const res = await api.get(`/users/${userId}/notifications/unread-count`);
+  return res.data.count;
+};
+
+export const markNotificationRead = async (userId: number, notificationId: number): Promise<Notification> => {
+  const res = await api.put(`/users/${userId}/notifications/${notificationId}/read`);
+  return res.data;
+};
+
+export const markAllNotificationsRead = async (userId: number): Promise<void> => {
+  await api.put(`/users/${userId}/notifications/read-all`);
+};
+
+export const dismissNotification = async (userId: number, notificationId: number): Promise<Notification> => {
+  const res = await api.delete(`/users/${userId}/notifications/${notificationId}`);
+  return res.data;
+};
+
+export const getReminderConfig = async (userId: number): Promise<ReminderConfig> => {
+  const res = await api.get(`/users/${userId}/reminder-config`);
+  return res.data;
+};
+
+export const updateReminderConfig = async (userId: number, config: Partial<ReminderConfig>): Promise<ReminderConfig> => {
+  const res = await api.put(`/users/${userId}/reminder-config`, config);
+  return res.data;
+};
+
+// ============================
+// EXPORT API
+// ============================
+
+export const exportData = async (
+  userId: number,
+  format: 'json' | 'csv',
+  types: string[],
+  startDate?: string,
+  endDate?: string,
+): Promise<Blob> => {
+  const params = new URLSearchParams({
+    format,
+    types: types.join(','),
+  });
+  if (startDate) params.set('start_date', startDate);
+  if (endDate) params.set('end_date', endDate);
+
+  const response = await api.get(
+    `/users/${userId}/export?${params.toString()}`,
+    { responseType: 'blob' }
+  );
+  return response.data;
 };

@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getDashboardStats, getDashboardToday, logHabit, updateTask, getGoals } from '../api';
-import type { DashboardStats, DashboardToday, Goal } from '../types';
-import { Target, Activity, CheckSquare, Clock, Zap, CheckCircle2, Circle, Flame, Star, TrendingUp, Sparkles } from 'lucide-react';
+import { getDashboardStats, getDashboardToday, logHabit, updateTask, syncHabits, syncNotifications } from '../api';
+import type { DashboardStats, DashboardToday } from '../types';
+import { Target, Activity, CheckSquare, Clock, Zap, CheckCircle2, Circle, Flame, Star, TrendingUp, Sparkles, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { PriorityBadge } from '../components/PriorityBadge';
+import { ProgressBar } from '../components/ProgressBar';
 
 export function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [efficiencySlide, setEfficiencySlide] = useState(0);
   const [todayData, setTodayData] = useState<DashboardToday | null>(null);
-  const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
 
   const getGreeting = () => {
@@ -25,14 +27,17 @@ export function Dashboard() {
     if (!user) return;
     try {
       setLoading(true);
-      const [statsRes, todayRes, goalsRes] = await Promise.all([
+      // Sync habits to tasks first
+      await syncHabits(user.id).catch(err => console.error('Sync failed', err));
+      // Sync notifications (fire-and-forget, don't block page)
+      syncNotifications(user.id).catch(err => console.error('Notification sync failed', err));
+
+      const [statsRes, todayRes] = await Promise.all([
         getDashboardStats(user.id),
         getDashboardToday(user.id),
-        getGoals(user.id),
       ]);
       setStats(statsRes);
       setTodayData(todayRes);
-      setGoals(goalsRes);
     } catch (err) {
       console.error('Failed to load dashboard data', err);
     } finally {
@@ -43,6 +48,12 @@ export function Dashboard() {
   useEffect(() => {
     loadDashboardData();
   }, [user]);
+
+  // Auto-rotate task efficiency carousel
+  useEffect(() => {
+    const timer = setInterval(() => setEfficiencySlide(prev => (prev + 1) % 3), 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleToggleHabit = async (habitId: number, currentLogs: any[]) => {
     if (!user) return;
@@ -112,19 +123,17 @@ export function Dashboard() {
   // Most Important Task (first task due today/overdue)
   const mit = todayData?.tasks?.[0] || null;
 
+  // Overdue and due-today task counts for KPI and indicators
+  const overdueTasks = todayData?.tasks.filter(t => t.target_date && t.target_date < todayStr && t.status !== 'Done') || [];
+  const overdueCount = overdueTasks.length;
+
   // Most critical pending habit (not done today, highest streak)
   const criticalHabit = todayData?.habits
     .filter(h => !h.logs?.some(l => l.log_date === todayStr && l.status === 'Done'))
     .sort((a, b) => b.current_streak - a.current_streak)[0] || null;
 
-  // Active goals sorted by priority
-  const activeGoals = goals
-    .filter(g => g.status === 'Active')
-    .sort((a, b) => {
-      const priorityOrder: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
-      return (priorityOrder[a.priority] ?? 1) - (priorityOrder[b.priority] ?? 1);
-    })
-    .slice(0, 3);
+  // Active goals from stats API (already sorted by priority, limited to 3)
+  const activeGoals = stats?.active_goals ?? [];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -222,9 +231,9 @@ export function Dashboard() {
             bg: 'bg-yellow-400/10',
             celebrate: allHabitsDone,
           },
-          { label: 'Goal Progress', value: `${stats?.goal_completion_percentage || 0}%`, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-          { label: 'Task Efficiency', value: `${stats?.task_efficiency_percentage || 0}%`, icon: CheckSquare, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+          { label: 'Avg. Goal Progress', value: `${Math.round(stats?.goal_completion_percentage || 0)}%`, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
           { label: 'Upcoming Deadlines', value: stats?.upcoming_deadlines || 0, icon: Clock, color: 'text-rose-400', bg: 'bg-rose-400/10' },
+          ...(overdueCount > 0 ? [{ label: 'Overdue Tasks', value: overdueCount, icon: AlertTriangle, color: 'text-rose-400', bg: 'bg-rose-400/10' }] : []),
         ].map((kpi, index) => (
           <div
             key={index}
@@ -248,6 +257,68 @@ export function Dashboard() {
             </div>
           </div>
         ))}
+
+        {/* Task Efficiency Carousel */}
+        {(() => {
+          const slides = [
+            { label: 'Today', value: stats?.task_efficiency?.daily || 0, color: '#22d3ee' },
+            { label: 'This Month', value: stats?.task_efficiency?.monthly || 0, color: '#a78bfa' },
+            { label: 'This Year', value: stats?.task_efficiency?.annual || 0, color: '#34d399' },
+          ];
+          const current = slides[efficiencySlide];
+          const radius = 36;
+          const circumference = 2 * Math.PI * radius;
+          const offset = circumference - (current.value / 100) * circumference;
+
+          return (
+            <div className="glass-panel p-6 rounded-2xl hover:border-white/10 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center relative">
+              <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">Task Efficiency</p>
+              <div className="relative w-24 h-24 mb-2">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+                  <circle
+                    cx="40" cy="40" r={radius}
+                    fill="none"
+                    stroke={current.color}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    className="transition-all duration-700 ease-out"
+                    style={{ filter: `drop-shadow(0 0 6px ${current.color}55)` }}
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-white font-['Outfit']">
+                  {current.value}%
+                </span>
+              </div>
+              <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2" style={{ color: current.color }}>{current.label}</p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setEfficiencySlide((prev) => (prev - 1 + slides.length) % slides.length)}
+                  className="p-1 text-neutral-600 hover:text-white transition-colors rounded-md hover:bg-white/5"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex gap-1.5">
+                  {slides.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setEfficiencySlide(i)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === efficiencySlide ? 'bg-cyan-400 scale-125' : 'bg-neutral-600 hover:bg-neutral-500'}`}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={() => setEfficiencySlide((prev) => (prev + 1) % slides.length)}
+                  className="p-1 text-neutral-600 hover:text-white transition-colors rounded-md hover:bg-white/5"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ======================== */}
@@ -303,12 +374,7 @@ export function Dashboard() {
                       {format(new Date(goal.target_date), 'MMM d, yyyy')}
                     </p>
                   )}
-                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-linear-to-r from-emerald-500 to-cyan-500 transition-all duration-1000"
-                      style={{ width: '0%' }}
-                    />
-                  </div>
+                  <ProgressBar progress={goal.progress} showLabel size="sm" />
                 </div>
               );
             })}
@@ -411,7 +477,16 @@ export function Dashboard() {
                         <Circle className="w-6 h-6 text-neutral-600 group-hover:text-cyan-400/50 transition-colors" />
                       </button>
                     <div>
-                      <p className="font-semibold text-white">{task.title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-white">{task.title}</p>
+                        <PriorityBadge priority={task.priority} />
+                        {task.target_date && task.target_date < todayStr && task.status !== 'Done' && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-[8px] font-bold text-rose-400 uppercase tracking-tighter">Overdue</span>
+                        )}
+                        {task.target_date && task.target_date === todayStr && task.status !== 'Done' && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[8px] font-bold text-amber-400 uppercase tracking-tighter">Due Today</span>
+                        )}
+                      </div>
                       {task.description && (
                         <p className="text-xs text-neutral-500 mt-1 line-clamp-1">{task.description}</p>
                       )}

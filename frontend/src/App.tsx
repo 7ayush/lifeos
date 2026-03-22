@@ -11,6 +11,8 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { JournalPage } from './pages/JournalPage';
 import { VaultPage } from './pages/VaultPage';
+import { WeeklyReviewPage } from './pages/WeeklyReviewPage';
+import { ExportPage } from './pages/ExportPage';
 
 function App() {
   return (
@@ -28,7 +30,8 @@ function App() {
             <Route path="/vault" element={<VaultPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            {/* Add more protected routes here later */}
+            <Route path="/weekly-review" element={<WeeklyReviewPage />} />
+            <Route path="/export" element={<ExportPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -4,6 +4,7 @@ from typing import List
 
 from .. import crud, models, schemas
 from ..database import get_db
+from ..progress_engine import recalculate_goal_progress
 
 router = APIRouter(
     prefix="/users/{user_id}/tasks",
@@ -14,7 +15,10 @@ router = APIRouter(
 def create_task_for_user(
     user_id: int, task: schemas.TaskCreate, db: Session = Depends(get_db)
 ):
-    return crud.create_user_task(db=db, task=task, user_id=user_id)
+    try:
+        return crud.create_user_task(db=db, task=task, user_id=user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 @router.get("/", response_model=List[schemas.Task])
 def read_tasks(
@@ -32,6 +36,17 @@ def read_tasks(
         tasks = [t for t in tasks if str(t.target_date) <= end_date]
     return tasks
 
+@router.put("/reorder", response_model=List[schemas.Task])
+def reorder_tasks_endpoint(
+    user_id: int,
+    request: schemas.ReorderRequest,
+    db: Session = Depends(get_db)
+):
+    try:
+        return crud.reorder_tasks(db, user_id, request.status, request.ordered_task_ids)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 @router.put("/{task_id}", response_model=schemas.Task)
 def update_task(
     user_id: int, task_id: int, task_update: schemas.TaskUpdate, db: Session = Depends(get_db)
@@ -39,7 +54,19 @@ def update_task(
     task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user_id == user_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    updated_task = crud.update_task(db, task_id=task_id, task_update=task_update)
+    old_status = task.status
+    try:
+        updated_task = crud.update_task(db, task_id=task_id, task_update=task_update)
+    except ValueError as e:
+        error_msg = str(e)
+        if "Cannot modify recurrence config on a task instance" in error_msg:
+            raise HTTPException(status_code=400, detail=error_msg)
+        raise HTTPException(status_code=422, detail=error_msg)
+
+    # Trigger progress recalculation if task has a goal and status changed
+    if updated_task.goal_id and task_update.status is not None and task_update.status != old_status:
+        recalculate_goal_progress(db, updated_task.goal_id)
+
     return updated_task
 
 @router.delete("/{task_id}")
