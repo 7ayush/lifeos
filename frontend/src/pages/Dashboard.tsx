@@ -142,7 +142,7 @@ export function Dashboard() {
         <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-500 font-['Outfit'] tracking-tight drop-shadow-sm">
           {getGreeting()}, {user.username.split(' ')[0]}
         </h1>
-        <p className="text-neutral-500 font-medium mt-1">
+        <p className="text-muted-foreground font-medium mt-1">
           Here's an overview of your progress today.
         </p>
       </div>
@@ -151,7 +151,7 @@ export function Dashboard() {
       {/* DAILY FOCUS HERO WIDGET */}
       {/* ======================== */}
       {(mit || criticalHabit) && (
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-indigo-950/40 via-[#0a0a0a] to-emerald-950/20 p-6 shadow-[0_0_60px_rgba(99,102,241,0.05)]">
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-linear-to-br from-indigo-950/40 via-background to-emerald-950/20 p-6 shadow-[0_0_60px_rgba(99,102,241,0.05)]">
           {/* Decorative glow */}
           <div className="absolute -top-20 -right-20 w-60 h-60 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -165,20 +165,20 @@ export function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* MIT Card */}
               {mit && (
-                <div className="group p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-cyan-500/20 transition-all duration-300">
+                <div className="group p-5 rounded-2xl bg-secondary/50 border border-border hover:bg-secondary/50 hover:border-cyan-500/20 transition-all duration-300">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-xl bg-cyan-500/10 flex items-center justify-center">
                       <CheckSquare className="w-4 h-4 text-cyan-400" />
                     </div>
                     <span className="text-[10px] font-bold text-cyan-400/70 uppercase tracking-wider">Most Important Task</span>
                   </div>
-                  <h3 className="text-lg font-bold text-white font-['Outfit'] mb-1 line-clamp-1">{mit.title}</h3>
+                  <h3 className="text-lg font-bold text-foreground font-['Outfit'] mb-1 line-clamp-1">{mit.title}</h3>
                   {mit.description && (
-                    <p className="text-xs text-neutral-500 line-clamp-1 mb-3">{mit.description}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mb-3">{mit.description}</p>
                   )}
                   <div className="flex items-center justify-between">
                     {mit.target_date && (
-                      <span className="text-[10px] text-neutral-600 font-medium flex items-center gap-1">
+                      <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         Due {format(new Date(mit.target_date), 'MMM d')}
                       </span>
@@ -195,14 +195,14 @@ export function Dashboard() {
 
               {/* Critical Habit Card */}
               {criticalHabit && (
-                <div className="group p-5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-indigo-500/20 transition-all duration-300">
+                <div className="group p-5 rounded-2xl bg-secondary/50 border border-border hover:bg-secondary/50 hover:border-indigo-500/20 transition-all duration-300">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                       <Activity className="w-4 h-4 text-indigo-400" />
                     </div>
                     <span className="text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider">Don't Break the Streak</span>
                   </div>
-                  <h3 className="text-lg font-bold text-white font-['Outfit'] mb-1 line-clamp-1">{criticalHabit.title}</h3>
+                  <h3 className="text-lg font-bold text-foreground font-['Outfit'] mb-1 line-clamp-1">{criticalHabit.title}</h3>
                   <div className="flex items-center gap-2 mb-3">
                     <Flame className="w-3.5 h-3.5 text-yellow-400" />
                     <span className="text-xs font-semibold text-yellow-400/80">{criticalHabit.current_streak} day streak at risk</span>
@@ -237,15 +237,15 @@ export function Dashboard() {
         ].map((kpi, index) => (
           <div
             key={index}
-            className={`glass-panel p-6 rounded-2xl flex items-center justify-between group hover:border-white/10 hover:-translate-y-1 transition-all duration-300 ${
+            className={`glass-panel p-6 rounded-2xl flex items-center justify-between group hover:border-border hover:-translate-y-1 transition-all duration-300 ${
               kpi.celebrate
                 ? 'border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.15)] bg-emerald-500/[0.03]'
                 : ''
             }`}
           >
             <div className="relative z-10">
-              <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-2">{kpi.label}</p>
-              <p className="text-3xl font-bold text-white font-['Outfit'] drop-shadow-md">{kpi.value}</p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">{kpi.label}</p>
+              <p className="text-3xl font-bold text-foreground font-['Outfit'] drop-shadow-md">{kpi.value}</p>
             </div>
             <div className={`w-12 h-12 rounded-xl flex flex-shrink-0 items-center justify-center relative z-10 ${kpi.bg} shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]`}>
               <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
@@ -271,8 +271,8 @@ export function Dashboard() {
           const offset = circumference - (current.value / 100) * circumference;
 
           return (
-            <div className="glass-panel p-6 rounded-2xl hover:border-white/10 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center relative">
-              <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">Task Efficiency</p>
+            <div className="glass-panel p-6 rounded-2xl hover:border-border hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center relative">
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Task Efficiency</p>
               <div className="relative w-24 h-24 mb-2">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
                   <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
@@ -288,15 +288,15 @@ export function Dashboard() {
                     style={{ filter: `drop-shadow(0 0 6px ${current.color}55)` }}
                   />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-white font-['Outfit']">
+                <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-foreground font-['Outfit']">
                   {current.value}%
                 </span>
               </div>
-              <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2" style={{ color: current.color }}>{current.label}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2" style={{ color: current.color }}>{current.label}</p>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setEfficiencySlide((prev) => (prev - 1 + slides.length) % slides.length)}
-                  className="p-1 text-neutral-600 hover:text-white transition-colors rounded-md hover:bg-white/5"
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-secondary/50"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -305,13 +305,13 @@ export function Dashboard() {
                     <button
                       key={i}
                       onClick={() => setEfficiencySlide(i)}
-                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === efficiencySlide ? 'bg-cyan-400 scale-125' : 'bg-neutral-600 hover:bg-neutral-500'}`}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === efficiencySlide ? 'bg-cyan-400 scale-125' : 'bg-muted-foreground hover:bg-muted-foreground'}`}
                     />
                   ))}
                 </div>
                 <button
                   onClick={() => setEfficiencySlide((prev) => (prev + 1) % slides.length)}
-                  className="p-1 text-neutral-600 hover:text-white transition-colors rounded-md hover:bg-white/5"
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-secondary/50"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -329,11 +329,11 @@ export function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Active Goals</h2>
+              <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Active Goals</h2>
             </div>
             <button
               onClick={() => navigate('/goals')}
-              className="text-[10px] font-bold text-neutral-600 hover:text-white uppercase tracking-wider transition-colors"
+              className="text-[10px] font-bold text-muted-foreground hover:text-foreground uppercase tracking-wider transition-colors"
             >
               View All →
             </button>
@@ -358,18 +358,18 @@ export function Dashboard() {
                 <div
                   key={goal.id}
                   onClick={() => navigate('/goals')}
-                  className={`relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br ${catGrad} p-5 cursor-pointer group hover:border-white/10 hover:-translate-y-1 transition-all duration-300`}
+                  className={`relative overflow-hidden rounded-2xl border border-border bg-linear-to-br ${catGrad} p-5 cursor-pointer group hover:border-border hover:-translate-y-1 transition-all duration-300`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">{goal.category}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{goal.category}</span>
                     <div className="flex items-center gap-1.5">
                       <div className={`w-1.5 h-1.5 rounded-full ${pc.dot}`} />
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${pc.text}`}>{goal.priority}</span>
                     </div>
                   </div>
-                  <h3 className="text-base font-bold text-white font-['Outfit'] mb-3 line-clamp-1 group-hover:text-emerald-300 transition-colors">{goal.title}</h3>
+                  <h3 className="text-base font-bold text-foreground font-['Outfit'] mb-3 line-clamp-1 group-hover:text-emerald-300 transition-colors">{goal.title}</h3>
                   {goal.target_date && (
-                    <p className="text-[10px] text-neutral-600 font-medium flex items-center gap-1 mb-3">
+                    <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1 mb-3">
                       <Clock className="w-3 h-3" />
                       {format(new Date(goal.target_date), 'MMM d, yyyy')}
                     </p>
@@ -386,7 +386,7 @@ export function Dashboard() {
       {/* ALL DONE CELEBRATION */}
       {/* ======================== */}
       {allHabitsDone && totalHabits > 0 && (
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-linear-to-r from-emerald-950/30 via-[#0a0a0a] to-emerald-950/30 p-6 text-center shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-linear-to-r from-emerald-950/30 via-background to-emerald-950/30 p-6 text-center shadow-[0_0_40px_rgba(16,185,129,0.1)]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.06)_0%,_transparent_70%)]" />
           <div className="relative z-10">
             <div className="flex items-center justify-center gap-2 mb-2">
@@ -407,21 +407,21 @@ export function Dashboard() {
               <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                 <Activity className="w-5 h-5 text-indigo-400" />
               </div>
-              <h2 className="text-xl font-bold text-white font-['Outfit']">Daily Habits</h2>
+              <h2 className="text-xl font-bold text-foreground font-['Outfit']">Daily Habits</h2>
             </div>
-            <span className="text-xs font-bold text-neutral-600 bg-white/5 px-3 py-1 rounded-full border border-white/5">
+            <span className="text-xs font-bold text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full border border-border">
               {completedHabits}/{totalHabits}
             </span>
           </div>
 
           <div className="flex-1 space-y-3">
             {todayData?.habits.length === 0 ? (
-              <p className="text-neutral-500 text-sm italic">No habits scheduled for today.</p>
+              <p className="text-muted-foreground text-sm italic">No habits scheduled for today.</p>
             ) : (
               todayData?.habits.map((habit) => {
                 const isDone = habit.logs?.some(l => l.log_date === todayStr && l.status === 'Done');
                 return (
-                  <div key={habit.id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.015] border border-white/[0.03] hover:bg-white/[0.04] hover:border-white/[0.08] hover:translate-x-1 transition-all group">
+                  <div key={habit.id} className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/50 hover:border-border hover:translate-x-1 transition-all group">
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => handleToggleHabit(habit.id, habit.logs || [])}
@@ -430,16 +430,16 @@ export function Dashboard() {
                         {isDone ? (
                           <CheckCircle2 className="w-7 h-7 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)] rounded-full" />
                         ) : (
-                          <Circle className="w-7 h-7 text-neutral-600 group-hover:text-emerald-400/50 transition-colors" />
+                          <Circle className="w-7 h-7 text-muted-foreground group-hover:text-emerald-400/50 transition-colors" />
                         )}
                       </button>
                       <div>
-                        <p className={`font-semibold transition-colors ${isDone ? 'text-neutral-400 line-through decoration-emerald-500/30' : 'text-white'}`}>
+                        <p className={`font-semibold transition-colors ${isDone ? 'text-muted-foreground line-through decoration-emerald-500/30' : 'text-foreground'}`}>
                           {habit.title}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           <Zap className="w-3 h-3 text-yellow-400" />
-                          <span className="text-xs font-medium text-neutral-500">{habit.current_streak} snap streak</span>
+                          <span className="text-xs font-medium text-muted-foreground">{habit.current_streak} snap streak</span>
                         </div>
                       </div>
                     </div>
@@ -456,29 +456,29 @@ export function Dashboard() {
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
               <CheckSquare className="w-5 h-5 text-cyan-400" />
             </div>
-            <h2 className="text-xl font-bold text-white font-['Outfit']">Action Items</h2>
+            <h2 className="text-xl font-bold text-foreground font-['Outfit']">Action Items</h2>
           </div>
 
           <div className="flex-1 space-y-3">
             {todayData?.tasks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center p-6 border border-dashed border-white/10 rounded-xl">
+              <div className="flex flex-col items-center justify-center h-full text-center p-6 border border-dashed border-border rounded-xl">
                 <CheckCircle2 className="w-10 h-10 text-emerald-400/50 mb-3" />
-                <p className="text-neutral-300 font-medium">All caught up!</p>
-                <p className="text-neutral-500 text-sm mt-1">No tasks due today.</p>
+                <p className="text-foreground font-medium">All caught up!</p>
+                <p className="text-muted-foreground text-sm mt-1">No tasks due today.</p>
               </div>
             ) : (
               todayData?.tasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.015] border border-white/[0.03] hover:bg-white/[0.04] hover:border-white/[0.08] hover:translate-x-1 transition-all group">
+                <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/50 hover:border-border hover:translate-x-1 transition-all group">
                   <div className="flex items-start gap-4">
                      <button
                         onClick={() => handleToggleTask(task.id)}
                         className="cursor-pointer mt-0.5 group-hover:scale-110 flex shrink-0 items-center justify-center transition-transform active:scale-90"
                       >
-                        <Circle className="w-6 h-6 text-neutral-600 group-hover:text-cyan-400/50 transition-colors" />
+                        <Circle className="w-6 h-6 text-muted-foreground group-hover:text-cyan-400/50 transition-colors" />
                       </button>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-white">{task.title}</p>
+                        <p className="font-semibold text-foreground">{task.title}</p>
                         <PriorityBadge priority={task.priority} />
                         {task.target_date && task.target_date < todayStr && task.status !== 'Done' && (
                           <span className="px-1.5 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-[8px] font-bold text-rose-400 uppercase tracking-tighter">Overdue</span>
@@ -488,7 +488,7 @@ export function Dashboard() {
                         )}
                       </div>
                       {task.description && (
-                        <p className="text-xs text-neutral-500 mt-1 line-clamp-1">{task.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{task.description}</p>
                       )}
                     </div>
                   </div>

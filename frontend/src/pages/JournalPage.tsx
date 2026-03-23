@@ -154,14 +154,14 @@ export function JournalPage() {
     <div className="h-[calc(100vh-8rem)] flex flex-col md:flex-row gap-6 animate-in fade-in duration-500 overflow-hidden">
       
       {/* Sidebar: Entry Timeline */}
-      <div className="w-full md:w-1/3 lg:w-1/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-white/10 overflow-hidden shrink-0">
-        <div className="p-6 border-b border-white/10 bg-white/[0.02]">
+      <div className="w-full md:w-1/3 lg:w-1/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-border overflow-hidden shrink-0">
+        <div className="p-6 border-b border-border bg-secondary/50">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center">
                 <BookOpen className="w-4 h-4 text-fuchsia-400" />
               </div>
-              <h1 className="text-xl font-bold text-white font-['Outfit'] tracking-tight">Timeline</h1>
+              <h1 className="text-xl font-bold text-foreground font-['Outfit'] tracking-tight">Timeline</h1>
             </div>
             {!isComposing && (
               <button 
@@ -176,7 +176,7 @@ export function JournalPage() {
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
           {entries.length === 0 ? (
-            <p className="text-center text-neutral-500 text-sm mt-8 p-4">Your journal is empty. Start writing your thoughts.</p>
+            <p className="text-center text-muted-foreground text-sm mt-8 p-4">Your journal is empty. Start writing your thoughts.</p>
           ) : (
             entries.map(entry => {
               const dateObj = parseISO(entry.entry_date);
@@ -189,21 +189,21 @@ export function JournalPage() {
                   className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
                     isActive 
                       ? 'bg-fuchsia-500/10 border-fuchsia-500/30' 
-                      : 'bg-white/[0.015] border-transparent hover:bg-white/[0.04] hover:-translate-y-0.5'
+                      : 'bg-secondary/50 border-transparent hover:bg-secondary/50 hover:-translate-y-0.5'
                   }`}
                 >
                   {isActive && (
                     <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-gradient-to-b from-fuchsia-400 to-transparent rounded-r-full shadow-[0_0_10px_rgba(217,70,239,0.5)]" />
                   )}
                   <div className="flex items-center justify-between mb-1">
-                    <p className={`font-bold text-sm ${isActive ? 'text-fuchsia-400' : 'text-neutral-300'}`}>
+                    <p className={`font-bold text-sm ${isActive ? 'text-fuchsia-400' : 'text-foreground'}`}>
                       {format(dateObj, 'MMM d, yyyy')}
                     </p>
                     {moodEmoji && (
                       <span className="text-lg" title={moodEmoji.label}>{moodEmoji.emoji}</span>
                     )}
                   </div>
-                  <p className="text-xs text-neutral-500 line-clamp-2">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {stripMarkdown(entry.content)}
                   </p>
                 </div>
@@ -214,24 +214,24 @@ export function JournalPage() {
       </div>
 
       {/* Main Area: Editor / Detail View */}
-      <div className="w-full md:w-2/3 lg:w-3/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-white/10 overflow-hidden relative">
+      <div className="w-full md:w-2/3 lg:w-3/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-border overflow-hidden relative">
         {isComposing ? (
-          <div className="flex flex-col h-full bg-black/40 p-6 md:p-8 relative z-10 custom-scrollbar overflow-y-auto">
+          <div className="flex flex-col h-full bg-card/60 p-6 md:p-8 relative z-10 custom-scrollbar overflow-y-auto">
             {/* Header Row */}
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
               <div className="flex items-center gap-4">
-                <Calendar className="w-5 h-5 text-neutral-500" />
+                <Calendar className="w-5 h-5 text-muted-foreground" />
                 <input 
                   type="date" 
                   value={currentDate}
                   onChange={(e) => setCurrentDate(e.target.value)}
-                  className="bg-transparent border-none text-xl font-bold text-white focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                  className="bg-transparent border-none text-xl font-bold text-foreground focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={resetEditor}
-                  className="px-4 py-2 text-sm font-semibold text-neutral-400 hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <span className="hidden sm:inline">Cancel</span>
                   <X className="w-4 h-4 sm:hidden" />
@@ -249,7 +249,7 @@ export function JournalPage() {
 
             {/* Mood Selector */}
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs uppercase font-bold text-neutral-500 tracking-wider whitespace-nowrap">Mood</span>
+              <span className="text-xs uppercase font-bold text-muted-foreground tracking-wider whitespace-nowrap">Mood</span>
               <div className="flex items-center gap-1.5">
                 {MOOD_EMOJIS.map(mood => (
                   <button
@@ -257,8 +257,8 @@ export function JournalPage() {
                     onClick={() => setCurrentMood(currentMood === mood.value ? undefined : mood.value)}
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all duration-200 border ${
                       currentMood === mood.value
-                        ? `bg-gradient-to-br ${mood.color} border-white/20 scale-110 shadow-lg`
-                        : 'bg-white/5 border-transparent hover:bg-white/10 hover:scale-105'
+                        ? `bg-gradient-to-br ${mood.color} border-border scale-110 shadow-lg`
+                        : 'bg-secondary/50 border-transparent hover:bg-secondary/50 hover:scale-105'
                     }`}
                     title={mood.label}
                   >
@@ -267,7 +267,7 @@ export function JournalPage() {
                 ))}
               </div>
               {currentMood && (
-                <span className="text-xs text-neutral-400 font-medium">
+                <span className="text-xs text-muted-foreground font-medium">
                   {MOOD_EMOJIS.find(m => m.value === currentMood)?.label}
                 </span>
               )}
@@ -283,7 +283,7 @@ export function JournalPage() {
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all border ${
                   showPrompts 
                     ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' 
-                    : 'bg-white/5 border-white/5 text-neutral-500 hover:text-white hover:bg-white/10'
+                    : 'bg-secondary/50 border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -296,14 +296,14 @@ export function JournalPage() {
                     <button
                       key={i}
                       onClick={() => applyPrompt(prompt)}
-                      className="px-3 py-2 rounded-xl bg-white/5 hover:bg-violet-500/10 text-neutral-400 hover:text-violet-300 text-sm font-medium border border-white/5 hover:border-violet-500/20 transition-all"
+                      className="px-3 py-2 rounded-xl bg-secondary/50 hover:bg-violet-500/10 text-muted-foreground hover:text-violet-300 text-sm font-medium border border-border hover:border-violet-500/20 transition-all"
                     >
                       {prompt}
                     </button>
                   ))}
                   <button
                     onClick={() => setPrompts(getRandomPrompts(3))}
-                    className="px-3 py-2 rounded-xl text-neutral-600 hover:text-neutral-400 text-sm transition-colors"
+                    className="px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground text-sm transition-colors"
                   >
                     ↻ Refresh
                   </button>
@@ -322,12 +322,12 @@ export function JournalPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50 select-none">
-            <BookOpen className="w-16 h-16 text-neutral-700 mb-6" />
-            <h2 className="text-2xl font-bold text-neutral-500 mb-2 font-['Outfit']">Reflect on your day</h2>
-            <p className="text-neutral-600 max-w-sm mb-8">Select an entry from the timeline to read or edit, or create a new one to capture your current thoughts.</p>
+            <BookOpen className="w-16 h-16 text-muted-foreground mb-6" />
+            <h2 className="text-2xl font-bold text-muted-foreground mb-2 font-['Outfit']">Reflect on your day</h2>
+            <p className="text-muted-foreground max-w-sm mb-8">Select an entry from the timeline to read or edit, or create a new one to capture your current thoughts.</p>
             <button 
               onClick={startNew}
-              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-colors border border-white/10"
+              className="flex items-center gap-2 px-6 py-3 bg-secondary/50 hover:bg-secondary/50 text-foreground rounded-xl font-semibold transition-colors border border-border"
             >
               <Plus className="w-5 h-5" />
               Write Entry

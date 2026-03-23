@@ -67,7 +67,7 @@ export function LoginPage() {
   }, [isAuthenticated, navigate, handleCredentialResponse]);
 
   return (
-    <div className="min-h-screen bg-[#030303] flex items-center justify-center relative overflow-hidden font-['Inter']">
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden font-['Inter']">
       {/* Ambient background effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent" />
       <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
@@ -75,25 +75,25 @@ export function LoginPage() {
 
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-10 shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+        <div className="bg-secondary/50 backdrop-blur-2xl border border-border rounded-3xl p-10 shadow-[0_0_80px_rgba(0,0,0,0.5)]">
           {/* Brand */}
           <div className="flex flex-col items-center mb-10">
             <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(52,211,153,0.3)] mb-5">
               <span className="text-3xl font-bold text-white font-['Outfit']">L</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-400 font-['Outfit'] tracking-tight">
+            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground font-['Outfit'] tracking-tight">
               Life OS
             </h1>
-            <p className="text-neutral-500 text-sm mt-2 font-medium">
+            <p className="text-muted-foreground text-sm mt-2 font-medium">
               Your personal management system
             </p>
           </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            <span className="text-neutral-600 text-xs uppercase tracking-widest font-medium">Sign in to continue</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <span className="text-muted-foreground text-xs uppercase tracking-widest font-medium">Sign in to continue</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
           </div>
 
           {/* Google Sign-In Button */}
@@ -102,7 +102,7 @@ export function LoginPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-neutral-600 text-xs text-center mt-10 leading-relaxed">
+          <p className="text-muted-foreground text-xs text-center mt-10 leading-relaxed">
             By signing in, you agree to allow Life OS to manage your personal data securely.
           </p>
         </div>

@@ -34,19 +34,19 @@ function DeltaIndicator({ delta }: { delta: number }) {
 
 export function GoalProgressSection({ goals }: GoalProgressSectionProps) {
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+    <div className="bg-secondary/50 border border-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-white font-semibold">Goal Progress</h2>
+          <h2 className="text-foreground font-semibold">Goal Progress</h2>
         </div>
-        <span className="text-neutral-400 text-sm">
+        <span className="text-muted-foreground text-sm">
           {goals.length} {goals.length === 1 ? 'goal' : 'goals'}
         </span>
       </div>
 
       {goals.length === 0 ? (
-        <p className="text-neutral-500 text-sm py-4 text-center">
+        <p className="text-muted-foreground text-sm py-4 text-center">
           No active goals this week.
         </p>
       ) : (
@@ -54,11 +54,11 @@ export function GoalProgressSection({ goals }: GoalProgressSectionProps) {
           {goals.map((goal) => (
             <div
               key={goal.goal_id}
-              className="px-3 py-3 rounded-lg bg-white/[0.02] border border-white/5"
+              className="px-3 py-3 rounded-lg bg-secondary/50 border border-border"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm text-white truncate">
+                  <span className="text-sm text-foreground truncate">
                     {goal.title}
                   </span>
                   <PriorityBadge priority={goal.priority} />
@@ -71,7 +71,7 @@ export function GoalProgressSection({ goals }: GoalProgressSectionProps) {
               </div>
 
               {goal.target_date && (
-                <div className="flex items-center gap-1 text-xs text-neutral-500">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="w-3 h-3" />
                   <span>Target: {goal.target_date}</span>
                 </div>

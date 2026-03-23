@@ -24,11 +24,11 @@ export function HabitSummarySection({
   overallAdherence,
 }: HabitSummarySectionProps) {
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+    <div className="bg-secondary/50 border border-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-violet-400" />
-          <h2 className="text-white font-semibold">Habit Performance</h2>
+          <h2 className="text-foreground font-semibold">Habit Performance</h2>
         </div>
         <span className="text-violet-400 font-medium text-sm">
           {Math.round(overallAdherence)}% adherence
@@ -36,7 +36,7 @@ export function HabitSummarySection({
       </div>
 
       {habits.length === 0 ? (
-        <p className="text-neutral-500 text-sm py-4 text-center">
+        <p className="text-muted-foreground text-sm py-4 text-center">
           No habits tracked this week.
         </p>
       ) : (
@@ -44,14 +44,14 @@ export function HabitSummarySection({
           {habits.map((habit) => (
             <div
               key={habit.habit_id}
-              className="px-3 py-3 rounded-lg bg-white/[0.02] border border-white/5"
+              className="px-3 py-3 rounded-lg bg-secondary/50 border border-border"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-white truncate">
+                <span className="text-sm text-foreground truncate">
                   {habit.title}
                 </span>
                 <div className="flex items-center gap-3 shrink-0 text-xs">
-                  <span className="text-neutral-400">
+                  <span className="text-muted-foreground">
                     {Math.round(habit.adherence_rate)}%
                   </span>
                   <span className="text-amber-400">
@@ -65,7 +65,7 @@ export function HabitSummarySection({
                   const status = habit.daily_status[day] ?? 'N/A';
                   return (
                     <div key={day} className="flex flex-col items-center gap-1">
-                      <span className="text-[10px] text-neutral-600">
+                      <span className="text-[10px] text-muted-foreground">
                         {day.charAt(0)}
                       </span>
                       <div

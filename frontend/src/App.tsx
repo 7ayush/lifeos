@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { LoginPage } from './pages/LoginPage';
@@ -17,24 +18,26 @@ import { ExportPage } from './pages/ExportPage';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          
-          <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/goals" element={<GoalsPage />} />
-            <Route path="/tasks" element={<KanbanBoard />} />
-            <Route path="/habits" element={<HabitsPage />} />
-            <Route path="/journal" element={<JournalPage />} />
-            <Route path="/vault" element={<VaultPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/weekly-review" element={<WeeklyReviewPage />} />
-            <Route path="/export" element={<ExportPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            
+            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/goals" element={<GoalsPage />} />
+              <Route path="/tasks" element={<KanbanBoard />} />
+              <Route path="/habits" element={<HabitsPage />} />
+              <Route path="/journal" element={<JournalPage />} />
+              <Route path="/vault" element={<VaultPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/weekly-review" element={<WeeklyReviewPage />} />
+              <Route path="/export" element={<ExportPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

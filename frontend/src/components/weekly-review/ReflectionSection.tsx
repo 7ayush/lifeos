@@ -45,11 +45,11 @@ export function ReflectionSection({ content, onSave }: ReflectionSectionProps) {
   }, []);
 
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+    <div className="bg-secondary/50 border border-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-fuchsia-400" />
-          <h2 className="text-white font-semibold">Weekly Reflection</h2>
+          <h2 className="text-foreground font-semibold">Weekly Reflection</h2>
         </div>
         {showSaved && (
           <span className="flex items-center gap-1 text-emerald-400 text-sm font-medium">
@@ -61,14 +61,14 @@ export function ReflectionSection({ content, onSave }: ReflectionSectionProps) {
 
       <div className="mb-4 space-y-1.5">
         {GUIDED_PROMPTS.map((prompt) => (
-          <p key={prompt} className="text-sm text-neutral-400 italic">
+          <p key={prompt} className="text-sm text-muted-foreground italic">
             • {prompt}
           </p>
         ))}
       </div>
 
       <div
-        className="rounded-lg border border-white/10 overflow-hidden bg-white/[0.02] min-h-[200px] flex flex-col"
+        className="rounded-lg border border-border overflow-hidden bg-secondary/50 min-h-[200px] flex flex-col"
         onBlur={handleBlur}
       >
         <MarkdownEditor

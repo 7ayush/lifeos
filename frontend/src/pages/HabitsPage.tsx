@@ -186,8 +186,8 @@ export function HabitsPage() {
     <div className="flex flex-col animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-white font-['Outfit'] tracking-tight">Habits</h1>
-          <p className="text-neutral-500 font-medium mt-1">Consistency is the key to mastery.</p>
+          <h1 className="text-3xl font-extrabold text-foreground font-['Outfit'] tracking-tight">Habits</h1>
+          <p className="text-muted-foreground font-medium mt-1">Consistency is the key to mastery.</p>
         </div>
         <button
           onClick={openCreateModal}
@@ -200,15 +200,15 @@ export function HabitsPage() {
 
       <div className="grid gap-6">
         {habits.length === 0 ? (
-          <div className="glass-panel p-12 rounded-3xl flex flex-col items-center justify-center text-center border-dashed border-white/20">
-            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4">
+          <div className="glass-panel p-12 rounded-3xl flex flex-col items-center justify-center text-center border-dashed border-border">
+            <div className="w-16 h-16 bg-secondary/50 rounded-2xl flex items-center justify-center mb-4">
               <Activity className="w-8 h-8 text-indigo-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No habits tracked yet</h3>
-            <p className="text-neutral-500 max-w-sm mb-6">Build a new routine by tracking your desired actions over set periods.</p>
+            <h3 className="text-xl font-bold text-foreground mb-2">No habits tracked yet</h3>
+            <p className="text-muted-foreground max-w-sm mb-6">Build a new routine by tracking your desired actions over set periods.</p>
             <button
               onClick={openCreateModal}
-              className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-colors border border-white/10"
+              className="px-6 py-2.5 bg-secondary/50 hover:bg-secondary/50 text-foreground rounded-xl font-semibold transition-colors border border-border"
             >
               Start Tracking
             </button>
@@ -230,25 +230,25 @@ export function HabitsPage() {
             const progressPct = Math.min(100, Math.round((doneInPeriod / habit.target_x) * 100));
 
             return (
-              <div key={habit.id} className="glass-panel p-6 rounded-2xl border border-white/5 group hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300">
+              <div key={habit.id} className="glass-panel p-6 rounded-2xl border border-border group hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300">
                 <div className="flex flex-col md:flex-row justify-between gap-6 relative z-10">
                   
                   <div className="flex-initial md:w-64 min-w-0 flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-xl font-bold text-white font-['Outfit'] truncate leading-tight" title={habit.title}>
+                        <h3 className="text-xl font-bold text-foreground font-['Outfit'] truncate leading-tight" title={habit.title}>
                           {habit.title}
                         </h3>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           <button 
                             onClick={(e) => { e.stopPropagation(); openEditModal(habit); }}
-                            className="p-1.5 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white rounded-lg transition-colors"
+                            className="p-1.5 bg-secondary/50 hover:bg-secondary/50 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
                             title="Edit Habit"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleDeleteHabit(habit.id); }}
-                            className="p-1.5 bg-white/5 hover:bg-red-500/10 text-neutral-400 hover:text-red-400 rounded-lg transition-colors"
+                            className="p-1.5 bg-secondary/50 hover:bg-red-500/10 text-muted-foreground hover:text-red-400 rounded-lg transition-colors"
                             title="Delete Habit"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -292,33 +292,33 @@ export function HabitsPage() {
                     </div>
 
                     <div className="flex flex-col gap-0.5 mt-2">
-                      <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Status</span>
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Target Status</span>
                       <div className="flex items-baseline gap-1.5">
-                        <strong className={`text-2xl font-black font-['Outfit'] ${isSuccess ? 'text-emerald-400' : 'text-white'}`}>
+                        <strong className={`text-2xl font-black font-['Outfit'] ${isSuccess ? 'text-emerald-400' : 'text-foreground'}`}>
                           {doneInPeriod} / {habit.target_x}
                         </strong>
-                        <span className="text-xs text-neutral-400 font-medium whitespace-nowrap">days</span>
+                        <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">days</span>
                       </div>
-                      <span className="text-[10px] text-neutral-500 font-medium">per {habit.target_y_days}-day period</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">per {habit.target_y_days}-day period</span>
                     </div>
                   </div>
 
                   <div className="flex-1 flex flex-col gap-3 min-w-0">
                     <div className="flex items-center justify-between gap-4">
-                      <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Activity History</p>
-                      <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Activity History</p>
+                      <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-lg border border-border">
                         <button 
                             onClick={(e) => { e.stopPropagation(); setViewOffset(v => v + 10); }}
-                            className="p-1 px-2.5 hover:bg-white/10 rounded-md text-neutral-400 hover:text-white transition-all active:scale-90"
+                            className="p-1 px-2.5 hover:bg-secondary/50 rounded-md text-muted-foreground hover:text-foreground transition-all active:scale-90"
                             title="Older (10 Days)"
                         >
                             <ChevronLeft className="w-3.5 h-3.5" />
                         </button>
-                        <div className="w-px h-3 bg-white/10 mx-0.5" />
+                        <div className="w-px h-3 bg-border mx-0.5" />
                         <button 
                             onClick={(e) => { e.stopPropagation(); setViewOffset(v => Math.max(0, v - 10)); }}
                             disabled={viewOffset === 0}
-                            className="p-1 px-2.5 hover:bg-white/10 rounded-md text-neutral-400 hover:text-white disabled:opacity-10 transition-all active:scale-90"
+                            className="p-1 px-2.5 hover:bg-secondary/50 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-10 transition-all active:scale-90"
                             title="Newer (10 Days)"
                         >
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -346,7 +346,7 @@ export function HabitsPage() {
                             
                             return (
                               <div key={idx} className={`flex flex-col items-center gap-2 min-w-[42px] snap-center transition-opacity duration-300 ${isDisabled ? 'opacity-20' : ''}`}>
-                                <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-400 ring-1 ring-indigo-400/30 px-1 rounded' : 'text-neutral-600'}`}>
+                                <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-400 ring-1 ring-indigo-400/30 px-1 rounded' : 'text-muted-foreground'}`}>
                                   {format(date, 'EEE')}
                                 </span>
                                 <button
@@ -358,19 +358,19 @@ export function HabitsPage() {
                                   disabled={isDisabled}
                                   className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${
                                     isDisabled 
-                                      ? 'bg-neutral-900/50 border-white/5 cursor-not-allowed' 
+                                      ? 'bg-secondary/50 border-border cursor-not-allowed' 
                                       : isDone 
                                         ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] active:scale-95' 
-                                        : 'bg-white/3 border-white/5 hover:bg-white/8 hover:border-white/10 active:scale-95'
+                                        : 'bg-secondary/50 border-border hover:bg-secondary/80 hover:border-border active:scale-95'
                                   }`}
                                 >
                                   {isDone ? (
                                     <CheckCircle2 className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
                                   ) : (
-                                    <div className={`w-2.5 h-2.5 rounded-full transition-colors ${isDisabled ? 'bg-neutral-800' : 'bg-neutral-800'}`} />
+                                    <div className={`w-2.5 h-2.5 rounded-full transition-colors ${isDisabled ? 'bg-muted' : 'bg-muted'}`} />
                                   )}
                                 </button>
-                                <span className={`text-[10px] font-medium ${isToday ? 'text-indigo-300' : 'text-neutral-500'}`}>
+                                <span className={`text-[10px] font-medium ${isToday ? 'text-indigo-300' : 'text-muted-foreground'}`}>
                                   {format(date, 'd')}
                                 </span>
                               </div>
@@ -380,23 +380,23 @@ export function HabitsPage() {
                       </div>
                       
                       {/* Subtle shadows to indicate more content */}
-                      <div className="absolute inset-y-0 left-0 w-8 bg-linear-to-r from-[#0d0d0d] to-transparent pointer-events-none opacity-0 group-hover/scroll:opacity-100 transition-opacity" />
-                      <div className="absolute inset-y-0 right-0 w-8 bg-linear-to-l from-[#0d0d0d] to-transparent pointer-events-none opacity-0 group-hover/scroll:opacity-100 transition-opacity" />
+                      <div className="absolute inset-y-0 left-0 w-8 bg-linear-to-r from-card to-transparent pointer-events-none opacity-0 group-hover/scroll:opacity-100 transition-opacity" />
+                      <div className="absolute inset-y-0 right-0 w-8 bg-linear-to-l from-card to-transparent pointer-events-none opacity-0 group-hover/scroll:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 </div>
 
                 {/* Progress Bar moved to bottom for full width */}
-                <div className="mt-6 flex flex-col gap-2 border-t border-white/5 pt-4">
+                <div className="mt-6 flex flex-col gap-2 border-t border-border pt-4">
                     <div className="flex items-center justify-between text-[10px] font-bold tracking-tighter uppercase">
                         <div className="flex items-center gap-2">
                             <span className={isSuccess ? 'text-emerald-400' : 'text-indigo-400'}>{progressPct}% Complete</span>
-                            <div className="w-1 h-1 rounded-full bg-neutral-700" />
-                            <span className="text-neutral-500">{doneInPeriod} of {habit.target_x} days achieved</span>
+                            <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                            <span className="text-muted-foreground">{doneInPeriod} of {habit.target_x} days achieved</span>
                         </div>
-                        <span className="text-neutral-600">{habit.target_x - doneInPeriod} more to reach target</span>
+                        <span className="text-muted-foreground">{habit.target_x - doneInPeriod} more to reach target</span>
                     </div>
-                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                    <div className="w-full h-2 bg-secondary/50 rounded-full overflow-hidden border border-border">
                         <div 
                             className={`h-full rounded-full transition-all duration-1000 relative ${
                                 isSuccess 
@@ -405,7 +405,7 @@ export function HabitsPage() {
                             }`}
                             style={{ width: `${progressPct}%` }}
                         >
-                            <div className="absolute inset-0 bg-white/10 animate-pulse" />
+                            <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                         </div>
                     </div>
                 </div>
@@ -416,57 +416,57 @@ export function HabitsPage() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => setIsModalOpen(false)}>
-          <div className="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-2xl font-bold text-white mb-2 font-['Outfit']">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-card/60 backdrop-blur-sm animate-in fade-in" onClick={() => setIsModalOpen(false)}>
+          <div className="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-bold text-foreground mb-2 font-['Outfit']">
               {editingHabit ? 'Edit Habit' : 'Create New Habit'}
             </h2>
-            <p className="text-neutral-400 text-sm mb-6">Set a realistic target using the X/Y system.</p>
+            <p className="text-muted-foreground text-sm mb-6">Set a realistic target using the X/Y system.</p>
             
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Habit Name</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Habit Name</label>
                 <input
                   type="text"
                   required
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow"
                   placeholder="e.g. Read 10 pages, Meditate..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Start Date</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Start Date</label>
                 <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="date"
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow scheme-dark"
+                    className="w-full bg-secondary/50 border border-border rounded-xl pl-11 pr-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow scheme-dark"
                   />
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-neutral-300 mb-2">Target Days</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Target Days</label>
                   <input
                     type="number"
                     min="1"
                     required
                     value={targetX}
                     onChange={(e) => setTargetX(parseInt(e.target.value))}
-                    className={`w-full bg-white/5 border rounded-xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
-                        targetX > targetY ? 'border-red-500/50' : 'border-white/10'
+                    className={`w-full bg-secondary/50 border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
+                        targetX > targetY ? 'border-red-500/50' : 'border-border'
                     }`}
                   />
                 </div>
-                <div className="pt-7 text-neutral-500 font-bold">in</div>
+                <div className="pt-7 text-muted-foreground font-bold">in</div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-neutral-300 mb-2">Total Days</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Total Days</label>
                   <input
                     type="number"
                     min="1"
@@ -477,8 +477,8 @@ export function HabitsPage() {
                       const val = parseInt(e.target.value);
                       if (!isNaN(val)) setTargetY(val);
                     }}
-                    className={`w-full bg-white/5 border rounded-xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
-                        targetX > targetY ? 'border-red-500/50' : 'border-white/10'
+                    className={`w-full bg-secondary/50 border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
+                        targetX > targetY ? 'border-red-500/50' : 'border-border'
                     }`}
                   />
                   {targetX > targetY && (
@@ -493,7 +493,7 @@ export function HabitsPage() {
               {startDate && targetY > 0 && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
                   <Calendar className="w-4 h-4 text-indigo-400" />
-                  <span className="text-xs text-neutral-400">Ends on:</span>
+                  <span className="text-xs text-muted-foreground">Ends on:</span>
                   <span className="text-xs font-bold text-indigo-300">
                     {format(addDays(new Date(startDate), targetY), 'MMM d, yyyy')}
                   </span>
@@ -502,24 +502,24 @@ export function HabitsPage() {
 
               {/* Goal Selector */}
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Link to Goal (optional)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Link to Goal (optional)</label>
                 <select
                   value={goalId || ''}
                   onChange={(e) => setGoalId(e.target.value ? parseInt(e.target.value) : undefined)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow appearance-none"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow appearance-none"
                 >
-                  <option value="" className="bg-neutral-900">No goal linked</option>
+                  <option value="" className="bg-popover">No goal linked</option>
                   {goals.filter(g => g.status === 'Active').map(g => (
-                    <option key={g.id} value={g.id} className="bg-neutral-900">{g.title}</option>
+                    <option key={g.id} value={g.id} className="bg-popover">{g.title}</option>
                   ))}
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-white/10">
+              <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl font-semibold text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+                  className="px-5 py-2.5 rounded-xl font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                 >
                   Cancel
                 </button>

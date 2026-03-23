@@ -309,3 +309,20 @@ export const exportData = async (
   );
   return response.data;
 };
+
+// ============================
+// USER SETTINGS API
+// ============================
+
+export const getUserSettings = async (userId: number): Promise<{ theme_preference: string }> => {
+  const res = await api.get(`/users/${userId}/settings`);
+  return res.data;
+};
+
+export const updateUserSettings = async (
+  userId: number,
+  settings: { theme_preference?: string }
+): Promise<{ theme_preference: string }> => {
+  const res = await api.patch(`/users/${userId}/settings`, settings);
+  return res.data;
+};

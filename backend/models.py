@@ -12,6 +12,7 @@ class User(Base):
     google_id = Column(String, unique=True, nullable=True, index=True)
     avatar_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    theme_preference = Column(String, default="dark")
 
     goals = relationship("Goal", back_populates="user")
     habits = relationship("Habit", back_populates="user")
