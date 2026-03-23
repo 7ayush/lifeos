@@ -9,7 +9,21 @@ Usage:
 import sqlite3
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "lifeos.db")
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./lifeos.db")
+
+
+def get_db_path(url: str) -> str:
+    """Extract the file path from a sqlite:/// URL."""
+    if url.startswith("sqlite:///"):
+        return url.replace("sqlite:///", "")
+    raise ValueError(f"Unsupported DATABASE_URL: {url}")
+
+
+DB_PATH = get_db_path(DATABASE_URL)
 
 COLUMNS_TO_ADD = [
     ("parent_task_id", "INTEGER REFERENCES tasks(id)"),
