@@ -225,7 +225,7 @@ export function JournalPage() {
                   type="date" 
                   value={currentDate}
                   onChange={(e) => setCurrentDate(e.target.value)}
-                  className="bg-transparent border-none text-xl font-bold text-foreground focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                  className="bg-transparent border-none text-xl font-bold text-foreground focus:outline-none focus:ring-0 dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert"
                 />
               </div>
               <div className="flex items-center gap-2">

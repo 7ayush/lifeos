@@ -44,13 +44,13 @@ function RadarChart({ stats }: { stats: PersonalStats }) {
             const p = getPoint(i, v);
             return `${p.x},${p.y}`;
           }).join(' ');
-          return <polygon key={v} points={points} fill="none" stroke="white" strokeOpacity={0.06} strokeWidth={1} />;
+          return <polygon key={v} points={points} fill="none" stroke="currentColor" strokeOpacity={0.06} strokeWidth={1} />;
         })}
 
         {/* Axis lines */}
         {axes.map((_, i) => {
           const p = getPoint(i, 100);
-          return <line key={`axis-${i}`} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="white" strokeOpacity={0.08} strokeWidth={1} />;
+          return <line key={`axis-${i}`} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />;
         })}
 
         {/* Data polygon */}
@@ -70,8 +70,8 @@ function RadarChart({ stats }: { stats: PersonalStats }) {
           const p = getPoint(i, stats[a.key]);
           return (
             <circle key={a.key} cx={p.x} cy={p.y} r={4}
-              fill={a.color} stroke="black" strokeWidth={1.5}
-              className="drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]"
+              fill={a.color} stroke="hsl(var(--border))" strokeWidth={1.5}
+              className="drop-shadow-sm"
             />
           );
         })}
@@ -123,11 +123,11 @@ function YearInPixelsGrid({ pixels }: { pixels: PixelDay[] }) {
 
   const getColor = (intensity: number, mood: number | null) => {
     if (intensity === 0 && mood === null) return 'bg-secondary/50';
-    if (intensity <= 0.15) return 'bg-emerald-900/40';
-    if (intensity <= 0.3) return 'bg-emerald-700/50';
-    if (intensity <= 0.5) return 'bg-emerald-600/60';
-    if (intensity <= 0.7) return 'bg-emerald-500/70';
-    return 'bg-emerald-400/80';
+    if (intensity <= 0.15) return 'bg-emerald-500/15';
+    if (intensity <= 0.3) return 'bg-emerald-500/30';
+    if (intensity <= 0.5) return 'bg-emerald-500/45';
+    if (intensity <= 0.7) return 'bg-emerald-500/60';
+    return 'bg-emerald-500/80';
   };
 
   const getMoodEmoji = (mood: number | null) => {
@@ -177,7 +177,7 @@ function YearInPixelsGrid({ pixels }: { pixels: PixelDay[] }) {
       {/* Legend */}
       <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-2">
         <span>Less</span>
-        {['bg-secondary/50', 'bg-emerald-900/40', 'bg-emerald-700/50', 'bg-emerald-600/60', 'bg-emerald-500/70', 'bg-emerald-400/80'].map((c, i) => (
+        {['bg-secondary/50', 'bg-emerald-500/15', 'bg-emerald-500/30', 'bg-emerald-500/45', 'bg-emerald-500/60', 'bg-emerald-500/80'].map((c, i) => (
           <div key={i} className={`w-3 h-3 rounded-[3px] ${c}`} />
         ))}
         <span>More</span>

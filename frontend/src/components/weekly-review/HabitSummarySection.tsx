@@ -15,7 +15,7 @@ function statusColor(status: string): string {
     case 'Missed':
       return 'bg-red-500';
     default:
-      return 'bg-neutral-600';
+      return 'bg-muted-foreground';
   }
 }
 

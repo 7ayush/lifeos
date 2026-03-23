@@ -151,7 +151,7 @@ export function Dashboard() {
       {/* DAILY FOCUS HERO WIDGET */}
       {/* ======================== */}
       {(mit || criticalHabit) && (
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-linear-to-br from-indigo-950/40 via-background to-emerald-950/20 p-6 shadow-[0_0_60px_rgba(99,102,241,0.05)]">
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-indigo-500/5 via-card to-emerald-500/5 p-6 shadow-[0_0_60px_rgba(99,102,241,0.05)]">
           {/* Decorative glow */}
           <div className="absolute -top-20 -right-20 w-60 h-60 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -247,7 +247,7 @@ export function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">{kpi.label}</p>
               <p className="text-3xl font-bold text-foreground font-['Outfit'] drop-shadow-md">{kpi.value}</p>
             </div>
-            <div className={`w-12 h-12 rounded-xl flex flex-shrink-0 items-center justify-center relative z-10 ${kpi.bg} shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]`}>
+            <div className={`w-12 h-12 rounded-xl flex flex-shrink-0 items-center justify-center relative z-10 ${kpi.bg}`}>
               <kpi.icon className={`w-6 h-6 ${kpi.color}`} />
               {kpi.celebrate && (
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full flex items-center justify-center animate-bounce">
@@ -275,7 +275,7 @@ export function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Task Efficiency</p>
               <div className="relative w-24 h-24 mb-2">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+                  <circle cx="40" cy="40" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
                   <circle
                     cx="40" cy="40" r={radius}
                     fill="none"
@@ -347,10 +347,10 @@ export function Dashboard() {
               };
               const pc = priorityColors[goal.priority] || priorityColors.Medium;
               const categoryColors: Record<string, string> = {
-                Project: 'from-indigo-500/20 to-indigo-500/5',
-                Area: 'from-emerald-500/20 to-emerald-500/5',
-                Resource: 'from-amber-500/20 to-amber-500/5',
-                Archive: 'from-neutral-500/20 to-neutral-500/5',
+                Project: 'from-indigo-500/10 to-indigo-500/5',
+                Area: 'from-emerald-500/10 to-emerald-500/5',
+                Resource: 'from-amber-500/10 to-amber-500/5',
+                Archive: 'from-neutral-500/10 to-neutral-500/5',
               };
               const catGrad = categoryColors[goal.category] || categoryColors.Project;
 
@@ -386,7 +386,7 @@ export function Dashboard() {
       {/* ALL DONE CELEBRATION */}
       {/* ======================== */}
       {allHabitsDone && totalHabits > 0 && (
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-linear-to-r from-emerald-950/30 via-background to-emerald-950/30 p-6 text-center shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 via-card to-emerald-500/5 p-6 text-center shadow-[0_0_40px_rgba(16,185,129,0.1)]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.06)_0%,_transparent_70%)]" />
           <div className="relative z-10">
             <div className="flex items-center justify-center gap-2 mb-2">

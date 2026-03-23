@@ -421,16 +421,16 @@ export function KanbanBoard() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   const colStyles: Record<string, { bg: string; border: string; glow: string; text: string; topGlare: string }> = {
-    Todo: { bg: 'bg-card/40', border: 'border-border hover:border-border', glow: 'shadow-[0_0_40px_rgba(255,255,255,0.02)]', text: 'text-foreground', topGlare: 'via-foreground/30' },
-    InProgress: { bg: 'bg-cyan-950/20', border: 'border-cyan-500/20 hover:border-cyan-500/40', glow: 'shadow-[0_0_40px_rgba(34,211,238,0.05)]', text: 'text-cyan-400', topGlare: 'via-cyan-500/40' },
-    Done: { bg: 'bg-emerald-950/20', border: 'border-emerald-500/20 hover:border-emerald-500/40', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.05)]', text: 'text-emerald-400', topGlare: 'via-emerald-500/40' },
-    Archived: { bg: 'bg-card/20', border: 'border-border hover:border-border', glow: 'shadow-[0_0_30px_rgba(255,255,255,0.01)]', text: 'text-muted-foreground', topGlare: 'via-muted-foreground/20' },
+    Todo: { bg: 'bg-card/40', border: 'border-border hover:border-border', glow: '', text: 'text-foreground', topGlare: 'via-foreground/30' },
+    InProgress: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/20 hover:border-cyan-500/40', glow: 'shadow-[0_0_40px_rgba(34,211,238,0.05)]', text: 'text-cyan-500', topGlare: 'via-cyan-500/40' },
+    Done: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/20 hover:border-emerald-500/40', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.05)]', text: 'text-emerald-500', topGlare: 'via-emerald-500/40' },
+    Archived: { bg: 'bg-card/20', border: 'border-border hover:border-border', glow: '', text: 'text-muted-foreground', topGlare: 'via-muted-foreground/20' },
   };
 
   const statusStyles: Record<string, { bg: string; border: string; accent: string; text: string; line: string }> = {
     Todo: { bg: 'bg-card/80', border: 'border-border', accent: 'border-l-foreground/30', text: 'text-foreground', line: '' },
-    InProgress: { bg: 'bg-cyan-950/30', border: 'border-cyan-500/20', accent: 'border-l-cyan-500', text: 'text-foreground', line: '' },
-    Done: { bg: 'bg-emerald-950/30', border: 'border-emerald-500/20', accent: 'border-l-emerald-500/50', text: 'text-muted-foreground', line: 'line-through' },
+    InProgress: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/20', accent: 'border-l-cyan-500', text: 'text-foreground', line: '' },
+    Done: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', accent: 'border-l-emerald-500/50', text: 'text-muted-foreground', line: 'line-through' },
     Archived: { bg: 'bg-card/40', border: 'border-border', accent: 'border-l-muted-foreground', text: 'text-muted-foreground', line: '' },
   };
 
@@ -973,7 +973,7 @@ export function KanbanBoard() {
                     required
                     value={newTaskDate}
                     onChange={(e) => setNewTaskDate(e.target.value)}
-                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 scheme-dark shrink-0"
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 shrink-0"
                   />
                 </div>
               </div>
@@ -1174,7 +1174,7 @@ export function KanbanBoard() {
                               type="date"
                               value={endsOnDate}
                               onChange={(e) => setEndsOnDate(e.target.value)}
-                              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50 scheme-dark"
+                              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                             />
                           </div>
                         )}

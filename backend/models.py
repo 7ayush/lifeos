@@ -61,6 +61,7 @@ class Habit(Base):
     ends_type = Column(String, default="never")  # never, on, after
     ends_on_date = Column(Date, nullable=True)
     ends_after_occurrences = Column(Integer, nullable=True)
+    min_threshold_pct = Column(Integer, default=80)  # minimum adherence % target
 
     user = relationship("User", back_populates="habits")
     goal = relationship("Goal", back_populates="habits")

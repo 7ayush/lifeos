@@ -35,8 +35,20 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+BYPASS_GOOGLE_AUTH = os.environ.get("BYPASS_GOOGLE_AUTH", "false").lower() == "true"
+
+
 def verify_google_token(token: str) -> dict:
-    """Verify a Google OAuth ID token and return user info."""
+    """Verify a Google OAuth ID token and return user info.
+    When BYPASS_GOOGLE_AUTH is true, returns a dev user without contacting Google."""
+    if BYPASS_GOOGLE_AUTH:
+        return {
+            "sub": "dev-user-001",
+            "email": "dev@localhost",
+            "name": "Dev User",
+            "picture": "",
+            "iss": "accounts.google.com",
+        }
     try:
         idinfo = id_token.verify_oauth2_token(
             token,

@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getHabits, createHabit, logHabit, updateHabit, deleteHabit, getGoals } from '../api';
 import type { Habit, HabitCreate, HabitLog, Goal } from '../types';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { Plus, Activity, CheckCircle2, Flame, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Target, TrendingUp } from 'lucide-react';
+import { Plus, Activity, CheckCircle2, Flame, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Target, TrendingUp, Repeat } from 'lucide-react';
 import { format, subDays, addDays, isSameDay, isAfter, isBefore, startOfDay } from 'date-fns';
 
 export function HabitsPage() {
@@ -20,6 +20,15 @@ export function HabitsPage() {
   const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [goalId, setGoalId] = useState<number | undefined>(undefined);
   const [goals, setGoals] = useState<Goal[]>([]);
+
+  // Scheduling state
+  const [frequencyType, setFrequencyType] = useState<string>('flexible');
+  const [repeatInterval, setRepeatInterval] = useState(1);
+  const [repeatDays, setRepeatDays] = useState<string>('');
+  const [endsType, setEndsType] = useState<string>('never');
+  const [endsOnDate, setEndsOnDate] = useState<string>('');
+  const [endsAfterOccurrences, setEndsAfterOccurrences] = useState<number>(30);
+  const [minThresholdPct, setMinThresholdPct] = useState<number>(80);
 
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [habitToDelete, setHabitToDelete] = useState<number | null>(null);
@@ -68,16 +77,30 @@ export function HabitsPage() {
     setTargetY(7);
     setStartDate(format(new Date(), 'yyyy-MM-dd'));
     setGoalId(undefined);
+    setFrequencyType('flexible');
+    setRepeatInterval(1);
+    setRepeatDays('');
+    setEndsType('never');
+    setEndsOnDate('');
+    setEndsAfterOccurrences(30);
+    setMinThresholdPct(80);
     setIsModalOpen(true);
   };
 
   const openEditModal = (habit: Habit) => {
     setEditingHabit(habit);
     setNewTitle(habit.title);
-    setTargetX(habit.target_x);
-    setTargetY(habit.target_y_days);
+    setTargetX(habit.target_x ?? 3);
+    setTargetY(habit.target_y_days ?? 7);
     setStartDate(habit.start_date);
     setGoalId(habit.goal_id || undefined);
+    setFrequencyType(habit.frequency_type || 'flexible');
+    setRepeatInterval(habit.repeat_interval || 1);
+    setRepeatDays(habit.repeat_days || '');
+    setEndsType(habit.ends_type || 'never');
+    setEndsOnDate(habit.ends_on_date || '');
+    setEndsAfterOccurrences(habit.ends_after_occurrences || 30);
+    setMinThresholdPct(habit.min_threshold_pct ?? 80);
     setIsModalOpen(true);
   };
 
@@ -91,21 +114,33 @@ export function HabitsPage() {
     }
 
     try {
+      const scheduleFields = {
+        frequency_type: frequencyType,
+        repeat_interval: repeatInterval,
+        repeat_days: repeatDays || undefined,
+        ends_type: endsType,
+        ends_on_date: endsType === 'on' ? endsOnDate || undefined : undefined,
+        ends_after_occurrences: endsType === 'after' ? endsAfterOccurrences : undefined,
+        min_threshold_pct: minThresholdPct,
+      };
+
       if (editingHabit) {
         await updateHabit(user.id, editingHabit.id, {
           title: newTitle,
-          target_x: targetX,
-          target_y_days: targetY,
+          target_x: frequencyType === 'flexible' ? targetX : undefined,
+          target_y_days: frequencyType === 'flexible' ? targetY : undefined,
           start_date: startDate,
           goal_id: goalId || undefined,
+          ...scheduleFields,
         });
       } else {
         const data: HabitCreate = {
           title: newTitle,
-          target_x: targetX,
-          target_y_days: targetY,
+          target_x: frequencyType === 'flexible' ? targetX : undefined,
+          target_y_days: frequencyType === 'flexible' ? targetY : undefined,
           start_date: startDate,
           goal_id: goalId,
+          ...scheduleFields,
         };
         await createHabit(user.id, data);
       }
@@ -215,19 +250,73 @@ export function HabitsPage() {
           </div>
         ) : (
           habits.map(habit => {
-            const displayDays = Math.max(30, habit.target_y_days);
-            const periodDays = getPastDays(displayDays, viewOffset);
-            
-            // For the progress bar/target, we always look at the current period (last target_y days from today)
-            const currentPeriodDays = getPastDays(habit.target_y_days, 0);
+            const isFlexible = !habit.frequency_type || habit.frequency_type === 'flexible';
             const logs = habit.logs || [];
-            const doneInPeriod = currentPeriodDays.filter(day => {
-              const dateStr = format(day, 'yyyy-MM-dd');
-              return logs.some(l => l.log_date === dateStr && l.status === 'Done');
-            }).length;
 
-            const isSuccess = doneInPeriod >= habit.target_x;
-            const progressPct = Math.min(100, Math.round((doneInPeriod / habit.target_x) * 100));
+            // Calculate expected days and done count based on schedule type
+            let expectedDays: number;
+            let lookbackDays: number;
+            let doneInPeriod: number;
+
+            if (isFlexible) {
+              lookbackDays = habit.target_y_days || 7;
+              expectedDays = habit.target_x || 1;
+              const currentPeriodDays = getPastDays(lookbackDays, 0);
+              doneInPeriod = currentPeriodDays.filter(day => {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                return logs.some(l => l.log_date === dateStr && l.status === 'Done');
+              }).length;
+            } else {
+              // For scheduled habits, compute expected days in the last 30 days
+              lookbackDays = 30;
+              const periodDaysForCalc = getPastDays(lookbackDays, 0);
+              const habitStart = startOfDay(new Date(habit.start_date));
+              const activeDays = periodDaysForCalc.filter(d => !isBefore(startOfDay(d), habitStart));
+
+              // Count expected scheduled days
+              const interval = habit.repeat_interval || 1;
+              const repeatDaysList = habit.repeat_days ? habit.repeat_days.split(',').map(Number) : [];
+
+              const isScheduledDay = (d: Date): boolean => {
+                switch (habit.frequency_type) {
+                  case 'daily':
+                    // Every N days from start
+                    const diffDays = Math.floor((d.getTime() - habitStart.getTime()) / 86400000);
+                    return diffDays >= 0 && diffDays % interval === 0;
+                  case 'weekly':
+                    if (repeatDaysList.length > 0) {
+                      return repeatDaysList.includes(d.getDay());
+                    }
+                    const diffWeekDays = Math.floor((d.getTime() - habitStart.getTime()) / 86400000);
+                    return diffWeekDays >= 0 && diffWeekDays % (interval * 7) === 0;
+                  case 'monthly':
+                    return d.getDate() === habitStart.getDate();
+                  case 'annually':
+                    return d.getDate() === habitStart.getDate() && d.getMonth() === habitStart.getMonth();
+                  case 'custom':
+                    if (repeatDaysList.length > 0) {
+                      return repeatDaysList.includes(d.getDay());
+                    }
+                    const diffCustom = Math.floor((d.getTime() - habitStart.getTime()) / 86400000);
+                    return diffCustom >= 0 && diffCustom % interval === 0;
+                  default:
+                    return true;
+                }
+              };
+
+              expectedDays = activeDays.filter(d => isScheduledDay(d)).length || 1;
+              doneInPeriod = activeDays.filter(day => {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                return logs.some(l => l.log_date === dateStr && l.status === 'Done');
+              }).length;
+            }
+
+            const threshold = habit.min_threshold_pct ?? 80;
+            const thresholdTarget = Math.ceil(expectedDays * threshold / 100);
+            const isSuccess = doneInPeriod >= thresholdTarget;
+            const progressPct = expectedDays > 0 ? Math.min(100, Math.round((doneInPeriod / expectedDays) * 100)) : 0;
+            const displayDays = Math.max(30, lookbackDays);
+            const periodDays = getPastDays(displayDays, viewOffset);
 
             return (
               <div key={habit.id} className="glass-panel p-6 rounded-2xl border border-border group hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-300">
@@ -265,19 +354,27 @@ export function HabitsPage() {
                         )}
                         {/* Habit Strength Badge */}
                         {(() => {
-                          const totalLogs = habit.logs?.length || 0;
                           const doneLogs = habit.logs?.filter((l: HabitLog) => l.status === 'Done').length || 0;
-                          const daysElapsed = Math.max(1, Math.floor((new Date().getTime() - new Date(habit.start_date).getTime()) / 86400000) + 1);
-                          const consistency = Math.min(100, Math.round((doneLogs / daysElapsed) * 100));
+                          if (doneLogs === 0) return null;
+
+                          // For scheduled habits, count only scheduled days elapsed
+                          let scheduledDaysElapsed: number;
+                          if (isFlexible) {
+                            scheduledDaysElapsed = Math.max(1, Math.floor((new Date().getTime() - new Date(habit.start_date).getTime()) / 86400000) + 1);
+                          } else {
+                            scheduledDaysElapsed = expectedDays;
+                          }
+
+                          const consistency = Math.min(100, Math.round((doneLogs / Math.max(1, scheduledDaysElapsed)) * 100));
                           const cColor = consistency >= 75 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
                                         : consistency >= 40 ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' 
                                         : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
-                          return totalLogs > 0 ? (
+                          return (
                             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0 ${cColor}`}>
                               <TrendingUp className="w-3 h-3" />
                               {consistency}%
                             </div>
-                          ) : null;
+                          );
                         })()}
                         {/* Goal Link Badge */}
                         {(() => {
@@ -295,11 +392,14 @@ export function HabitsPage() {
                       <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Target Status</span>
                       <div className="flex items-baseline gap-1.5">
                         <strong className={`text-2xl font-black font-['Outfit'] ${isSuccess ? 'text-emerald-400' : 'text-foreground'}`}>
-                          {doneInPeriod} / {habit.target_x}
+                          {doneInPeriod} / {expectedDays}
                         </strong>
                         <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">days</span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground font-medium">per {habit.target_y_days}-day period</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        {isFlexible ? `per ${lookbackDays}-day period` : `last ${lookbackDays} days`}
+                        {' · '}min {threshold}%
+                      </span>
                     </div>
                   </div>
 
@@ -333,20 +433,57 @@ export function HabitsPage() {
                       >
                         {(() => {
                           const today = new Date();
-                          
-                            return periodDays
-                              .filter(date => !isBefore(startOfDay(date), startOfDay(new Date(habit.start_date))))
+                          const habitStart = startOfDay(new Date(habit.start_date));
+                          const interval = habit.repeat_interval || 1;
+                          const repeatDaysList = habit.repeat_days ? habit.repeat_days.split(',').map(Number) : [];
+
+                          const isScheduledDay = (d: Date): boolean => {
+                            if (isFlexible) return true;
+                            switch (habit.frequency_type) {
+                              case 'daily': {
+                                const diff = Math.floor((startOfDay(d).getTime() - habitStart.getTime()) / 86400000);
+                                return diff >= 0 && diff % interval === 0;
+                              }
+                              case 'weekly':
+                                if (repeatDaysList.length > 0) return repeatDaysList.includes(d.getDay());
+                                const diffW = Math.floor((startOfDay(d).getTime() - habitStart.getTime()) / 86400000);
+                                return diffW >= 0 && diffW % (interval * 7) === 0;
+                              case 'monthly':
+                                return d.getDate() === habitStart.getDate();
+                              case 'annually':
+                                return d.getDate() === habitStart.getDate() && d.getMonth() === habitStart.getMonth();
+                              case 'custom':
+                                if (repeatDaysList.length > 0) return repeatDaysList.includes(d.getDay());
+                                const diffC = Math.floor((startOfDay(d).getTime() - habitStart.getTime()) / 86400000);
+                                return diffC >= 0 && diffC % interval === 0;
+                              default:
+                                return true;
+                            }
+                          };
+
+                          return periodDays
+                              .filter(date => !isBefore(startOfDay(date), habitStart))
+                              .filter(date => {
+                                // For scheduled habits: show only scheduled days, today (for adhoc), and days with logs
+                                if (isFlexible) return true;
+                                const isToday = isSameDay(date, today);
+                                const dateStr = format(date, 'yyyy-MM-dd');
+                                const hasLog = logs.some(l => l.log_date === dateStr && l.status === 'Done');
+                                return isScheduledDay(date) || isToday || hasLog;
+                              })
                               .map((date, idx) => {
                             const dateStr = format(date, 'yyyy-MM-dd');
                             const isDone = logs.some(l => l.log_date === dateStr && l.status === 'Done');
                             const isFuture = isAfter(startOfDay(date), startOfDay(today));
-                            const isBeforeStart = isBefore(startOfDay(date), startOfDay(new Date(habit.start_date)));
+                            const isBeforeStart = isBefore(startOfDay(date), habitStart);
                             const isDisabled = isFuture || isBeforeStart;
                             const isToday = isSameDay(date, today);
+                            const isScheduled = isScheduledDay(date);
+                            const isAdhoc = !isFlexible && !isScheduled && isToday;
                             
                             return (
                               <div key={idx} className={`flex flex-col items-center gap-2 min-w-[42px] snap-center transition-opacity duration-300 ${isDisabled ? 'opacity-20' : ''}`}>
-                                <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-400 ring-1 ring-indigo-400/30 px-1 rounded' : 'text-muted-foreground'}`}>
+                                <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-400 ring-1 ring-indigo-400/30 px-1 rounded' : isAdhoc ? 'text-amber-400' : 'text-muted-foreground'}`}>
                                   {format(date, 'EEE')}
                                 </span>
                                 <button
@@ -361,13 +498,16 @@ export function HabitsPage() {
                                       ? 'bg-secondary/50 border-border cursor-not-allowed' 
                                       : isDone 
                                         ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] active:scale-95' 
-                                        : 'bg-secondary/50 border-border hover:bg-secondary/80 hover:border-border active:scale-95'
+                                        : isAdhoc
+                                          ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10 hover:border-amber-500/30 active:scale-95'
+                                          : 'bg-secondary/50 border-border hover:bg-secondary/80 hover:border-border active:scale-95'
                                   }`}
+                                  title={isAdhoc ? 'Not scheduled — adhoc tracking' : undefined}
                                 >
                                   {isDone ? (
                                     <CheckCircle2 className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
                                   ) : (
-                                    <div className={`w-2.5 h-2.5 rounded-full transition-colors ${isDisabled ? 'bg-muted' : 'bg-muted'}`} />
+                                    <div className={`w-2.5 h-2.5 rounded-full transition-colors ${isDisabled ? 'bg-muted' : isAdhoc ? 'bg-amber-500/40' : 'bg-muted'}`} />
                                   )}
                                 </button>
                                 <span className={`text-[10px] font-medium ${isToday ? 'text-indigo-300' : 'text-muted-foreground'}`}>
@@ -392,9 +532,9 @@ export function HabitsPage() {
                         <div className="flex items-center gap-2">
                             <span className={isSuccess ? 'text-emerald-400' : 'text-indigo-400'}>{progressPct}% Complete</span>
                             <div className="w-1 h-1 rounded-full bg-muted-foreground" />
-                            <span className="text-muted-foreground">{doneInPeriod} of {habit.target_x} days achieved</span>
+                            <span className="text-muted-foreground">{doneInPeriod} of {expectedDays} days achieved</span>
                         </div>
-                        <span className="text-muted-foreground">{habit.target_x - doneInPeriod} more to reach target</span>
+                        <span className="text-muted-foreground">{Math.max(0, thresholdTarget - doneInPeriod)} more to reach {threshold}% target</span>
                     </div>
                     <div className="w-full h-2 bg-secondary/50 rounded-full overflow-hidden border border-border">
                         <div 
@@ -423,7 +563,7 @@ export function HabitsPage() {
             </h2>
             <p className="text-muted-foreground text-sm mb-6">Set a realistic target using the X/Y system.</p>
             
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Habit Name</label>
                 <input
@@ -445,52 +585,215 @@ export function HabitsPage() {
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-secondary/50 border border-border rounded-xl pl-11 pr-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow scheme-dark"
+                    className="w-full bg-secondary/50 border border-border rounded-xl pl-11 pr-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow"
                   />
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-foreground mb-2">Target Days</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    value={targetX}
-                    onChange={(e) => setTargetX(parseInt(e.target.value))}
-                    className={`w-full bg-secondary/50 border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
-                        targetX > targetY ? 'border-red-500/50' : 'border-border'
-                    }`}
-                  />
-                </div>
-                <div className="pt-7 text-muted-foreground font-bold">in</div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-foreground mb-2">Total Days</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="365"
-                    required
-                    value={targetY}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      if (!isNaN(val)) setTargetY(val);
-                    }}
-                    className={`w-full bg-secondary/50 border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
-                        targetX > targetY ? 'border-red-500/50' : 'border-border'
-                    }`}
-                  />
-                  {targetX > targetY && (
-                    <p className="absolute -bottom-6 left-0 text-[10px] text-red-400 font-medium">
-                        Target cannot be greater than Period
-                    </p>
-                  )}
                 </div>
               </div>
 
-              {/* Computed Last Date */}
-              {startDate && targetY > 0 && (
+              {/* Schedule Type */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  <span className="flex items-center gap-2"><Repeat className="w-4 h-4 text-indigo-400" /> Schedule</span>
+                </label>
+                <select
+                  value={frequencyType}
+                  onChange={(e) => setFrequencyType(e.target.value)}
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow appearance-none"
+                >
+                  <option value="flexible" className="bg-popover">Flexible (X days in Y days)</option>
+                  <option value="daily" className="bg-popover">Daily</option>
+                  <option value="weekly" className="bg-popover">Weekly</option>
+                  <option value="monthly" className="bg-popover">Monthly</option>
+                  <option value="annually" className="bg-popover">Annually</option>
+                  <option value="custom" className="bg-popover">Custom</option>
+                </select>
+              </div>
+
+              {/* Flexible: X/Y target */}
+              {frequencyType === 'flexible' && (
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-foreground mb-2">Target Days</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={targetX}
+                      onChange={(e) => setTargetX(parseInt(e.target.value))}
+                      className={`w-full bg-secondary/50 border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
+                          targetX > targetY ? 'border-red-500/50' : 'border-border'
+                      }`}
+                    />
+                  </div>
+                  <div className="pt-7 text-muted-foreground font-bold">in</div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-foreground mb-2">Total Days</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="365"
+                      required
+                      value={targetY}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val)) setTargetY(val);
+                      }}
+                      className={`w-full bg-secondary/50 border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow ${
+                          targetX > targetY ? 'border-red-500/50' : 'border-border'
+                      }`}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Repeat Interval for non-flexible */}
+              {frequencyType !== 'flexible' && (
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-foreground whitespace-nowrap">Repeat every</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={repeatInterval}
+                    onChange={(e) => setRepeatInterval(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-20 bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-foreground text-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  />
+                  <span className="text-sm text-muted-foreground font-medium">
+                    {frequencyType === 'daily' && (repeatInterval === 1 ? 'day' : 'days')}
+                    {frequencyType === 'weekly' && (repeatInterval === 1 ? 'week' : 'weeks')}
+                    {frequencyType === 'monthly' && (repeatInterval === 1 ? 'month' : 'months')}
+                    {frequencyType === 'annually' && (repeatInterval === 1 ? 'year' : 'years')}
+                    {frequencyType === 'custom' && (repeatInterval === 1 ? 'day' : 'days')}
+                  </span>
+                </div>
+              )}
+
+              {/* Day-of-week picker for weekly */}
+              {(frequencyType === 'weekly' || frequencyType === 'custom') && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-3">Repeat on</label>
+                  <div className="flex gap-2">
+                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((label, idx) => {
+                      const selected = repeatDays.split(',').filter(Boolean).includes(String(idx));
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            const current = repeatDays.split(',').filter(Boolean);
+                            const dayStr = String(idx);
+                            const next = selected
+                              ? current.filter(d => d !== dayStr)
+                              : [...current, dayStr];
+                            setRepeatDays(next.sort().join(','));
+                          }}
+                          className={`w-10 h-10 rounded-full text-sm font-bold transition-all ${
+                            selected
+                              ? 'bg-indigo-500 text-white shadow-[0_0_12px_rgba(99,102,241,0.4)]'
+                              : 'bg-secondary/50 text-muted-foreground border border-border hover:bg-secondary/80'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Ends configuration */}
+              {frequencyType !== 'flexible' && (
+                <div className="space-y-3 p-4 rounded-xl bg-secondary/30 border border-border">
+                  <label className="block text-sm font-medium text-foreground">Ends</label>
+                  <div className="flex flex-col gap-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="endsType"
+                        value="never"
+                        checked={endsType === 'never'}
+                        onChange={() => setEndsType('never')}
+                        className="accent-indigo-500"
+                      />
+                      <span className="text-sm text-foreground">Never</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="endsType"
+                        value="on"
+                        checked={endsType === 'on'}
+                        onChange={() => setEndsType('on')}
+                        className="accent-indigo-500"
+                      />
+                      <span className="text-sm text-foreground">On</span>
+                      {endsType === 'on' && (
+                        <input
+                          type="date"
+                          value={endsOnDate}
+                          onChange={(e) => setEndsOnDate(e.target.value)}
+                          className="bg-secondary/50 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        />
+                      )}
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="endsType"
+                        value="after"
+                        checked={endsType === 'after'}
+                        onChange={() => setEndsType('after')}
+                        className="accent-indigo-500"
+                      />
+                      <span className="text-sm text-foreground">After</span>
+                      {endsType === 'after' && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            value={endsAfterOccurrences}
+                            onChange={(e) => setEndsAfterOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-20 bg-secondary/50 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground text-center focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                          />
+                          <span className="text-sm text-muted-foreground">occurrences</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Schedule Summary */}
+              {frequencyType !== 'flexible' && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                  <Repeat className="w-4 h-4 text-indigo-400" />
+                  <span className="text-xs text-muted-foreground">
+                    {(() => {
+                      const intervalText = repeatInterval > 1 ? `${repeatInterval} ` : '';
+                      const unitMap: Record<string, [string, string]> = {
+                        daily: ['day', 'days'],
+                        weekly: ['week', 'weeks'],
+                        monthly: ['month', 'months'],
+                        annually: ['year', 'years'],
+                        custom: ['day', 'days'],
+                      };
+                      const [singular, plural] = unitMap[frequencyType] || ['', ''];
+                      const unit = repeatInterval > 1 ? plural : singular;
+                      let summary = `Every ${intervalText}${unit}`;
+                      if ((frequencyType === 'weekly' || frequencyType === 'custom') && repeatDays) {
+                        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        const days = repeatDays.split(',').filter(Boolean).map(d => dayNames[parseInt(d)]).join(', ');
+                        summary += ` on ${days}`;
+                      }
+                      if (endsType === 'on' && endsOnDate) summary += ` until ${format(new Date(endsOnDate), 'MMM d, yyyy')}`;
+                      if (endsType === 'after') summary += `, ${endsAfterOccurrences} times`;
+                      return summary;
+                    })()}
+                  </span>
+                </div>
+              )}
+
+              {/* Computed Last Date for flexible */}
+              {frequencyType === 'flexible' && startDate && targetY > 0 && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
                   <Calendar className="w-4 h-4 text-indigo-400" />
                   <span className="text-xs text-muted-foreground">Ends on:</span>
@@ -500,19 +803,62 @@ export function HabitsPage() {
                 </div>
               )}
 
+              {/* Minimum Adherence Threshold */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Minimum Adherence Threshold
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="5"
+                    value={minThresholdPct}
+                    onChange={(e) => setMinThresholdPct(parseInt(e.target.value))}
+                    className="flex-1 accent-indigo-500 h-2 rounded-full"
+                  />
+                  <span className="text-lg font-bold text-indigo-400 min-w-[3.5rem] text-right">{minThresholdPct}%</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  You should complete this habit at least {minThresholdPct}% of scheduled times.
+                </p>
+              </div>
+
               {/* Goal Selector */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Link to Goal (optional)</label>
                 <select
                   value={goalId || ''}
-                  onChange={(e) => setGoalId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) => {
+                    const selectedId = e.target.value ? parseInt(e.target.value) : undefined;
+                    setGoalId(selectedId);
+                    if (selectedId) {
+                      const goal = goals.find(g => g.id === selectedId);
+                      if (goal?.target_date) {
+                        setEndsType('on');
+                        setEndsOnDate(goal.target_date);
+                      }
+                    }
+                  }}
                   className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-shadow appearance-none"
                 >
                   <option value="" className="bg-popover">No goal linked</option>
                   {goals.filter(g => g.status === 'Active').map(g => (
-                    <option key={g.id} value={g.id} className="bg-popover">{g.title}</option>
+                    <option key={g.id} value={g.id} className="bg-popover">
+                      {g.title}{g.target_date ? ` (due ${format(new Date(g.target_date), 'MMM d, yyyy')})` : ''}
+                    </option>
                   ))}
                 </select>
+                {goalId && (() => {
+                  const linkedGoal = goals.find(g => g.id === goalId);
+                  return linkedGoal?.target_date ? (
+                    <p className="text-[11px] text-indigo-400 mt-1.5 flex items-center gap-1">
+                      <Target className="w-3 h-3" />
+                      End date set to goal deadline — you can change it above.
+                    </p>
+                  ) : null;
+                })()}
               </div>
 
               <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-border">

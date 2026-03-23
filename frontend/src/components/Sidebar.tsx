@@ -1,9 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen, CalendarDays, Download } from 'lucide-react';
+import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen, CalendarDays, Download, Sun, Moon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProfileMenu } from './ProfileMenu';
+import { useTheme } from '../contexts/ThemeContext';
 
 export function Sidebar() {
+  const { theme, toggleTheme } = useTheme();
   const routes = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { name: 'Goals', icon: Target, path: '/goals' },
@@ -38,7 +40,7 @@ export function Sidebar() {
                   cn(
                     'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 group relative overflow-hidden',
                     isActive 
-                      ? 'bg-gradient-to-r from-primary/10 to-accent/5 text-primary shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-border/50' 
+                      ? 'bg-gradient-to-r from-primary/10 to-accent/5 text-primary shadow-[inset_0_1px_1px_var(--glass-rim-from)] border border-border/50' 
                       : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground border border-transparent'
                   )
                 }
@@ -57,8 +59,20 @@ export function Sidebar() {
           })}
         </div>
 
-        {/* Profile Menu (replaced Settings) */}
-        <div className="mt-auto border-t border-border pt-4">
+        {/* Theme Toggle + Profile Menu */}
+        <div className="mt-auto border-t border-border pt-4 space-y-2">
+          <button
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground border border-transparent transition-all duration-300 cursor-pointer"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-5 h-5 text-amber-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-indigo-400" />
+            )}
+            <span className="tracking-wide font-medium">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
           <ProfileMenu />
         </div>
     </nav>

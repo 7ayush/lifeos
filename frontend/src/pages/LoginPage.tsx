@@ -36,6 +36,12 @@ export function LoginPage() {
       return;
     }
 
+    // Bypass Google OAuth for local dev
+    if (import.meta.env.VITE_BYPASS_GOOGLE_AUTH === 'true') {
+      login('bypass-token').then(() => navigate('/', { replace: true })).catch(console.error);
+      return;
+    }
+
     const initializeGoogle = () => {
       if (window.google && googleButtonRef.current) {
         window.google.accounts.id.initialize({
@@ -69,7 +75,7 @@ export function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden font-['Inter']">
       {/* Ambient background effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
       <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
       <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px]" />
 

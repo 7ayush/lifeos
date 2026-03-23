@@ -573,7 +573,7 @@ export function GoalsPage() {
                 type="date"
                 value={formTargetDate}
                 onChange={(e) => setFormTargetDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground focus:outline-none focus:border-indigo-500/50 transition-colors [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground focus:outline-none focus:border-indigo-500/50 transition-colors dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert"
               />
             </div>
 

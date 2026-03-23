@@ -49,7 +49,7 @@ export function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div 
-        className="absolute inset-0 bg-black/70 backdrop-blur-md" 
+        className="absolute inset-0 bg-popover/80 backdrop-blur-md" 
         onClick={onClose}
       />
       <div className="relative w-full max-w-sm glass-panel rounded-3xl border border-border p-8 shadow-2xl animate-in zoom-in-95 duration-300">
