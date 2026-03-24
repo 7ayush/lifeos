@@ -1232,3 +1232,99 @@ def count_focus_tasks(db: Session, user_id: int, week_identifier: str) -> int:
         )
         .scalar()
     )
+
+# ============================
+# WATER INTAKE CRUD
+# ============================
+
+def create_water_entry(db: Session, user_id: int, entry: schemas.WaterEntryCreate) -> models.WaterEntry:
+    db_entry = models.WaterEntry(user_id=user_id, amount_ml=entry.amount_ml)
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    return db_entry
+
+
+def get_water_entries_by_date(db: Session, user_id: int, target_date: date) -> List[models.WaterEntry]:
+    start = datetime.datetime.combine(target_date, datetime.time.min)
+    end = datetime.datetime.combine(target_date, datetime.time.max)
+    return (
+        db.query(models.WaterEntry)
+        .filter(
+            models.WaterEntry.user_id == user_id,
+            models.WaterEntry.timestamp >= start,
+            models.WaterEntry.timestamp <= end,
+        )
+        .order_by(models.WaterEntry.timestamp)
+        .all()
+    )
+
+
+def delete_water_entry(db: Session, entry_id: int, user_id: int) -> bool:
+    entry = db.query(models.WaterEntry).filter(models.WaterEntry.id == entry_id).first()
+    if not entry or entry.user_id != user_id:
+        return False
+    db.delete(entry)
+    db.commit()
+    return True
+
+
+def get_daily_progress(
+    db: Session, user_id: int, start_date: date, end_date: date
+) -> List[schemas.DailyProgressOut]:
+    start = datetime.datetime.combine(start_date, datetime.time.min)
+    end = datetime.datetime.combine(end_date, datetime.time.max)
+
+    rows = (
+        db.query(
+            func.date(models.WaterEntry.timestamp).label("entry_date"),
+            func.sum(models.WaterEntry.amount_ml).label("total_ml"),
+        )
+        .filter(
+            models.WaterEntry.user_id == user_id,
+            models.WaterEntry.timestamp >= start,
+            models.WaterEntry.timestamp <= end,
+        )
+        .group_by(func.date(models.WaterEntry.timestamp))
+        .all()
+    )
+
+    goal = get_water_goal(db, user_id)
+    goal_ml = goal.amount_ml if goal else 2000
+
+    results = []
+    for row in rows:
+        entry_date = row.entry_date
+        if isinstance(entry_date, str):
+            entry_date = date.fromisoformat(entry_date)
+        total = row.total_ml or 0
+        percentage = (total / goal_ml) * 100 if goal_ml > 0 else 0.0
+        results.append(
+            schemas.DailyProgressOut(
+                date=entry_date,
+                total_ml=total,
+                goal_ml=goal_ml,
+                percentage=round(percentage, 1),
+            )
+        )
+    return results
+
+
+def get_water_goal(db: Session, user_id: int):
+    return (
+        db.query(models.WaterGoal)
+        .filter(models.WaterGoal.user_id == user_id)
+        .first()
+    )
+
+
+def upsert_water_goal(db: Session, user_id: int, amount_ml: int) -> models.WaterGoal:
+    goal = get_water_goal(db, user_id)
+    if goal:
+        goal.amount_ml = amount_ml
+    else:
+        goal = models.WaterGoal(user_id=user_id, amount_ml=amount_ml)
+        db.add(goal)
+    db.commit()
+    db.refresh(goal)
+    return goal

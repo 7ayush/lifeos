@@ -14,6 +14,7 @@ import { JournalPage } from './pages/JournalPage';
 import { VaultPage } from './pages/VaultPage';
 import { WeeklyReviewPage } from './pages/WeeklyReviewPage';
 import { ExportPage } from './pages/ExportPage';
+import { HydrationPage } from './pages/HydrationPage';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/weekly-review" element={<WeeklyReviewPage />} />
               <Route path="/export" element={<ExportPage />} />
+              <Route path="/hydration" element={<HydrationPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

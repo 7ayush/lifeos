@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from . import models
-from .routers import users, goals, habits, tasks, journal, analytics, auth, dashboard, notes, sync, notifications, tags, weekly_review, export
+from .routers import users, goals, habits, tasks, journal, analytics, auth, dashboard, notes, sync, notifications, tags, weekly_review, export, water
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -23,6 +23,7 @@ app.include_router(notifications.router)
 app.include_router(tags.router)
 app.include_router(weekly_review.router)
 app.include_router(export.router)
+app.include_router(water.router)
 
 # Configure CORS for frontend access
 app.add_middleware(

@@ -24,6 +24,8 @@ class User(Base):
     tags = relationship("Tag", back_populates="user")
     weekly_reflections = relationship("WeeklyReflection", back_populates="user")
     focus_tasks = relationship("FocusTask", back_populates="user")
+    water_entries = relationship("WaterEntry", back_populates="user")
+    water_goal = relationship("WaterGoal", back_populates="user", uselist=False)
 
 class Goal(Base):
     __tablename__ = "goals"
@@ -251,4 +253,24 @@ class FocusTask(Base):
 
     user = relationship("User", back_populates="focus_tasks")
     task = relationship("Task")
+
+
+class WaterEntry(Base):
+    __tablename__ = "water_entries"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    amount_ml = Column(Integer, nullable=False)  # 1–5000
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User", back_populates="water_entries")
+
+
+class WaterGoal(Base):
+    __tablename__ = "water_goals"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    amount_ml = Column(Integer, nullable=False, default=2000)  # 500–10000
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="water_goal")
 

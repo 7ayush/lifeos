@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional, List, Literal
 from datetime import date, datetime
 
@@ -512,3 +512,30 @@ class UserSettingsUpdate(BaseModel):
             raise ValueError("theme_preference must be 'dark' or 'light'")
         return v
 
+
+# ============================
+# WATER INTAKE SCHEMAS
+# ============================
+
+class WaterEntryCreate(BaseModel):
+    amount_ml: int = Field(..., ge=1, le=5000)
+
+class WaterEntryOut(BaseModel):
+    id: int
+    user_id: int
+    amount_ml: int
+    timestamp: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class WaterGoalUpdate(BaseModel):
+    amount_ml: int = Field(..., ge=500, le=10000)
+
+class WaterGoalOut(BaseModel):
+    amount_ml: int
+    model_config = ConfigDict(from_attributes=True)
+
+class DailyProgressOut(BaseModel):
+    date: date
+    total_ml: int
+    goal_ml: int
+    percentage: float

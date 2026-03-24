@@ -372,3 +372,21 @@ export interface WeeklyReviewData {
   daily_task_counts: DailyTaskCount[];
   comparison: WeekComparisonStats;
 }
+
+export interface WaterEntry {
+  id: number;
+  user_id: number;
+  amount_ml: number;
+  timestamp: string;
+}
+
+export interface WaterGoal {
+  amount_ml: number;
+}
+
+export interface DailyProgress {
+  date: string;
+  total_ml: number;
+  goal_ml: number;
+  percentage: number;
+}

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen, CalendarDays, Download, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Target, CheckSquare, BookOpen, BarChart3, Activity, FolderOpen, CalendarDays, Download, Droplets, Sun, Moon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProfileMenu } from './ProfileMenu';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,6 +15,7 @@ export function Sidebar() {
     { name: 'Vault', icon: FolderOpen, path: '/vault' },
     { name: 'Weekly Review', icon: CalendarDays, path: '/weekly-review' },
     { name: 'Export Data', icon: Download, path: '/export' },
+    { name: 'Hydration', icon: Droplets, path: '/hydration' },
     { name: 'Leaderboard', icon: BarChart3, path: '/analytics' },
   ];
 

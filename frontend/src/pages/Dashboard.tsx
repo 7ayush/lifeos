@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { PriorityBadge } from '../components/PriorityBadge';
 import { ProgressBar } from '../components/ProgressBar';
+import { HydrationWidget } from '../components/HydrationWidget';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -400,6 +401,9 @@ export function Dashboard() {
       )}
 
       <div className="grid lg:grid-cols-2 gap-8">
+        {/* Hydration Widget */}
+        <HydrationWidget />
+
         {/* Today's Habits Widget */}
         <div className="glass-panel rounded-2xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
