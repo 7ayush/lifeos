@@ -9,11 +9,11 @@ import { MarkdownEditor } from '../components/MarkdownEditor';
 import { stripMarkdown } from '../utils/stripMarkdown';
 
 const PARA_FOLDERS = [
-  { key: 'all', label: 'All Notes', icon: Layers, color: 'text-white', bg: 'bg-white/10' },
+  { key: 'all', label: 'All Notes', icon: Layers, color: 'text-foreground', bg: 'bg-secondary/50' },
   { key: 'Project', label: 'Projects', icon: Briefcase, color: 'text-sky-400', bg: 'bg-sky-500/10' },
   { key: 'Area', label: 'Areas', icon: Compass, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   { key: 'Resource', label: 'Resources', icon: FolderOpen, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-  { key: 'Archive', label: 'Archive', icon: Archive, color: 'text-neutral-400', bg: 'bg-neutral-500/10' },
+  { key: 'Archive', label: 'Archive', icon: Archive, color: 'text-muted-foreground', bg: 'bg-neutral-500/10' },
 ];
 
 export function VaultPage() {
@@ -152,15 +152,15 @@ export function VaultPage() {
     <div className="h-[calc(100vh-8rem)] flex flex-col md:flex-row gap-6 animate-in fade-in duration-500 overflow-hidden">
 
       {/* Sidebar: P.A.R.A. Folders + Note List */}
-      <div className="w-full md:w-1/3 lg:w-1/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-white/10 overflow-hidden shrink-0">
+      <div className="w-full md:w-1/3 lg:w-1/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-border overflow-hidden shrink-0">
         {/* Folder Tabs */}
-        <div className="p-4 border-b border-white/10 bg-white/[0.02]">
+        <div className="p-4 border-b border-border bg-secondary/50">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
                 <FolderOpen className="w-4 h-4 text-amber-400" />
               </div>
-              <h1 className="text-xl font-bold text-white font-['Outfit'] tracking-tight">Vault</h1>
+              <h1 className="text-xl font-bold text-foreground font-['Outfit'] tracking-tight">Vault</h1>
             </div>
             <button
               onClick={handleCreateNote}
@@ -182,7 +182,7 @@ export function VaultPage() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
                     activeFolder === f.key
                       ? `${f.bg} ${f.color} border-current/20`
-                      : 'bg-transparent border-transparent text-neutral-500 hover:text-neutral-300 hover:bg-white/5'
+                      : 'bg-transparent border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -195,13 +195,13 @@ export function VaultPage() {
 
           {/* Search */}
           <div className="mt-3 relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search notes..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/5 rounded-xl text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-amber-500/30"
+              className="w-full pl-9 pr-3 py-2 bg-secondary/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber-500/30"
             />
           </div>
         </div>
@@ -213,7 +213,7 @@ export function VaultPage() {
               <div className="w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
             </div>
           ) : filteredNotes.length === 0 ? (
-            <p className="text-center text-neutral-500 text-sm mt-8 p-4">
+            <p className="text-center text-muted-foreground text-sm mt-8 p-4">
               {searchQuery ? 'No notes match your search.' : 'No notes yet. Create your first note!'}
             </p>
           ) : (
@@ -227,7 +227,7 @@ export function VaultPage() {
                   className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
                     isActive
                       ? 'bg-amber-500/10 border-amber-500/30'
-                      : 'bg-white/[0.015] border-transparent hover:bg-white/[0.04] hover:-translate-y-0.5'
+                      : 'bg-secondary/50 border-transparent hover:bg-secondary/50 hover:-translate-y-0.5'
                   }`}
                 >
                   {isActive && (
@@ -236,21 +236,21 @@ export function VaultPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <FileText className={`w-3.5 h-3.5 shrink-0 ${folderInfo?.color || 'text-neutral-500'}`} />
-                        <p className={`font-bold text-sm truncate ${isActive ? 'text-amber-400' : 'text-neutral-300'}`}>
+                        <FileText className={`w-3.5 h-3.5 shrink-0 ${folderInfo?.color || 'text-muted-foreground'}`} />
+                        <p className={`font-bold text-sm truncate ${isActive ? 'text-amber-400' : 'text-foreground'}`}>
                           {note.title}
                         </p>
                       </div>
-                      <p className="text-xs text-neutral-600 line-clamp-1 pl-5.5">
+                      <p className="text-xs text-muted-foreground line-clamp-1 pl-5.5">
                         {stripMarkdown(note.content) || 'Empty note'}
                       </p>
-                      <p className="text-[10px] text-neutral-700 mt-1 pl-5.5">
+                      <p className="text-[10px] text-muted-foreground mt-1 pl-5.5">
                         {format(parseISO(note.updated_at), 'MMM d, h:mm a')}
                       </p>
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
-                      className="p-1.5 bg-white/5 hover:bg-red-500/10 text-neutral-600 hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                      className="p-1.5 bg-secondary/50 hover:bg-red-500/10 text-muted-foreground hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -263,11 +263,11 @@ export function VaultPage() {
       </div>
 
       {/* Main Area: Note Editor */}
-      <div className="w-full md:w-2/3 lg:w-3/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-white/10 overflow-hidden relative">
+      <div className="w-full md:w-2/3 lg:w-3/4 h-1/2 md:h-full flex flex-col glass-panel rounded-3xl border border-border overflow-hidden relative">
         {isEditing && editingNote ? (
           <div className="flex flex-col h-full">
             {/* Editor Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/[0.02]">
+            <div className="flex items-center justify-between p-6 border-b border-border bg-secondary/50">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <input
                   type="text"
@@ -275,7 +275,7 @@ export function VaultPage() {
                   onChange={e => setEditTitle(e.target.value)}
                   onBlur={handleSave}
                   placeholder="Note title..."
-                  className="flex-1 bg-transparent text-2xl font-bold text-white focus:outline-none placeholder:text-neutral-700 font-['Outfit']"
+                  className="flex-1 bg-transparent text-2xl font-bold text-foreground focus:outline-none placeholder:text-muted-foreground font-['Outfit']"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ export function VaultPage() {
                   value={editFolder}
                   onChange={e => { setEditFolder(e.target.value); }}
                   onBlur={handleSave}
-                  className="bg-white/5 border border-white/10 text-neutral-300 rounded-lg px-3 py-1.5 text-xs font-bold focus:outline-none cursor-pointer"
+                  className="bg-secondary/50 border border-border text-foreground rounded-lg px-3 py-1.5 text-xs font-bold focus:outline-none cursor-pointer"
                 >
                   <option value="Project">📦 Project</option>
                   <option value="Area">🧭 Area</option>
@@ -299,7 +299,7 @@ export function VaultPage() {
                 </button>
                 <button
                   onClick={closeEditor}
-                  className="p-1.5 text-neutral-500 hover:text-white transition-colors"
+                  className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -317,12 +317,12 @@ export function VaultPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50 select-none">
-            <FolderOpen className="w-16 h-16 text-neutral-700 mb-6" />
-            <h2 className="text-2xl font-bold text-neutral-500 mb-2 font-['Outfit']">Knowledge Vault</h2>
-            <p className="text-neutral-600 max-w-sm mb-8">Organize your notes using the P.A.R.A. method — Projects, Areas, Resources, and Archive.</p>
+            <FolderOpen className="w-16 h-16 text-muted-foreground mb-6" />
+            <h2 className="text-2xl font-bold text-muted-foreground mb-2 font-['Outfit']">Knowledge Vault</h2>
+            <p className="text-muted-foreground max-w-sm mb-8">Organize your notes using the P.A.R.A. method — Projects, Areas, Resources, and Archive.</p>
             <button
               onClick={handleCreateNote}
-              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-colors border border-white/10"
+              className="flex items-center gap-2 px-6 py-3 bg-secondary/50 hover:bg-secondary/50 text-foreground rounded-xl font-semibold transition-colors border border-border"
             >
               <Plus className="w-5 h-5" />
               New Note

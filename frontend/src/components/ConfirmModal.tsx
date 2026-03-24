@@ -49,13 +49,13 @@ export function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div 
-        className="absolute inset-0 bg-black/70 backdrop-blur-md" 
+        className="absolute inset-0 bg-popover/80 backdrop-blur-md" 
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm glass-panel rounded-3xl border border-white/10 p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-sm glass-panel rounded-3xl border border-border p-8 shadow-2xl animate-in zoom-in-95 duration-300">
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-xl text-neutral-500 hover:text-white hover:bg-white/5 transition-all"
+          className="absolute top-6 right-6 p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
         >
           <X className="w-5 h-5" />
         </button>
@@ -66,14 +66,14 @@ export function ConfirmModal({
           </div>
           
           <div className="space-y-3">
-            <h3 className="text-2xl font-extrabold text-white font-['Outfit'] tracking-tight">{title}</h3>
-            <p className="text-neutral-400 text-sm leading-relaxed max-w-[240px] mx-auto font-medium">{message}</p>
+            <h3 className="text-2xl font-extrabold text-foreground font-['Outfit'] tracking-tight">{title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-[240px] mx-auto font-medium">{message}</p>
           </div>
 
           <div className="flex w-full gap-3 pt-4">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3.5 rounded-2xl font-bold text-neutral-400 hover:text-white hover:bg-white/5 transition-all border border-transparent hover:border-white/10 active:scale-95"
+              className="flex-1 px-4 py-3.5 rounded-2xl font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border border-transparent hover:border-border active:scale-95"
             >
               {cancelText}
             </button>

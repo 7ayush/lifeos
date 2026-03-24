@@ -37,21 +37,21 @@ export function WeekNavigator({
   const dateRange = formatDateRange(weekStart, weekEnd);
 
   return (
-    <div className="flex items-center justify-between bg-white/[0.03] border border-white/10 rounded-xl px-5 py-3">
+    <div className="flex items-center justify-between bg-secondary/50 border border-border rounded-xl px-5 py-3">
       <button
         onClick={onPrevious}
-        className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
         aria-label="Previous week"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
 
       <div className="text-center">
-        <span className="text-white font-semibold tracking-wide">
+        <span className="text-foreground font-semibold tracking-wide">
           {weekIdentifier}
         </span>
-        <span className="text-neutral-500 mx-2">·</span>
-        <span className="text-neutral-400">{dateRange}</span>
+        <span className="text-muted-foreground mx-2">·</span>
+        <span className="text-muted-foreground">{dateRange}</span>
       </div>
 
       <button
@@ -59,8 +59,8 @@ export function WeekNavigator({
         disabled={isCurrentWeek}
         className={`p-2 rounded-lg transition-colors ${
           isCurrentWeek
-            ? 'text-neutral-600 cursor-not-allowed'
-            : 'text-neutral-400 hover:text-white hover:bg-white/[0.06]'
+            ? 'text-muted-foreground/50 cursor-not-allowed'
+            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
         }`}
         aria-label="Next week"
       >

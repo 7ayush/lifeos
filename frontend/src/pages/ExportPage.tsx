@@ -92,28 +92,28 @@ export function ExportPage() {
 
       {/* Data Types */}
       <div className="glass-panel rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-4">Data Types</h2>
+        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Data Types</h2>
         <label className="flex items-center gap-3 mb-3 cursor-pointer group">
           <input
             type="checkbox"
             checked={allSelected}
             onChange={handleToggleAll}
-            className="w-4 h-4 rounded border-neutral-600 bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
+            className="w-4 h-4 rounded border-border bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
           />
-          <span className="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors">
+          <span className="text-sm font-semibold text-foreground group-hover:text-emerald-300 transition-colors">
             {allSelected ? 'Deselect All' : 'Select All'}
           </span>
         </label>
-        <div className="border-t border-white/5 pt-3 space-y-2">
+        <div className="border-t border-border pt-3 space-y-2">
           {ALL_TYPES.map(type => (
             <label key={type} className="flex items-center gap-3 cursor-pointer group py-1">
               <input
                 type="checkbox"
                 checked={selectedTypes.has(type)}
                 onChange={() => handleToggleType(type)}
-                className="w-4 h-4 rounded border-neutral-600 bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
+                className="w-4 h-4 rounded border-border bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
               />
-              <span className="text-sm text-neutral-300 group-hover:text-white transition-colors">
+              <span className="text-sm text-foreground group-hover:text-emerald-300 transition-colors">
                 {TYPE_LABELS[type]}
               </span>
             </label>
@@ -123,7 +123,7 @@ export function ExportPage() {
 
       {/* Format Selector */}
       <div className="glass-panel rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-4">Export Format</h2>
+        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Export Format</h2>
         <div className="flex gap-4">
           <label className="flex items-center gap-3 cursor-pointer group">
             <input
@@ -132,10 +132,10 @@ export function ExportPage() {
               value="json"
               checked={format === 'json'}
               onChange={() => setFormat('json')}
-              className="w-4 h-4 border-neutral-600 bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
+              className="w-4 h-4 border-border bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
             />
-            <FileJson className="w-4 h-4 text-neutral-500 group-hover:text-emerald-400 transition-colors" />
-            <span className="text-sm text-neutral-300 group-hover:text-white transition-colors">JSON</span>
+            <FileJson className="w-4 h-4 text-muted-foreground group-hover:text-emerald-400 transition-colors" />
+            <span className="text-sm text-foreground group-hover:text-emerald-300 transition-colors">JSON</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer group">
             <input
@@ -144,34 +144,34 @@ export function ExportPage() {
               value="csv"
               checked={format === 'csv'}
               onChange={() => setFormat('csv')}
-              className="w-4 h-4 border-neutral-600 bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
+              className="w-4 h-4 border-border bg-transparent text-emerald-500 focus:ring-emerald-500/30 focus:ring-offset-0 cursor-pointer"
             />
-            <FileSpreadsheet className="w-4 h-4 text-neutral-500 group-hover:text-emerald-400 transition-colors" />
-            <span className="text-sm text-neutral-300 group-hover:text-white transition-colors">CSV</span>
+            <FileSpreadsheet className="w-4 h-4 text-muted-foreground group-hover:text-emerald-400 transition-colors" />
+            <span className="text-sm text-foreground group-hover:text-emerald-300 transition-colors">CSV</span>
           </label>
         </div>
       </div>
 
       {/* Date Range */}
       <div className="glass-panel rounded-2xl p-6">
-        <h2 className="text-sm font-bold text-neutral-400 uppercase tracking-wider mb-4">Date Range (Optional)</h2>
+        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Date Range (Optional)</h2>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <label className="block text-xs text-neutral-500 mb-1.5">Start Date</label>
+            <label className="block text-xs text-muted-foreground mb-1.5">Start Date</label>
             <input
               type="date"
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-neutral-200 text-sm focus:outline-none focus:border-emerald-500/40 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-foreground text-sm focus:outline-none focus:border-emerald-500/40 transition-colors"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs text-neutral-500 mb-1.5">End Date</label>
+            <label className="block text-xs text-muted-foreground mb-1.5">End Date</label>
             <input
               type="date"
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-neutral-200 text-sm focus:outline-none focus:border-emerald-500/40 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-secondary/50 border border-border text-foreground text-sm focus:outline-none focus:border-emerald-500/40 transition-colors"
             />
           </div>
         </div>

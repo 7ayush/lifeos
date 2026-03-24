@@ -6,6 +6,7 @@ python-dotenv
 alembic
 psycopg2-binary
 pytest
+hypothesis
 python-jose[cryptography]
 google-auth
 google-auth-httplib2

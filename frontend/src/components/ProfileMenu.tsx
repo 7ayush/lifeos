@@ -32,13 +32,13 @@ export function ProfileMenu() {
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 w-full px-3 py-2.5 text-neutral-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 cursor-pointer"
+        className="flex items-center gap-3 w-full px-3 py-2.5 text-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all duration-300 cursor-pointer"
       >
         {user.avatar_url ? (
           <img
             src={user.avatar_url}
             alt={user.username}
-            className="w-8 h-8 rounded-lg object-cover ring-1 ring-white/10"
+            className="w-8 h-8 rounded-lg object-cover ring-1 ring-border"
             referrerPolicy="no-referrer"
           />
         ) : (
@@ -50,10 +50,10 @@ export function ProfileMenu() {
         )}
         <div className="flex-1 text-left min-w-0">
           <p className="text-sm font-medium truncate">{user.username}</p>
-          <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
         </div>
         <ChevronUp
-          className={`w-4 h-4 text-neutral-500 transition-transform duration-200 flex-shrink-0 ${
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
             isOpen ? 'rotate-0' : 'rotate-180'
           }`}
         />
@@ -61,18 +61,18 @@ export function ProfileMenu() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="absolute bottom-full left-0 right-0 mb-2 bg-popover backdrop-blur-xl border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
           <button
             onClick={() => {
               setIsOpen(false);
               navigate('/profile');
             }}
-            className="flex items-center gap-3 w-full px-4 py-3 text-neutral-300 hover:text-white hover:bg-white/5 transition-all duration-200 text-sm font-medium cursor-pointer"
+            className="flex items-center gap-3 w-full px-4 py-3 text-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200 text-sm font-medium cursor-pointer"
           >
             <User className="w-4 h-4" />
             Profile
           </button>
-          <div className="border-t border-white/5" />
+          <div className="border-t border-border" />
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-4 py-3 text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200 text-sm font-medium cursor-pointer"

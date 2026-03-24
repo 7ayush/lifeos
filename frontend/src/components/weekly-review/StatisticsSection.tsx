@@ -26,7 +26,7 @@ function ChangeIndicator({ change }: { change: number }) {
       </span>
     );
   }
-  return <span className="text-xs text-neutral-500">No change</span>;
+  return <span className="text-xs text-muted-foreground">No change</span>;
 }
 
 export function StatisticsSection({
@@ -36,15 +36,15 @@ export function StatisticsSection({
   const maxCount = Math.max(...dailyTaskCounts.map((d) => d.count), 1);
 
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+    <div className="bg-secondary/50 border border-border rounded-xl p-5">
       <div className="flex items-center gap-2 mb-5">
         <BarChart3 className="w-5 h-5 text-cyan-400" />
-        <h2 className="text-white font-semibold">Weekly Statistics</h2>
+        <h2 className="text-foreground font-semibold">Weekly Statistics</h2>
       </div>
 
       {/* Bar Chart */}
       <div className="mb-6">
-        <h3 className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-3">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
           Daily Completions
         </h3>
         <div className="flex items-end gap-2 h-28">
@@ -58,14 +58,14 @@ export function StatisticsSection({
                 key={label}
                 className="flex-1 flex flex-col items-center gap-1"
               >
-                <span className="text-[10px] text-neutral-400">{count}</span>
+                <span className="text-[10px] text-muted-foreground">{count}</span>
                 <div className="w-full flex items-end" style={{ height: '80px' }}>
                   <div
                     className="w-full rounded-t bg-cyan-500/80 transition-all"
                     style={{ height: `${Math.max(heightPct, 2)}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-neutral-600">{label}</span>
+                <span className="text-[10px] text-muted-foreground">{label}</span>
               </div>
             );
           })}
@@ -75,12 +75,12 @@ export function StatisticsSection({
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 mb-3">
         {/* Completion Rate Card */}
-        <div className="px-3 py-3 rounded-lg bg-white/[0.02] border border-white/5">
+        <div className="px-3 py-3 rounded-lg bg-secondary/50 border border-border">
           <div className="flex items-center gap-1.5 mb-2">
             <Target className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-xs text-neutral-400">Completion Rate</span>
+            <span className="text-xs text-muted-foreground">Completion Rate</span>
           </div>
-          <div className="text-xl font-semibold text-white">
+          <div className="text-xl font-semibold text-foreground">
             {Math.round(comparison.completion_rate)}%
           </div>
           <div className="mt-1">
@@ -89,12 +89,12 @@ export function StatisticsSection({
         </div>
 
         {/* Habit Adherence Card */}
-        <div className="px-3 py-3 rounded-lg bg-white/[0.02] border border-white/5">
+        <div className="px-3 py-3 rounded-lg bg-secondary/50 border border-border">
           <div className="flex items-center gap-1.5 mb-2">
             <Activity className="w-3.5 h-3.5 text-violet-400" />
-            <span className="text-xs text-neutral-400">Habit Adherence</span>
+            <span className="text-xs text-muted-foreground">Habit Adherence</span>
           </div>
-          <div className="text-xl font-semibold text-white">
+          <div className="text-xl font-semibold text-foreground">
             {Math.round(comparison.habit_adherence_rate)}%
           </div>
           <div className="mt-1">
@@ -104,26 +104,26 @@ export function StatisticsSection({
       </div>
 
       {/* Time Tracking Card */}
-      <div className="px-3 py-3 rounded-lg bg-white/[0.02] border border-white/5">
+      <div className="px-3 py-3 rounded-lg bg-secondary/50 border border-border">
         <div className="flex items-center gap-1.5 mb-2">
           <Clock className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-xs text-neutral-400">Time Tracking</span>
+          <span className="text-xs text-muted-foreground">Time Tracking</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="text-sm">
-            <span className="text-neutral-400">Est.</span>{' '}
-            <span className="text-white font-medium">
+            <span className="text-muted-foreground">Est.</span>{' '}
+            <span className="text-foreground font-medium">
               {comparison.total_estimated_minutes}m
             </span>
           </div>
           <div className="text-sm">
-            <span className="text-neutral-400">Actual</span>{' '}
-            <span className="text-white font-medium">
+            <span className="text-muted-foreground">Actual</span>{' '}
+            <span className="text-foreground font-medium">
               {comparison.total_actual_minutes}m
             </span>
           </div>
           <div className="text-sm">
-            <span className="text-neutral-400">Efficiency</span>{' '}
+            <span className="text-muted-foreground">Efficiency</span>{' '}
             <span className="text-amber-400 font-medium">
               {Math.round(comparison.efficiency_ratio * 100)}%
             </span>

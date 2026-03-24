@@ -36,7 +36,7 @@ export function CustomDropdown({ value, onChange, options, icon, className = '',
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-white/3 hover:bg-white/8 border border-white/5 rounded-lg text-sm text-white font-medium transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 group"
+        className="w-full flex items-center justify-between gap-1.5 px-2.5 py-1.5 bg-secondary/50 hover:bg-secondary/80 border border-border rounded-lg text-sm text-foreground font-medium transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 group"
       >
 
         <div className="flex items-center gap-1.5 overflow-hidden">
@@ -45,12 +45,12 @@ export function CustomDropdown({ value, onChange, options, icon, className = '',
           <span className="truncate">{selectedOption?.label}</span>
         </div>
         <ChevronDown 
-          className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${isOpen ? 'rotate-180 text-cyan-400' : 'group-hover:text-neutral-300'}`} 
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180 text-cyan-400' : 'group-hover:text-foreground'}`} 
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-100 left-0 min-w-full w-max mt-1.5 py-1.5 bg-[#0a0a0a]/95 backdrop-blur-3xl rounded-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200 origin-top overflow-hidden">
+        <div className="absolute z-100 left-0 min-w-full w-max mt-1.5 py-1.5 bg-popover/95 backdrop-blur-3xl rounded-xl border border-border shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200 origin-top overflow-hidden">
 
           <div className="max-h-60 overflow-y-auto custom-scrollbar">
 
@@ -66,7 +66,7 @@ export function CustomDropdown({ value, onChange, options, icon, className = '',
                 className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center justify-between ${
                   option.value === value 
                     ? 'bg-cyan-500/20 text-cyan-300 font-bold' 
-                    : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                    : 'text-foreground hover:bg-secondary/50 hover:text-foreground'
                 }`}
               >
                 {option.label}

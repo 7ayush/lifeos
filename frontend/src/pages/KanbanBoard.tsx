@@ -421,17 +421,17 @@ export function KanbanBoard() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   const colStyles: Record<string, { bg: string; border: string; glow: string; text: string; topGlare: string }> = {
-    Todo: { bg: 'bg-neutral-900/40', border: 'border-white/10 hover:border-white/20', glow: 'shadow-[0_0_40px_rgba(255,255,255,0.02)]', text: 'text-white', topGlare: 'via-white/30' },
-    InProgress: { bg: 'bg-cyan-950/20', border: 'border-cyan-500/20 hover:border-cyan-500/40', glow: 'shadow-[0_0_40px_rgba(34,211,238,0.05)]', text: 'text-cyan-400', topGlare: 'via-cyan-500/40' },
-    Done: { bg: 'bg-emerald-950/20', border: 'border-emerald-500/20 hover:border-emerald-500/40', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.05)]', text: 'text-emerald-400', topGlare: 'via-emerald-500/40' },
-    Archived: { bg: 'bg-neutral-900/20', border: 'border-white/5 hover:border-white/15', glow: 'shadow-[0_0_30px_rgba(255,255,255,0.01)]', text: 'text-neutral-500', topGlare: 'via-neutral-500/20' },
+    Todo: { bg: 'bg-card/40', border: 'border-border hover:border-border', glow: '', text: 'text-foreground', topGlare: 'via-foreground/30' },
+    InProgress: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/20 hover:border-cyan-500/40', glow: 'shadow-[0_0_40px_rgba(34,211,238,0.05)]', text: 'text-cyan-500', topGlare: 'via-cyan-500/40' },
+    Done: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/20 hover:border-emerald-500/40', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.05)]', text: 'text-emerald-500', topGlare: 'via-emerald-500/40' },
+    Archived: { bg: 'bg-card/20', border: 'border-border hover:border-border', glow: '', text: 'text-muted-foreground', topGlare: 'via-muted-foreground/20' },
   };
 
   const statusStyles: Record<string, { bg: string; border: string; accent: string; text: string; line: string }> = {
-    Todo: { bg: 'bg-[#111111]/80', border: 'border-white/10', accent: 'border-l-white/30', text: 'text-neutral-100', line: '' },
-    InProgress: { bg: 'bg-[#0a151a]/80', border: 'border-cyan-500/20', accent: 'border-l-cyan-500', text: 'text-cyan-50', line: '' },
-    Done: { bg: 'bg-[#0a1a12]/80', border: 'border-emerald-500/20', accent: 'border-l-emerald-500/50', text: 'text-neutral-500', line: 'line-through' },
-    Archived: { bg: 'bg-neutral-950/40', border: 'border-white/5', accent: 'border-l-neutral-700', text: 'text-neutral-600', line: '' },
+    Todo: { bg: 'bg-card/80', border: 'border-border', accent: 'border-l-foreground/30', text: 'text-foreground', line: '' },
+    InProgress: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/20', accent: 'border-l-cyan-500', text: 'text-foreground', line: '' },
+    Done: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', accent: 'border-l-emerald-500/50', text: 'text-muted-foreground', line: 'line-through' },
+    Archived: { bg: 'bg-card/40', border: 'border-border', accent: 'border-l-muted-foreground', text: 'text-muted-foreground', line: '' },
   };
 
   return (
@@ -439,12 +439,12 @@ export function KanbanBoard() {
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 relative z-30">
 
         <div>
-          <h1 className="text-3xl font-extrabold text-white font-['Outfit'] tracking-tight">Tasks</h1>
-          <p className="text-neutral-500 font-medium mt-1">Organize priorities by timeframe.</p>
+          <h1 className="text-3xl font-extrabold text-foreground font-['Outfit'] tracking-tight">Tasks</h1>
+          <p className="text-muted-foreground font-medium mt-1">Organize priorities by timeframe.</p>
         </div>
 
         <div className="flex flex-col xl:flex-row items-start xl:items-center gap-3">
-          <div className="flex flex-wrap xl:flex-nowrap items-center gap-2 glass-panel overflow-visible! p-2 rounded-2xl border border-white/10 shadow-xl w-full sm:w-max relative z-40">
+          <div className="flex flex-wrap xl:flex-nowrap items-center gap-2 glass-panel overflow-visible! p-2 rounded-2xl border border-border shadow-xl w-full sm:w-max relative z-40">
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-cyan-500/10 rounded-xl border border-cyan-500/20">
               <CalendarDays className="w-3.5 h-3.5 text-cyan-400" />
               <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider font-['Outfit']">Timeline</span>
@@ -495,17 +495,17 @@ export function KanbanBoard() {
               )}
             </div>
             
-            <div className="h-4 w-px bg-white/10 mx-0.5 hidden md:block" />
+            <div className="h-4 w-px bg-border mx-0.5 hidden md:block" />
 
-            <div className={`flex items-center gap-2 bg-white/3 px-2 py-1.5 rounded-xl border border-white/5 transition-all duration-300 ${view === 'All' ? 'opacity-30' : 'opacity-100'}`}>
-              <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest font-['Outfit']">Target:</span>
+            <div className={`flex items-center gap-2 bg-secondary/50 px-2 py-1.5 rounded-xl border border-border transition-all duration-300 ${view === 'All' ? 'opacity-30' : 'opacity-100'}`}>
+              <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest font-['Outfit']">Target:</span>
               <div className="flex items-center gap-1 font-mono text-[9px]">
                 {view === 'All' ? (
                   <span className="text-cyan-400/70">ALL TASKS</span>
                 ) : (
                   <>
                     <span className="text-cyan-400/90">{getNormalizedDateRange(selectedDate, view).start}</span>
-                    <span className="text-neutral-600">→</span>
+                    <span className="text-muted-foreground">→</span>
                     <span className="text-cyan-400/90">{getNormalizedDateRange(selectedDate, view).end}</span>
                   </>
                 )}
@@ -513,15 +513,15 @@ export function KanbanBoard() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between glass-panel overflow-visible! p-1.5 rounded-2xl border border-white/10 shadow-lg w-full sm:w-max relative z-40">
+          <div className="flex items-center justify-between glass-panel overflow-visible! p-1.5 rounded-2xl border border-border shadow-lg w-full sm:w-max relative z-40">
             <button
               onClick={() => navigatePeriod(-1)}
-              className={`p-1.5 text-neutral-500 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl transition-all active:scale-95 ${view === 'All' ? 'opacity-20 pointer-events-none' : ''}`}
+              className={`p-1.5 text-muted-foreground hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl transition-all active:scale-95 ${view === 'All' ? 'opacity-20 pointer-events-none' : ''}`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             
-            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5 mx-1">
+            <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-xl border border-border mx-1">
               {(['Daily', 'Weekly', 'Monthly', 'Annual', 'All'] as TimeframeView[]).map((t) => (
                 <button
                   key={t}
@@ -529,7 +529,7 @@ export function KanbanBoard() {
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tighter sm:tracking-wider transition-all duration-300 ${
                     view === t 
                       ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(34,211,238,0.4)] scale-105 z-10' 
-                      : 'text-neutral-500 hover:text-neutral-200 hover:bg-white/5'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                   }`}
                 >
                   {t}
@@ -539,7 +539,7 @@ export function KanbanBoard() {
 
             <button
               onClick={() => navigatePeriod(1)}
-              className={`p-1.5 text-neutral-500 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl transition-all active:scale-95 ${view === 'All' ? 'opacity-20 pointer-events-none' : ''}`}
+              className={`p-1.5 text-muted-foreground hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl transition-all active:scale-95 ${view === 'All' ? 'opacity-20 pointer-events-none' : ''}`}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -559,16 +559,16 @@ export function KanbanBoard() {
         <div className="relative shrink-0" ref={colMenuRef}>
           <button
             onClick={() => setIsColMenuOpen(!isColMenuOpen)}
-            className={`flex items-center gap-2 px-4 py-3 bg-white/3 hover:bg-white/8 border border-white/10 rounded-2xl text-sm font-bold transition-all ${isColMenuOpen ? 'text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'text-neutral-400'}`}
+            className={`flex items-center gap-2 px-4 py-3 bg-secondary/50 hover:bg-secondary/50 border border-border rounded-2xl text-sm font-bold transition-all ${isColMenuOpen ? 'text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'text-muted-foreground'}`}
           >
             <LayoutTemplate className="w-4 h-4" />
             <span>View</span>
-            <span className="ml-1 px-1.5 py-0.5 bg-white/5 rounded text-[10px] text-neutral-500">{visibleColumns.length}</span>
+            <span className="ml-1 px-1.5 py-0.5 bg-secondary/50 rounded text-[10px] text-muted-foreground">{visibleColumns.length}</span>
           </button>
 
           {isColMenuOpen && (
-            <div className="absolute top-full left-0 mt-2 w-48 glass-panel bg-[#0a0a0a]/95! backdrop-blur-3xl! rounded-2xl border border-white/10 shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-200 origin-top z-50">
-              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest px-3 py-2 mb-1 border-b border-white/5">Visible Columns</div>
+            <div className="absolute top-full left-0 mt-2 w-48 glass-panel bg-popover! backdrop-blur-3xl! rounded-2xl border border-border shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-200 origin-top z-50">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3 py-2 mb-1 border-b border-border">Visible Columns</div>
               {ALL_COLUMNS.map(col => {
                 const isVisible = visibleColumns.includes(col);
                 const isLast = visibleColumns.length === 1 && isVisible;
@@ -580,7 +580,7 @@ export function KanbanBoard() {
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all mb-1 last:mb-0 ${
                       isVisible 
                         ? 'bg-cyan-500/10 text-cyan-50' 
-                        : 'text-neutral-500 hover:bg-white/5 hover:text-neutral-300'
+                        : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                     } ${isLast ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <div className="flex items-center gap-2">
@@ -596,8 +596,8 @@ export function KanbanBoard() {
         </div>
 
         {/* Energy Filter */}
-        <div className="flex items-center gap-1 bg-white/3 p-1 rounded-xl border border-white/5">
-          <Zap className="w-3.5 h-3.5 text-neutral-500 ml-2" />
+        <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-xl border border-border">
+          <Zap className="w-3.5 h-3.5 text-muted-foreground ml-2" />
           {['All', 'High', 'Medium', 'Low'].map(e => {
             const eColors: Record<string, string> = { High: 'text-rose-400 bg-rose-500/15', Medium: 'text-amber-400 bg-amber-500/15', Low: 'text-emerald-400 bg-emerald-500/15', All: '' };
             return (
@@ -607,7 +607,7 @@ export function KanbanBoard() {
                 className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                   energyFilter === e
                     ? (e === 'All' ? 'bg-cyan-500 text-black' : eColors[e] || 'bg-cyan-500 text-black')
-                    : 'text-neutral-500 hover:text-white hover:bg-white/5'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
                 {e}
@@ -617,10 +617,10 @@ export function KanbanBoard() {
         </div>
 
         {/* Priority Filter */}
-        <div className="flex items-center gap-1 bg-white/3 p-1 rounded-xl border border-white/5">
-          <Target className="w-3.5 h-3.5 text-neutral-500 ml-2" />
+        <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-xl border border-border">
+          <Target className="w-3.5 h-3.5 text-muted-foreground ml-2" />
           {['All', 'High', 'Medium', 'Low', 'None'].map(p => {
-            const pColors: Record<string, string> = { High: 'text-rose-400 bg-rose-500/15', Medium: 'text-amber-400 bg-amber-500/15', Low: 'text-blue-400 bg-blue-500/15', None: 'text-neutral-400 bg-neutral-500/15', All: '' };
+            const pColors: Record<string, string> = { High: 'text-rose-400 bg-rose-500/15', Medium: 'text-amber-400 bg-amber-500/15', Low: 'text-blue-400 bg-blue-500/15', None: 'text-muted-foreground bg-secondary/50', All: '' };
             return (
               <button
                 key={p}
@@ -628,7 +628,7 @@ export function KanbanBoard() {
                 className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                   priorityFilter === p
                     ? (p === 'All' ? 'bg-cyan-500 text-black' : pColors[p] || 'bg-cyan-500 text-black')
-                    : 'text-neutral-500 hover:text-white hover:bg-white/5'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
                 {p}
@@ -639,7 +639,7 @@ export function KanbanBoard() {
 
         {/* Tag Filter */}
         {tags.length > 0 && (
-          <div className="flex items-center gap-1 bg-white/3 p-1 rounded-xl border border-white/5 flex-wrap">
+          <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-xl border border-border flex-wrap">
             {tags.map(tag => {
               const isSelected = selectedTagFilter.includes(tag.id);
               return (
@@ -661,7 +661,7 @@ export function KanbanBoard() {
             {selectedTagFilter.length > 0 && (
               <button
                 onClick={() => setSelectedTagFilter([])}
-                className="px-2 py-1 rounded-lg text-[10px] font-bold text-neutral-500 hover:text-white hover:bg-white/5 transition-all duration-200"
+                className="px-2 py-1 rounded-lg text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200"
               >
                 Clear
               </button>
@@ -686,10 +686,10 @@ export function KanbanBoard() {
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-linear-to-r from-transparent ${cStyle.topGlare} to-transparent opacity-60`} />
                 <div className="flex items-center justify-between mb-6 relative z-10 px-1 shrink-0">
                   <div className="flex items-center gap-2">
-                    {colConfig === 'Archived' && <Archive className="w-4 h-4 text-neutral-500" />}
+                    {colConfig === 'Archived' && <Archive className="w-4 h-4 text-muted-foreground" />}
                     <h3 className={`font-bold tracking-widest uppercase text-sm ${cStyle.text}`}>{colTitle}</h3>
                   </div>
-                  <span className="bg-black/40 border border-white/5 text-neutral-300 text-xs py-1 px-3 rounded-full font-bold shadow-inner">
+                  <span className="bg-card/60 border border-border text-foreground text-xs py-1 px-3 rounded-full font-bold shadow-inner">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -700,7 +700,7 @@ export function KanbanBoard() {
                       {...provided.droppableProps}
                       ref={provided.innerRef}
                       className={`flex-1 overflow-y-auto pr-1 -mr-1 custom-scrollbar min-h-0 transition-colors rounded-xl p-1 ${
-                        snapshot.isDraggingOver ? 'bg-white/[0.03]' : ''
+                        snapshot.isDraggingOver ? 'bg-secondary/50' : ''
                       }`}
                     >
                       <div className="space-y-4">
@@ -719,7 +719,7 @@ export function KanbanBoard() {
                                   <div className="flex gap-3">
                                     <div
                                       {...provided.dragHandleProps}
-                                      className="pt-1.5 text-neutral-600 hover:text-white transition-colors cursor-grab active:cursor-grabbing"
+                                      className="pt-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-grab active:cursor-grabbing"
                                     >
                                       <GripVertical className="w-4 h-4" />
                                     </div>
@@ -779,12 +779,12 @@ export function KanbanBoard() {
                                             <TagChip key={tag.id} tag={tag} size="sm" />
                                           ))}
                                           {task.tags.length > 3 && (
-                                            <span className="text-[9px] font-bold text-neutral-500">+{task.tags.length - 3}</span>
+                                            <span className="text-[9px] font-bold text-muted-foreground">+{task.tags.length - 3}</span>
                                           )}
                                         </div>
                                       )}
                                       {task.description && (
-                                        <p className="text-xs text-neutral-400/80 mt-1.5 line-clamp-2 leading-relaxed">
+                                        <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
                                           {task.description}
                                         </p>
                                       )}
@@ -832,13 +832,13 @@ export function KanbanBoard() {
                                         return (
                                           <div className="mt-2">
                                             <div className="flex items-center justify-between mb-1">
-                                              <span className="flex items-center gap-1 text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                                              <span className="flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
                                                 <ListChecks className="w-3 h-3" />
                                                 Subtasks
                                               </span>
-                                              <span className="text-[9px] font-bold text-neutral-400">{done}/{total}</span>
+                                              <span className="text-[9px] font-bold text-muted-foreground">{done}/{total}</span>
                                             </div>
-                                            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-1 bg-secondary/50 rounded-full overflow-hidden">
                                               <div className="h-full rounded-full bg-linear-to-r from-cyan-500 to-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
                                             </div>
                                           </div>
@@ -856,10 +856,10 @@ export function KanbanBoard() {
                                               {st.is_complete ? (
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                                               ) : (
-                                                <div className="w-3.5 h-3.5 rounded-full border border-neutral-600" />
+                                                <div className="w-3.5 h-3.5 rounded-full border border-border" />
                                               )}
                                             </button>
-                                            <span className={`flex-1 ${st.is_complete ? 'line-through text-neutral-600' : 'text-neutral-400'}`}>{st.title}</span>
+                                            <span className={`flex-1 ${st.is_complete ? 'line-through text-muted-foreground' : 'text-muted-foreground'}`}>{st.title}</span>
                                             <button
                                               onClick={() => deleteSubTask(user!.id, task.id, st.id).then(loadTasks)}
                                               className="opacity-0 group-hover:opacity-50 hover:!opacity-100 text-rose-400 transition-all"
@@ -879,18 +879,18 @@ export function KanbanBoard() {
                                             loadTasks();
                                           }}
                                         >
-                                          <Plus className="w-3 h-3 text-neutral-600" />
+                                          <Plus className="w-3 h-3 text-muted-foreground" />
                                           <input
                                             type="text"
                                             value={subtaskInput[task.id] || ''}
                                             onChange={(e) => setSubtaskInput(prev => ({ ...prev, [task.id]: e.target.value }))}
                                             placeholder="Add subtask..."
-                                            className="flex-1 bg-transparent text-[10px] text-neutral-400 placeholder:text-neutral-700 focus:outline-none border-b border-transparent focus:border-white/10"
+                                            className="flex-1 bg-transparent text-[10px] text-muted-foreground placeholder:text-muted-foreground/50 focus:outline-none border-b border-transparent focus:border-border"
                                           />
                                         </form>
                                       </div>
                                       <div className="mt-4 flex items-center justify-between">
-                                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-neutral-500 font-medium bg-black/30 px-2 py-1 rounded-md border border-white/5">
+                                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground font-medium bg-secondary/50 px-2 py-1 rounded-md border border-border">
                                           {task.target_date && (
                                             <span className="flex items-center gap-1.5">
                                               <Calendar className="w-3 h-3 text-cyan-500/70" />
@@ -901,14 +901,14 @@ export function KanbanBoard() {
                                         <div className="flex items-center gap-1">
                                           <button
                                             onClick={() => handleOpenEditModal(task)}
-                                            className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-cyan-400 transition-all p-1.5 hover:bg-cyan-500/10 rounded-lg"
+                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-cyan-400 transition-all p-1.5 hover:bg-cyan-500/10 rounded-lg"
                                           >
                                             <Pencil className="w-3.5 h-3.5" />
                                           </button>
                                           {task.task_type !== 'habit' && (
                                             <button
                                               onClick={() => handleDeleteTask(task.id)}
-                                              className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 transition-all p-1.5 hover:bg-rose-500/10 rounded-lg"
+                                              className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-rose-400 transition-all p-1.5 hover:bg-rose-500/10 rounded-lg"
                                             >
                                               <Trash2 className="w-4 h-4" />
                                             </button>
@@ -934,25 +934,25 @@ export function KanbanBoard() {
       </DragDropContext>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={() => { setIsModalOpen(false); setEditingTask(null); }}>
-          <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-6 shadow-2xl border border-white/10 custom-scrollbar" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-2xl font-bold text-white mb-6 font-['Outfit']">{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-card/60 backdrop-blur-sm animate-in fade-in" onClick={() => { setIsModalOpen(false); setEditingTask(null); }}>
+          <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-6 shadow-2xl border border-border custom-scrollbar" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-bold text-foreground mb-6 font-['Outfit']">{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
             <form onSubmit={handleSaveTask} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-1">Title</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Title</label>
                 <input
                   type="text"
                   required
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                   placeholder="What needs to be done?"
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-400 mb-1">Type</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Type</label>
                   <CustomDropdown
                     value={newTaskType}
                     onChange={(val) => handleTaskTypeChange(val as TimeframeView)}
@@ -967,38 +967,38 @@ export function KanbanBoard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-400 mb-1">Target Date</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Target Date</label>
                   <input
                     type="date"
                     required
                     value={newTaskDate}
                     onChange={(e) => setNewTaskDate(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 scheme-dark shrink-0"
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 shrink-0"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-1">Description (Optional)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Description (Optional)</label>
                 <textarea
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 min-h-[100px] resize-none"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 min-h-[100px] resize-none"
                   placeholder="Add details..."
                 />
               </div>
 
               {/* Goal Selector */}
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-1">Link to Goal (optional)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Link to Goal (optional)</label>
                 <select
                   value={newTaskGoalId || ''}
                   onChange={(e) => setNewTaskGoalId(e.target.value ? parseInt(e.target.value) : undefined)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
                 >
-                  <option value="" className="bg-neutral-900">No goal linked</option>
+                  <option value="" className="bg-popover">No goal linked</option>
                   {goals.filter(g => g.status === 'Active').map(g => (
-                    <option key={g.id} value={g.id} className="bg-neutral-900">{g.title}</option>
+                    <option key={g.id} value={g.id} className="bg-popover">{g.title}</option>
                   ))}
                 </select>
               </div>
@@ -1006,26 +1006,26 @@ export function KanbanBoard() {
               {/* Energy & Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-400 mb-1">Energy Level</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Energy Level</label>
                   <select
                     value={newTaskEnergy}
                     onChange={(e) => setNewTaskEnergy(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
                   >
-                    <option value="" className="bg-neutral-900">None</option>
-                    <option value="High" className="bg-neutral-900">⚡ High</option>
-                    <option value="Medium" className="bg-neutral-900">🔶 Medium</option>
-                    <option value="Low" className="bg-neutral-900">🟢 Low</option>
+                    <option value="" className="bg-popover">None</option>
+                    <option value="High" className="bg-popover">⚡ High</option>
+                    <option value="Medium" className="bg-popover">🔶 Medium</option>
+                    <option value="Low" className="bg-popover">🟢 Low</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-400 mb-1">Est. Minutes</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Est. Minutes</label>
                   <input
                     type="number"
                     min="1"
                     value={newTaskEstMins}
                     onChange={(e) => setNewTaskEstMins(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                     placeholder="e.g. 30"
                   />
                 </div>
@@ -1033,22 +1033,22 @@ export function KanbanBoard() {
 
               {/* Priority */}
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-1">Priority</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Priority</label>
                 <select
                   value={newTaskPriority}
                   onChange={(e) => setNewTaskPriority(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500/50 appearance-none"
                 >
-                  <option value="None" className="bg-neutral-900">None</option>
-                  <option value="High" className="bg-neutral-900">🔴 High</option>
-                  <option value="Medium" className="bg-neutral-900">🟡 Medium</option>
-                  <option value="Low" className="bg-neutral-900">🔵 Low</option>
+                  <option value="None" className="bg-popover">None</option>
+                  <option value="High" className="bg-popover">🔴 High</option>
+                  <option value="Medium" className="bg-popover">🟡 Medium</option>
+                  <option value="Low" className="bg-popover">🔵 Low</option>
                 </select>
               </div>
 
               {/* Tags */}
               <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-1">Tags</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Tags</label>
                 <TagSelector
                   allTags={tags}
                   selectedTagIds={newTaskTagIds}
@@ -1083,12 +1083,12 @@ export function KanbanBoard() {
                     {/* Recurring toggle - only show for create or template edit */}
                     {!isEditingInstance && (
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium text-neutral-400">Recurring</label>
+                        <label className="text-sm font-medium text-muted-foreground">Recurring</label>
                         <button
                           type="button"
                           onClick={() => !recurrenceDisabled && setIsRecurring(!isRecurring)}
                           disabled={recurrenceDisabled}
-                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isRecurring ? 'bg-violet-500' : 'bg-white/10'} ${recurrenceDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isRecurring ? 'bg-violet-500' : 'bg-secondary/50'} ${recurrenceDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                           <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${isRecurring ? 'translate-x-5' : ''}`} />
                         </button>
@@ -1097,37 +1097,37 @@ export function KanbanBoard() {
 
                     {/* Recurrence fields */}
                     {(isRecurring || isEditingTemplate) && !isEditingInstance && (
-                      <div className="space-y-3 p-3 bg-white/3 rounded-xl border border-white/5">
+                      <div className="space-y-3 p-3 bg-secondary/50 rounded-xl border border-border">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-neutral-500 mb-1">Frequency</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Frequency</label>
                             <select
                               value={freqType}
                               onChange={(e) => setFreqType(e.target.value)}
-                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 appearance-none"
+                              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50 appearance-none"
                             >
-                              <option value="daily" className="bg-neutral-900">Daily</option>
-                              <option value="weekly" className="bg-neutral-900">Weekly</option>
-                              <option value="monthly" className="bg-neutral-900">Monthly</option>
-                              <option value="annually" className="bg-neutral-900">Annually</option>
-                              <option value="custom" className="bg-neutral-900">Custom</option>
+                              <option value="daily" className="bg-popover">Daily</option>
+                              <option value="weekly" className="bg-popover">Weekly</option>
+                              <option value="monthly" className="bg-popover">Monthly</option>
+                              <option value="annually" className="bg-popover">Annually</option>
+                              <option value="custom" className="bg-popover">Custom</option>
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-neutral-500 mb-1">Every N periods</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Every N periods</label>
                             <input
                               type="number"
                               min="1"
                               value={repeatInterval}
                               onChange={(e) => setRepeatInterval(parseInt(e.target.value) || 1)}
-                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                             />
                           </div>
                         </div>
 
                         {freqType === 'weekly' && (
                           <div>
-                            <label className="block text-xs font-medium text-neutral-500 mb-1.5">Repeat on days</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Repeat on days</label>
                             <div className="flex gap-1.5">
                               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
                                 <button
@@ -1137,7 +1137,7 @@ export function KanbanBoard() {
                                   className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
                                     repeatDays.includes(String(i))
                                       ? 'bg-violet-500 text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
-                                      : 'bg-white/5 text-neutral-500 hover:bg-white/10'
+                                      : 'bg-secondary/50 text-muted-foreground hover:bg-secondary/50'
                                   }`}
                                 >
                                   {day}
@@ -1148,7 +1148,7 @@ export function KanbanBoard() {
                         )}
 
                         <div>
-                          <label className="block text-xs font-medium text-neutral-500 mb-1.5">Ends</label>
+                          <label className="block text-xs font-medium text-muted-foreground mb-1.5">Ends</label>
                           <div className="flex gap-2">
                             {['never', 'on', 'after'].map(opt => (
                               <button
@@ -1158,7 +1158,7 @@ export function KanbanBoard() {
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
                                   endsType === opt
                                     ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
-                                    : 'bg-white/5 text-neutral-500 border border-transparent hover:bg-white/10'
+                                    : 'bg-secondary/50 text-muted-foreground border border-transparent hover:bg-secondary/50'
                                 }`}
                               >
                                 {opt}
@@ -1169,25 +1169,25 @@ export function KanbanBoard() {
 
                         {endsType === 'on' && (
                           <div>
-                            <label className="block text-xs font-medium text-neutral-500 mb-1">End date</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">End date</label>
                             <input
                               type="date"
                               value={endsOnDate}
                               onChange={(e) => setEndsOnDate(e.target.value)}
-                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 scheme-dark"
+                              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                             />
                           </div>
                         )}
 
                         {endsType === 'after' && (
                           <div>
-                            <label className="block text-xs font-medium text-neutral-500 mb-1">Number of occurrences</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Number of occurrences</label>
                             <input
                               type="number"
                               min="1"
                               value={endsAfterOccurrences}
                               onChange={(e) => setEndsAfterOccurrences(e.target.value)}
-                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                              className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                               placeholder="e.g. 10"
                             />
                           </div>
@@ -1202,7 +1202,7 @@ export function KanbanBoard() {
                 <button
                   type="button"
                   onClick={() => { setIsModalOpen(false); setEditingTask(null); }}
-                  className="px-5 py-2.5 rounded-xl font-semibold text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+                  className="px-5 py-2.5 rounded-xl font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
                 >
                   Cancel
                 </button>

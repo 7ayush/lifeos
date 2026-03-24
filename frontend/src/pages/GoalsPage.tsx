@@ -15,7 +15,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string
   Project: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', border: 'border-indigo-500/20' },
   Area: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
   Resource: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
-  Archive: { bg: 'bg-neutral-500/10', text: 'text-neutral-400', border: 'border-neutral-500/20' },
+  Archive: { bg: 'bg-neutral-500/10', text: 'text-muted-foreground', border: 'border-neutral-500/20' },
 };
 
 const PARA_DESCRIPTIONS: Record<string, string> = {
@@ -184,8 +184,8 @@ export function GoalsPage() {
               <Target className="w-6 h-6 text-indigo-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white font-['Outfit'] tracking-tight">Goals</h1>
-              <p className="text-xs text-neutral-500 font-medium">{goals.length} total · {goals.filter(g => g.status === 'Active').length} active</p>
+              <h1 className="text-2xl font-extrabold text-foreground font-['Outfit'] tracking-tight">Goals</h1>
+              <p className="text-xs text-muted-foreground font-medium">{goals.length} total · {goals.filter(g => g.status === 'Active').length} active</p>
             </div>
           </div>
           <button
@@ -207,7 +207,7 @@ export function GoalsPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 filter === cat
                   ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                  : 'bg-white/5 text-neutral-500 hover:text-neutral-300 border border-transparent hover:border-white/10'
+                  : 'bg-secondary/50 text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
               }`}
             >
               {cat}
@@ -218,10 +218,10 @@ export function GoalsPage() {
         {/* Goal Cards Grid */}
         <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
           {filteredGoals.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed border-white/10 rounded-2xl">
-              <Target className="w-12 h-12 text-neutral-700 mb-4" />
-              <p className="text-neutral-400 font-medium">No goals yet</p>
-              <p className="text-neutral-600 text-sm mt-1">Create your first goal to start mapping your journey.</p>
+            <div className="flex flex-col items-center justify-center h-full text-center p-8 border border-dashed border-border rounded-2xl">
+              <Target className="w-12 h-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground font-medium">No goals yet</p>
+              <p className="text-muted-foreground text-sm mt-1">Create your first goal to start mapping your journey.</p>
             </div>
           ) : (
             filteredGoals.map(goal => {
@@ -234,7 +234,7 @@ export function GoalsPage() {
                   className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
                     isSelected
                       ? 'bg-indigo-500/10 border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
-                      : 'bg-white/2 border-white/5 hover:bg-white/4 hover:border-white/10 hover:-translate-y-0.5'
+                      : 'bg-secondary/50 border-border hover:bg-secondary/50 hover:border-border hover:-translate-y-0.5'
                   }`}
                 >
                   {/* Active Indicator */}
@@ -248,21 +248,21 @@ export function GoalsPage() {
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${catColor.bg} ${catColor.text} border ${catColor.border}`}>
                           {goal.category}
                         </span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${PRIORITY_COLORS[goal.priority] || 'text-neutral-400'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${PRIORITY_COLORS[goal.priority] || 'text-muted-foreground'}`}>
                           {goal.priority}
                         </span>
                         {goal.status === 'Completed' && (
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                         )}
                       </div>
-                      <h3 className={`font-bold text-base truncate ${goal.status === 'Completed' ? 'text-neutral-400 line-through decoration-emerald-500/30' : 'text-white'}`}>
+                      <h3 className={`font-bold text-base truncate ${goal.status === 'Completed' ? 'text-muted-foreground line-through decoration-emerald-500/30' : 'text-foreground'}`}>
                         {goal.title}
                       </h3>
                       {goal.description && (
-                        <p className="text-xs text-neutral-500 mt-1 line-clamp-2">{goal.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{goal.description}</p>
                       )}
                     </div>
-                    <ChevronRight className={`w-4 h-4 shrink-0 mt-1 transition-transform ${isSelected ? 'text-indigo-400 translate-x-0' : 'text-neutral-600 -translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                    <ChevronRight className={`w-4 h-4 shrink-0 mt-1 transition-transform ${isSelected ? 'text-indigo-400 translate-x-0' : 'text-muted-foreground -translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
                   </div>
 
                   {/* Progress Bar */}
@@ -271,9 +271,9 @@ export function GoalsPage() {
                   </div>
 
                   {/* Footer */}
-                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
+                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                     {goal.target_date && (
-                      <div className="flex items-center gap-1.5 text-neutral-500">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Calendar className="w-3 h-3" />
                         <span className="text-[11px] font-medium">{format(new Date(goal.target_date), 'MMM d, yyyy')}</span>
                       </div>
@@ -281,13 +281,13 @@ export function GoalsPage() {
                     <div className="ml-auto flex items-center gap-1">
                       <button
                         onClick={(e) => { e.stopPropagation(); openEditModal(goal); }}
-                        className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 opacity-0 group-hover:opacity-100 transition-all"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(goal.id); }}
-                        className="p-1.5 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -302,7 +302,7 @@ export function GoalsPage() {
 
       {/* Right Panel: Goal Detail View */}
       {selectedGoal && (
-        <div className="w-full md:w-2/3 lg:w-3/5 h-full flex flex-col glass-panel rounded-3xl border border-white/10 overflow-hidden animate-in slide-in-from-right-4 duration-300">
+        <div className="w-full md:w-2/3 lg:w-3/5 h-full flex flex-col glass-panel rounded-3xl border border-border overflow-hidden animate-in slide-in-from-right-4 duration-300">
           {detailLoading ? (
             <div className="flex justify-center items-center h-full">
               <div className="w-8 h-8 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
@@ -310,7 +310,7 @@ export function GoalsPage() {
           ) : (
             <>
               {/* Detail Header */}
-              <div className="p-6 border-b border-white/10 bg-white/2">
+              <div className="p-6 border-b border-border bg-secondary/50">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -326,12 +326,12 @@ export function GoalsPage() {
                         ● {selectedGoal.priority} Priority
                       </span>
                     </div>
-                    <h2 className="text-2xl font-extrabold text-white font-['Outfit'] tracking-tight">{selectedGoal.title}</h2>
+                    <h2 className="text-2xl font-extrabold text-foreground font-['Outfit'] tracking-tight">{selectedGoal.title}</h2>
                     {selectedGoal.description && (
-                      <p className="text-neutral-400 text-sm mt-2 leading-relaxed">{selectedGoal.description}</p>
+                      <p className="text-muted-foreground text-sm mt-2 leading-relaxed">{selectedGoal.description}</p>
                     )}
                   </div>
-                  <button onClick={() => setSelectedGoal(null)} className="p-2 rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition-all">
+                  <button onClick={() => setSelectedGoal(null)} className="p-2 rounded-xl hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-all">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -339,10 +339,10 @@ export function GoalsPage() {
                 {/* Progress Bar */}
                 <div className="mt-5">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Overall Progress</span>
-                    <span className="text-sm font-bold text-white font-['Outfit']">{Math.round(selectedGoal.progress)}%</span>
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Overall Progress</span>
+                    <span className="text-sm font-bold text-foreground font-['Outfit']">{Math.round(selectedGoal.progress)}%</span>
                   </div>
-                  <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-secondary/50 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-1000 bg-linear-to-r from-indigo-500 via-purple-500 to-emerald-500"
                       style={{ width: `${Math.min(selectedGoal.progress, 100)}%` }}
@@ -360,8 +360,8 @@ export function GoalsPage() {
                         selectedGoal.status === s
                           ? s === 'Active' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
                           : s === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30'
-                          : 'bg-white/5 text-neutral-600 border border-transparent hover:text-neutral-300 hover:border-white/10'
+                          : 'bg-neutral-500/20 text-muted-foreground border border-neutral-500/30'
+                          : 'bg-secondary/50 text-muted-foreground border border-transparent hover:text-foreground hover:border-border'
                       }`}
                     >
                       {s}
@@ -376,25 +376,25 @@ export function GoalsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Activity className="w-4 h-4 text-indigo-400" />
-                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Linked Habits</h3>
-                    <span className="text-xs text-neutral-600 font-medium">({selectedGoal.habits.length})</span>
+                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Linked Habits</h3>
+                    <span className="text-xs text-muted-foreground font-medium">({selectedGoal.habits.length})</span>
                   </div>
                   {selectedGoal.habits.length === 0 ? (
-                    <p className="text-neutral-600 text-xs italic pl-6">No habits linked to this goal yet. Link habits from the Habits page.</p>
+                    <p className="text-muted-foreground text-xs italic pl-6">No habits linked to this goal yet. Link habits from the Habits page.</p>
                   ) : (
                     <div className="space-y-2">
                       {selectedGoal.habits.map(habit => (
-                        <div key={habit.id} className="flex items-center justify-between p-3 rounded-xl bg-white/2 border border-white/5 hover:bg-white/4 transition-all">
+                        <div key={habit.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/50 transition-all">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                               <Flame className="w-4 h-4 text-indigo-400" />
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-white">{habit.title}</p>
-                              <p className="text-[11px] text-neutral-500">{habit.target_x}/{habit.target_y_days} days · {habit.current_streak} streak</p>
+                              <p className="text-sm font-semibold text-foreground">{habit.title}</p>
+                              <p className="text-[11px] text-muted-foreground">{habit.target_x}/{habit.target_y_days} days · {habit.current_streak} streak</p>
                             </div>
                           </div>
-                          <TrendingUp className="w-4 h-4 text-neutral-600" />
+                          <TrendingUp className="w-4 h-4 text-muted-foreground" />
                         </div>
                       ))}
                     </div>
@@ -405,34 +405,34 @@ export function GoalsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <CheckSquare className="w-4 h-4 text-cyan-400" />
-                    <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Linked Tasks</h3>
-                    <span className="text-xs text-neutral-600 font-medium">({selectedGoal.tasks.length})</span>
+                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Linked Tasks</h3>
+                    <span className="text-xs text-muted-foreground font-medium">({selectedGoal.tasks.length})</span>
                   </div>
                   {selectedGoal.tasks.length === 0 ? (
-                    <p className="text-neutral-600 text-xs italic pl-6">No tasks linked to this goal yet. Link tasks from the Kanban board.</p>
+                    <p className="text-muted-foreground text-xs italic pl-6">No tasks linked to this goal yet. Link tasks from the Kanban board.</p>
                   ) : (
                     <div className="space-y-2">
                       {selectedGoal.tasks.map(task => (
-                        <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-white/2 border border-white/5 hover:bg-white/4 transition-all">
+                        <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/50 transition-all">
                           <div className="flex items-center gap-3">
                             {task.status === 'Done' ? (
                               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                             ) : (
-                              <Circle className="w-5 h-5 text-neutral-600" />
+                              <Circle className="w-5 h-5 text-muted-foreground" />
                             )}
                             <div>
-                              <p className={`text-sm font-semibold ${task.status === 'Done' ? 'text-neutral-400 line-through decoration-emerald-500/30' : 'text-white'}`}>
+                              <p className={`text-sm font-semibold ${task.status === 'Done' ? 'text-muted-foreground line-through decoration-emerald-500/30' : 'text-foreground'}`}>
                                 {task.title}
                               </p>
                               {task.target_date && (
-                                <p className="text-[11px] text-neutral-500">Due {format(new Date(task.target_date), 'MMM d')}</p>
+                                <p className="text-[11px] text-muted-foreground">Due {format(new Date(task.target_date), 'MMM d')}</p>
                               )}
                             </div>
                           </div>
                           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
                             task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400' :
                             task.status === 'InProgress' ? 'bg-amber-500/10 text-amber-400' :
-                            'bg-white/5 text-neutral-500'
+                            'bg-secondary/50 text-muted-foreground'
                           }`}>
                             {task.status === 'InProgress' ? 'In Progress' : task.status}
                           </span>
@@ -447,14 +447,14 @@ export function GoalsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Trophy className="w-4 h-4 text-amber-400" />
-                      <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Milestones</h3>
+                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Milestones</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {selectedGoal.milestones.map(m => (
                         <div key={m.threshold} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/5 border border-amber-500/10">
                           <Trophy className="w-3.5 h-3.5 text-amber-400" />
                           <span className="text-sm font-bold text-amber-400">{m.threshold}%</span>
-                          <span className="text-[11px] text-neutral-500">
+                          <span className="text-[11px] text-muted-foreground">
                             {format(new Date(m.achieved_at), 'MMM d, yyyy')}
                           </span>
                         </div>
@@ -468,15 +468,15 @@ export function GoalsPage() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <TrendingUp className="w-4 h-4 text-purple-400" />
-                      <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-wider">Progress History</h3>
+                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Progress History</h3>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                       {selectedGoal.progress_history.map(snap => (
-                        <div key={snap.date} className="flex items-center justify-between p-3 rounded-xl bg-white/2 border border-white/5">
-                          <span className="text-xs text-neutral-500 font-medium">
+                        <div key={snap.date} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border">
+                          <span className="text-xs text-muted-foreground font-medium">
                             {format(new Date(snap.date), 'MMM d, yyyy')}
                           </span>
-                          <span className="text-sm font-bold text-white">{snap.progress}%</span>
+                          <span className="text-sm font-bold text-foreground">{snap.progress}%</span>
                         </div>
                       ))}
                     </div>
@@ -485,12 +485,12 @@ export function GoalsPage() {
 
                 {/* Deadline Info */}
                 {selectedGoal.target_date && (
-                  <div className="p-4 rounded-xl bg-white/2 border border-white/5">
+                  <div className="p-4 rounded-xl bg-secondary/50 border border-border">
                     <div className="flex items-center gap-2 mb-1">
-                      <Calendar className="w-4 h-4 text-neutral-500" />
-                      <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Target Deadline</span>
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Target Deadline</span>
                     </div>
-                    <p className="text-lg font-bold text-white font-['Outfit'] pl-6">
+                    <p className="text-lg font-bold text-foreground font-['Outfit'] pl-6">
                       {format(new Date(selectedGoal.target_date), 'MMMM d, yyyy')}
                     </p>
                   </div>
@@ -504,63 +504,63 @@ export function GoalsPage() {
       {/* Create/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative w-full max-w-lg glass-panel rounded-3xl border border-white/10 p-6 space-y-5 animate-in zoom-in-95 duration-200">
-            <h2 className="text-xl font-extrabold text-white font-['Outfit']">
+          <div className="absolute inset-0 bg-popover/70 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative w-full max-w-lg glass-panel rounded-3xl border border-border p-6 space-y-5 animate-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-extrabold text-foreground font-['Outfit']">
               {editingGoal ? 'Edit Goal' : 'Create New Goal'}
             </h2>
 
             {/* Title */}
             <div>
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5 block">Title</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Title</label>
               <input
                 type="text"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
                 placeholder="e.g., Complete Marathon Training"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/50 transition-colors"
                 autoFocus
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5 block">Description</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
                 placeholder="What does success look like?"
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-neutral-600 focus:outline-none focus:border-indigo-500/50 transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500/50 transition-colors resize-none"
               />
             </div>
 
             {/* Category & Priority Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5 block">Category (P.A.R.A.)</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Category (P.A.R.A.)</label>
                 <select
                   value={formCategory}
                   onChange={(e) => setFormCategory(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none"
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none"
                 >
                   {CATEGORIES.map(c => (
-                    <option key={c} value={c} className="bg-neutral-900" title={PARA_DESCRIPTIONS[c]}>{c}</option>
+                    <option key={c} value={c} className="bg-popover" title={PARA_DESCRIPTIONS[c]}>{c}</option>
                   ))}
                 </select>
                 {formCategory && PARA_DESCRIPTIONS[formCategory] && (
-                  <p className="text-[10px] text-neutral-500 mt-1 italic">{PARA_DESCRIPTIONS[formCategory]}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 italic">{PARA_DESCRIPTIONS[formCategory]}</p>
                 )}
               </div>
               <div>
-                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5 block">Priority</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Priority</label>
                 <select
                   value={formPriority}
                   onChange={(e) => setFormPriority(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none"
+                  className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none"
                 >
                   {PRIORITIES.map(p => (
-                    <option key={p} value={p} className="bg-neutral-900">{p}</option>
+                    <option key={p} value={p} className="bg-popover">{p}</option>
                   ))}
                 </select>
               </div>
@@ -568,12 +568,12 @@ export function GoalsPage() {
 
             {/* Target Date */}
             <div>
-              <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5 block">Target Date</label>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">Target Date</label>
               <input
                 type="date"
                 value={formTargetDate}
                 onChange={(e) => setFormTargetDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-indigo-500/50 transition-colors [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
+                className="w-full px-4 py-3 rounded-xl bg-secondary/50 border border-border text-foreground focus:outline-none focus:border-indigo-500/50 transition-colors dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert"
               />
             </div>
 
@@ -581,7 +581,7 @@ export function GoalsPage() {
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2.5 text-neutral-400 hover:text-white font-semibold transition-colors"
+                className="px-5 py-2.5 text-muted-foreground hover:text-foreground font-semibold transition-colors"
               >
                 Cancel
               </button>

@@ -204,7 +204,7 @@ export function WeeklyReviewPage() {
         <p className="text-red-400">{error}</p>
         <button
           onClick={loadData}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] text-white hover:bg-white/[0.1] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary/50 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
           Retry

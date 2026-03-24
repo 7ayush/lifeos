@@ -132,6 +132,7 @@ class HabitBase(BaseModel):
     ends_type: Optional[str] = "never"  # never, on, after
     ends_on_date: Optional[date] = None
     ends_after_occurrences: Optional[int] = None
+    min_threshold_pct: Optional[int] = 80  # minimum adherence % target
 
 class HabitCreate(HabitBase):
     goal_id: Optional[int] = None
@@ -148,6 +149,7 @@ class HabitUpdate(BaseModel):
     ends_type: Optional[str] = None
     ends_on_date: Optional[date] = None
     ends_after_occurrences: Optional[int] = None
+    min_threshold_pct: Optional[int] = None
 
 class Habit(HabitBase):
     id: int
@@ -160,6 +162,7 @@ class Habit(HabitBase):
     ends_type: Optional[str] = "never"
     ends_on_date: Optional[date] = None
     ends_after_occurrences: Optional[int] = None
+    min_threshold_pct: Optional[int] = 80
     logs: Optional[List[HabitLog]] = []
     model_config = ConfigDict(from_attributes=True)
 
@@ -489,3 +492,23 @@ class WeeklyReviewResponse(BaseModel):
     focus_tasks: list[FocusTaskOut]
     daily_task_counts: list[DailyTaskCount]
     comparison: WeekComparisonStats
+
+
+# ============================
+# USER SETTINGS SCHEMAS
+# ============================
+
+class UserSettingsOut(BaseModel):
+    theme_preference: str
+    model_config = ConfigDict(from_attributes=True)
+
+class UserSettingsUpdate(BaseModel):
+    theme_preference: Optional[str] = None
+
+    @field_validator("theme_preference")
+    @classmethod
+    def validate_theme(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in ("dark", "light"):
+            raise ValueError("theme_preference must be 'dark' or 'light'")
+        return v
+

@@ -11,7 +11,7 @@ export function ProgressBar({ progress, showLabel = false, size = 'md' }: Progre
 
   return (
     <div className="flex items-center gap-2 w-full">
-      <div className={`flex-1 ${height} bg-white/5 rounded-full overflow-hidden`}>
+      <div className={`flex-1 ${height} bg-secondary/50 rounded-full overflow-hidden`}>
         <div
           className={`h-full rounded-full transition-all duration-700 ${
             isComplete
@@ -22,7 +22,7 @@ export function ProgressBar({ progress, showLabel = false, size = 'md' }: Progre
         />
       </div>
       {showLabel && (
-        <span className="text-xs font-bold text-neutral-400 tabular-nums shrink-0">
+        <span className="text-xs font-bold text-muted-foreground tabular-nums shrink-0">
           {clamped}%
         </span>
       )}

@@ -14,7 +14,7 @@ interface FocusTasksSectionProps {
 }
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  Todo: { bg: 'bg-neutral-500/10', text: 'text-neutral-400' },
+  Todo: { bg: 'bg-muted', text: 'text-muted-foreground' },
   InProgress: { bg: 'bg-sky-500/10', text: 'text-sky-400' },
   Done: { bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
 };
@@ -79,21 +79,21 @@ export function FocusTasksSection({
   };
 
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+    <div className="bg-secondary/50 border border-border rounded-xl p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Crosshair className="w-5 h-5 text-violet-400" />
-          <h2 className="text-white font-semibold">Focus Tasks</h2>
+          <h2 className="text-foreground font-semibold">Focus Tasks</h2>
         </div>
-        <span className="text-neutral-400 text-sm">
+        <span className="text-muted-foreground text-sm">
           {focusTasks.length}/{MAX_FOCUS_TASKS}
         </span>
       </div>
 
       {/* Focus task list */}
       {focusTasks.length === 0 ? (
-        <p className="text-neutral-500 text-sm py-4 text-center">
+        <p className="text-muted-foreground text-sm py-4 text-center">
           No focus tasks set for this week.
         </p>
       ) : (
@@ -101,10 +101,10 @@ export function FocusTasksSection({
           {focusTasks.map((ft) => (
             <div
               key={ft.task_id}
-              className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/5"
+              className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-secondary/50 border border-border"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-sm text-white truncate">
+                <span className="text-sm text-foreground truncate">
                   {ft.task_title}
                 </span>
                 <StatusBadge status={ft.task_status} />
@@ -113,7 +113,7 @@ export function FocusTasksSection({
               <button
                 type="button"
                 onClick={() => onRemove(ft.task_id)}
-                className="shrink-0 p-1 rounded hover:bg-white/10 text-neutral-500 hover:text-red-400 transition-colors"
+                className="shrink-0 p-1 rounded hover:bg-secondary/50 text-muted-foreground hover:text-red-400 transition-colors"
                 aria-label={`Remove ${ft.task_title} from focus`}
               >
                 <X className="w-3.5 h-3.5" />
@@ -126,8 +126,8 @@ export function FocusTasksSection({
       {/* Search / create input */}
       {!atLimit && (
         <div className="relative">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-white/[0.02] focus-within:border-violet-500/50 transition-colors">
-            <Search className="w-4 h-4 text-neutral-500 shrink-0" />
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-secondary/50 focus-within:border-violet-500/50 transition-colors">
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
             <input
               type="text"
               value={query}
@@ -142,22 +142,22 @@ export function FocusTasksSection({
               }}
               onKeyDown={handleKeyDown}
               placeholder="Search tasks or type to create new…"
-              className="flex-1 bg-transparent text-sm text-white placeholder-neutral-500 outline-none"
+              className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none"
             />
           </div>
 
           {/* Dropdown */}
           {showDropdown && query.trim() && (
-            <div className="absolute z-10 mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 shadow-xl max-h-52 overflow-y-auto">
+            <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-popover shadow-xl max-h-52 overflow-y-auto">
               {filteredTasks.map((task) => (
                 <button
                   key={task.id}
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleSelect(task.id)}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.06] transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-secondary/50 transition-colors"
                 >
-                  <span className="text-sm text-white truncate">
+                  <span className="text-sm text-foreground truncate">
                     {task.title}
                   </span>
                   <PriorityBadge priority={task.priority} />
@@ -169,7 +169,7 @@ export function FocusTasksSection({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleCreate}
-                className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.06] transition-colors border-t border-white/5"
+                className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-secondary/50 transition-colors border-t border-border"
               >
                 <Plus className="w-4 h-4 text-violet-400" />
                 <span className="text-sm text-violet-400">
@@ -182,7 +182,7 @@ export function FocusTasksSection({
       )}
 
       {atLimit && (
-        <p className="text-neutral-500 text-xs text-center mt-2">
+        <p className="text-muted-foreground text-xs text-center mt-2">
           Maximum of {MAX_FOCUS_TASKS} focus tasks reached.
         </p>
       )}

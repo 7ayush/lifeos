@@ -140,6 +140,7 @@ export interface Habit {
   ends_type?: string; // never, on, after
   ends_on_date?: string;
   ends_after_occurrences?: number;
+  min_threshold_pct?: number;
   logs?: HabitLog[];
 }
 
@@ -155,6 +156,7 @@ export interface HabitCreate {
   ends_type?: string;
   ends_on_date?: string;
   ends_after_occurrences?: number;
+  min_threshold_pct?: number;
 }
 
 export interface JournalEntry {

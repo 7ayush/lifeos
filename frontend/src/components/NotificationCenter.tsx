@@ -93,7 +93,7 @@ export function NotificationCenter() {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 cursor-pointer"
+        className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl transition-all duration-300 cursor-pointer"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
@@ -106,10 +106,10 @@ export function NotificationCenter() {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-96 max-h-[28rem] bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50 flex flex-col">
+        <div className="absolute right-0 top-full mt-2 w-96 max-h-[28rem] bg-popover backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <h3 className="text-sm font-semibold text-neutral-200">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
             {notifications.length > 0 && (
               <button
                 onClick={handleMarkAllRead}
@@ -124,7 +124,7 @@ export function NotificationCenter() {
           {/* Notification List */}
           <div className="overflow-y-auto flex-1 custom-scrollbar">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-neutral-500">
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                 <Bell className="w-8 h-8 mb-2 opacity-40" />
                 <p className="text-sm">No pending reminders</p>
               </div>
@@ -135,8 +135,8 @@ export function NotificationCenter() {
                   <button
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`w-full text-left px-4 py-3 border-b border-white/5 transition-all duration-200 hover:bg-white/5 cursor-pointer group ${
-                      notif.is_read ? 'bg-transparent' : 'bg-white/[0.02]'
+                    className={`w-full text-left px-4 py-3 border-b border-border/50 transition-all duration-200 hover:bg-secondary/50 cursor-pointer group ${
+                      notif.is_read ? 'bg-transparent' : 'bg-secondary/20'
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -144,16 +144,16 @@ export function NotificationCenter() {
                         {style.label}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm leading-snug ${notif.is_read ? 'text-neutral-400' : 'text-neutral-200'}`}>
+                        <p className={`text-sm leading-snug ${notif.is_read ? 'text-muted-foreground' : 'text-foreground'}`}>
                           {notif.message}
                         </p>
-                        <p className="text-[11px] text-neutral-600 mt-1">
+                        <p className="text-[11px] text-muted-foreground mt-1">
                           {new Date(notif.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       <button
                         onClick={(e) => handleDismiss(e, notif)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-neutral-300 hover:bg-white/10 rounded-lg transition-all cursor-pointer shrink-0"
+                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-all cursor-pointer shrink-0"
                         aria-label="Dismiss notification"
                       >
                         <X className="w-3.5 h-3.5" />
