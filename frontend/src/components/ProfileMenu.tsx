@@ -42,7 +42,7 @@ export function ProfileMenu() {
             referrerPolicy="no-referrer"
           />
         ) : (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-bold text-white font-['Outfit']">
               {user.username.charAt(0).toUpperCase()}
             </span>

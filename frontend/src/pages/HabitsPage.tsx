@@ -226,7 +226,7 @@ export function HabitsPage() {
         </div>
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(99,102,241,0.2)] hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]"
+          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-900 text-indigo-50 hover:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white rounded-xl font-bold transition-all shadow-md dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] dark:hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]"
         >
           <Plus className="w-5 h-5" />
           New Habit
@@ -347,7 +347,7 @@ export function HabitsPage() {
 
                     <div className="flex flex-wrap items-center gap-2">
                         {habit.current_streak > 0 && (
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-[10px] font-bold border border-yellow-500/20 shrink-0">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-yellow-500/10 text-amber-950 dark:text-yellow-400 text-[10px] font-bold border border-amber-200 dark:border-yellow-500/20 shrink-0">
                             <Flame className="w-3 h-3" />
                             {habit.current_streak} Streak
                           </div>
@@ -366,9 +366,9 @@ export function HabitsPage() {
                           }
 
                           const consistency = Math.min(100, Math.round((doneLogs / Math.max(1, scheduledDaysElapsed)) * 100));
-                          const cColor = consistency >= 75 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
-                                        : consistency >= 40 ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' 
-                                        : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                          const cColor = consistency >= 75 ? 'text-emerald-950 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/20' 
+                                        : consistency >= 40 ? 'text-amber-950 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/20' 
+                                        : 'text-rose-950 dark:text-rose-400 bg-rose-100 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/20';
                           return (
                             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0 ${cColor}`}>
                               <TrendingUp className="w-3 h-3" />
@@ -380,7 +380,7 @@ export function HabitsPage() {
                         {(() => {
                           const linkedGoal = habit.goal_id ? goals.find(g => g.id === habit.goal_id) : null;
                           return linkedGoal ? (
-                            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-bold border border-indigo-500/20 shrink-0">
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-950 dark:text-indigo-400 text-[10px] font-bold border border-indigo-200 dark:border-indigo-500/20 shrink-0">
                               <Target className="w-2.5 h-2.5" />
                               <span className="truncate max-w-[100px]">{linkedGoal.title}</span>
                             </div>
@@ -391,7 +391,7 @@ export function HabitsPage() {
                     <div className="flex flex-col gap-0.5 mt-2">
                       <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Target Status</span>
                       <div className="flex items-baseline gap-1.5">
-                        <strong className={`text-2xl font-black font-['Outfit'] ${isSuccess ? 'text-emerald-400' : 'text-foreground'}`}>
+                        <strong className={`text-2xl font-black font-['Outfit'] ${isSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'}`}>
                           {doneInPeriod} / {expectedDays}
                         </strong>
                         <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">days</span>
@@ -483,7 +483,7 @@ export function HabitsPage() {
                             
                             return (
                               <div key={idx} className={`flex flex-col items-center gap-2 min-w-[42px] snap-center transition-opacity duration-300 ${isDisabled ? 'opacity-20' : ''}`}>
-                                <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-400 ring-1 ring-indigo-400/30 px-1 rounded' : isAdhoc ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                                <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/30 px-1 rounded' : isAdhoc ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
                                   {format(date, 'EEE')}
                                 </span>
                                 <button
@@ -497,20 +497,20 @@ export function HabitsPage() {
                                     isDisabled 
                                       ? 'bg-secondary/50 border-border cursor-not-allowed' 
                                       : isDone 
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] active:scale-95' 
+                                        ? 'bg-emerald-100 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] active:scale-95' 
                                         : isAdhoc
-                                          ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10 hover:border-amber-500/30 active:scale-95'
+                                          ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/10 hover:border-amber-300 dark:hover:border-amber-500/30 active:scale-95'
                                           : 'bg-secondary/50 border-border hover:bg-secondary/80 hover:border-border active:scale-95'
                                   }`}
                                   title={isAdhoc ? 'Not scheduled — adhoc tracking' : undefined}
                                 >
                                   {isDone ? (
-                                    <CheckCircle2 className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
                                   ) : (
                                     <div className={`w-2.5 h-2.5 rounded-full transition-colors ${isDisabled ? 'bg-muted' : isAdhoc ? 'bg-amber-500/40' : 'bg-muted'}`} />
                                   )}
                                 </button>
-                                <span className={`text-[10px] font-medium ${isToday ? 'text-indigo-300' : 'text-muted-foreground'}`}>
+                                <span className={`text-[10px] font-medium ${isToday ? 'text-indigo-600 dark:text-indigo-300' : 'text-muted-foreground'}`}>
                                   {format(date, 'd')}
                                 </span>
                               </div>
@@ -530,7 +530,7 @@ export function HabitsPage() {
                 <div className="mt-6 flex flex-col gap-2 border-t border-border pt-4">
                     <div className="flex items-center justify-between text-[10px] font-bold tracking-tighter uppercase">
                         <div className="flex items-center gap-2">
-                            <span className={isSuccess ? 'text-emerald-400' : 'text-indigo-400'}>{progressPct}% Complete</span>
+                            <span className={isSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'}>{progressPct}% Complete</span>
                             <div className="w-1 h-1 rounded-full bg-muted-foreground" />
                             <span className="text-muted-foreground">{doneInPeriod} of {expectedDays} days achieved</span>
                         </div>
@@ -688,7 +688,7 @@ export function HabitsPage() {
                           }}
                           className={`w-10 h-10 rounded-full text-sm font-bold transition-all ${
                             selected
-                              ? 'bg-indigo-500 text-white shadow-[0_0_12px_rgba(99,102,241,0.4)]'
+                              ? 'bg-indigo-900 border border-indigo-900 dark:border-transparent text-indigo-50 dark:bg-indigo-500 dark:text-white shadow-md dark:shadow-[0_0_12px_rgba(99,102,241,0.4)]'
                               : 'bg-secondary/50 text-muted-foreground border border-border hover:bg-secondary/80'
                           }`}
                         >
@@ -872,7 +872,7 @@ export function HabitsPage() {
                 <button
                   type="submit"
                   disabled={!newTitle.trim()}
-                  className="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                  className="px-6 py-2.5 bg-indigo-900 border-indigo-900 text-indigo-50 hover:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white border dark:border-transparent rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md dark:shadow-[0_0_15px_rgba(99,102,241,0.4)]"
                 >
                   {editingHabit ? 'Save Changes' : 'Create Habit'}
                 </button>

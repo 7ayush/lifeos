@@ -67,7 +67,7 @@ export function ProfilePage() {
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center ring-2 ring-border shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center ring-2 ring-border shadow-lg">
               <span className="text-3xl font-bold text-foreground font-['Outfit']">
                 {user.username.charAt(0).toUpperCase()}
               </span>

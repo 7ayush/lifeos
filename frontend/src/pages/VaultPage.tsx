@@ -10,10 +10,10 @@ import { stripMarkdown } from '../utils/stripMarkdown';
 
 const PARA_FOLDERS = [
   { key: 'all', label: 'All Notes', icon: Layers, color: 'text-foreground', bg: 'bg-secondary/50' },
-  { key: 'Project', label: 'Projects', icon: Briefcase, color: 'text-sky-400', bg: 'bg-sky-500/10' },
-  { key: 'Area', label: 'Areas', icon: Compass, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  { key: 'Resource', label: 'Resources', icon: FolderOpen, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-  { key: 'Archive', label: 'Archive', icon: Archive, color: 'text-muted-foreground', bg: 'bg-neutral-500/10' },
+  { key: 'Project', label: 'Projects', icon: Briefcase, color: 'text-sky-950 dark:text-sky-400', bg: 'bg-sky-100 dark:bg-sky-500/10' },
+  { key: 'Area', label: 'Areas', icon: Compass, color: 'text-emerald-950 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-500/10' },
+  { key: 'Resource', label: 'Resources', icon: FolderOpen, color: 'text-amber-950 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-500/10' },
+  { key: 'Archive', label: 'Archive', icon: Archive, color: 'text-neutral-950 dark:text-muted-foreground', bg: 'bg-neutral-100 dark:bg-neutral-500/10' },
 ];
 
 export function VaultPage() {
@@ -157,14 +157,14 @@ export function VaultPage() {
         <div className="p-4 border-b border-border bg-secondary/50">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <FolderOpen className="w-4 h-4 text-amber-400" />
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                <FolderOpen className="w-4 h-4 text-amber-950 dark:text-amber-400" />
               </div>
               <h1 className="text-xl font-bold text-foreground font-['Outfit'] tracking-tight">Vault</h1>
             </div>
             <button
               onClick={handleCreateNote}
-              className="w-8 h-8 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-950 dark:text-amber-400 flex items-center justify-center transition-colors"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -226,7 +226,7 @@ export function VaultPage() {
                   onClick={() => openEditor(note)}
                   className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
                     isActive
-                      ? 'bg-amber-500/10 border-amber-500/30'
+                      ? 'bg-amber-100 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30'
                       : 'bg-secondary/50 border-transparent hover:bg-secondary/50 hover:-translate-y-0.5'
                   }`}
                 >
@@ -237,7 +237,7 @@ export function VaultPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className={`w-3.5 h-3.5 shrink-0 ${folderInfo?.color || 'text-muted-foreground'}`} />
-                        <p className={`font-bold text-sm truncate ${isActive ? 'text-amber-400' : 'text-foreground'}`}>
+                        <p className={`font-bold text-sm truncate ${isActive ? 'text-amber-900 dark:text-amber-400' : 'text-foreground'}`}>
                           {note.title}
                         </p>
                       </div>
@@ -292,7 +292,7 @@ export function VaultPage() {
                 </select>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg text-xs font-bold transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-950 dark:text-amber-400 rounded-lg text-xs font-bold transition-colors"
                 >
                   <Save className="w-3.5 h-3.5" />
                   Save

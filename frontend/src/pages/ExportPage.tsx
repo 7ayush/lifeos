@@ -86,7 +86,7 @@ export function ExportPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl">
-      <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-500 font-['Outfit'] tracking-tight">
+      <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-amber-400 via-orange-400 to-primary font-['Outfit'] tracking-tight">
         Export Data
       </h1>
 
@@ -191,7 +191,7 @@ export function ExportPage() {
       <button
         onClick={handleExport}
         disabled={!canExport}
-        className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-500/50 active:scale-[0.98]"
+        className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed bg-emerald-900 text-emerald-50 hover:bg-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-900 dark:border-emerald-500/30 dark:hover:bg-emerald-500/30 dark:hover:border-emerald-500/50 active:scale-[0.98]"
       >
         {loading ? (
           <>

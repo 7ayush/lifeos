@@ -12,10 +12,10 @@ const PRIORITIES = ['High', 'Medium', 'Low'] as const;
 const STATUSES = ['Active', 'Completed', 'Archived'] as const;
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  Project: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', border: 'border-indigo-500/20' },
-  Area: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-  Resource: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
-  Archive: { bg: 'bg-neutral-500/10', text: 'text-muted-foreground', border: 'border-neutral-500/20' },
+  Project: { bg: 'bg-indigo-100 dark:bg-indigo-500/10', text: 'text-indigo-950 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-500/20' },
+  Area: { bg: 'bg-emerald-100 dark:bg-emerald-500/10', text: 'text-emerald-950 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-500/20' },
+  Resource: { bg: 'bg-amber-100 dark:bg-amber-500/10', text: 'text-amber-950 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  Archive: { bg: 'bg-neutral-100 dark:bg-neutral-500/10', text: 'text-neutral-950 dark:text-muted-foreground', border: 'border-neutral-200 dark:border-neutral-500/20' },
 };
 
 const PARA_DESCRIPTIONS: Record<string, string> = {
@@ -26,9 +26,9 @@ const PARA_DESCRIPTIONS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  High: 'text-rose-400',
-  Medium: 'text-amber-400',
-  Low: 'text-emerald-400',
+  High: 'text-rose-600 dark:text-rose-400',
+  Medium: 'text-amber-600 dark:text-amber-400',
+  Low: 'text-emerald-600 dark:text-emerald-400',
 };
 
 export function GoalsPage() {
@@ -190,7 +190,7 @@ export function GoalsPage() {
           </div>
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-900 border-indigo-900 text-indigo-50 hover:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white border dark:border-transparent rounded-xl font-bold transition-all shadow-md dark:shadow-[0_0_20px_rgba(99,102,241,0.3)] active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Goal</span>
@@ -206,7 +206,7 @@ export function GoalsPage() {
               title={PARA_DESCRIPTIONS[cat] || 'Show all goals'}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 filter === cat
-                  ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                  ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-950 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30'
                   : 'bg-secondary/50 text-muted-foreground hover:text-foreground border border-transparent hover:border-border'
               }`}
             >
@@ -233,7 +233,7 @@ export function GoalsPage() {
                   onClick={() => loadGoalDetail(goal.id)}
                   className={`p-5 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
                     isSelected
-                      ? 'bg-indigo-500/10 border-indigo-500/30 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
+                      ? 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/30' /* removed manual shadow for light mode focus state */
                       : 'bg-secondary/50 border-border hover:bg-secondary/50 hover:border-border hover:-translate-y-0.5'
                   }`}
                 >
@@ -252,17 +252,17 @@ export function GoalsPage() {
                           {goal.priority}
                         </span>
                         {goal.status === 'Completed' && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                         )}
                       </div>
-                      <h3 className={`font-bold text-base truncate ${goal.status === 'Completed' ? 'text-muted-foreground line-through decoration-emerald-500/30' : 'text-foreground'}`}>
+                      <h3 className={`font-bold text-base truncate ${goal.status === 'Completed' ? 'text-muted-foreground line-through decoration-emerald-200 dark:decoration-emerald-500/30' : 'text-foreground'}`}>
                         {goal.title}
                       </h3>
                       {goal.description && (
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{goal.description}</p>
                       )}
                     </div>
-                    <ChevronRight className={`w-4 h-4 shrink-0 mt-1 transition-transform ${isSelected ? 'text-indigo-400 translate-x-0' : 'text-muted-foreground -translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                    <ChevronRight className={`w-4 h-4 shrink-0 mt-1 transition-transform ${isSelected ? 'text-indigo-600 dark:text-indigo-400 translate-x-0' : 'text-muted-foreground -translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
                   </div>
 
                   {/* Progress Bar */}
@@ -358,9 +358,9 @@ export function GoalsPage() {
                       onClick={() => handleStatusChange(selectedGoal, s)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                         selectedGoal.status === s
-                          ? s === 'Active' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
-                          : s === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-neutral-500/20 text-muted-foreground border border-neutral-500/30'
+                          ? s === 'Active' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-950 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30'
+                          : s === 'Completed' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
+                          : 'bg-neutral-100 dark:bg-neutral-500/20 text-neutral-950 dark:text-muted-foreground border border-neutral-200 dark:border-neutral-500/30'
                           : 'bg-secondary/50 text-muted-foreground border border-transparent hover:text-foreground hover:border-border'
                       }`}
                     >
@@ -375,7 +375,7 @@ export function GoalsPage() {
                 {/* Linked Habits */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Activity className="w-4 h-4 text-indigo-400" />
+                    <Activity className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Linked Habits</h3>
                     <span className="text-xs text-muted-foreground font-medium">({selectedGoal.habits.length})</span>
                   </div>
@@ -386,8 +386,8 @@ export function GoalsPage() {
                       {selectedGoal.habits.map(habit => (
                         <div key={habit.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/50 transition-all">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                              <Flame className="w-4 h-4 text-indigo-400" />
+                            <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center">
+                              <Flame className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-foreground">{habit.title}</p>
@@ -404,7 +404,7 @@ export function GoalsPage() {
                 {/* Linked Tasks */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <CheckSquare className="w-4 h-4 text-cyan-400" />
+                    <CheckSquare className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                     <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Linked Tasks</h3>
                     <span className="text-xs text-muted-foreground font-medium">({selectedGoal.tasks.length})</span>
                   </div>
@@ -416,12 +416,12 @@ export function GoalsPage() {
                         <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/50 transition-all">
                           <div className="flex items-center gap-3">
                             {task.status === 'Done' ? (
-                              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                             ) : (
                               <Circle className="w-5 h-5 text-muted-foreground" />
                             )}
                             <div>
-                              <p className={`text-sm font-semibold ${task.status === 'Done' ? 'text-muted-foreground line-through decoration-emerald-500/30' : 'text-foreground'}`}>
+                              <p className={`text-sm font-semibold ${task.status === 'Done' ? 'text-muted-foreground line-through decoration-emerald-200 dark:decoration-emerald-500/30' : 'text-foreground'}`}>
                                 {task.title}
                               </p>
                               {task.target_date && (
@@ -430,8 +430,8 @@ export function GoalsPage() {
                             </div>
                           </div>
                           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            task.status === 'Done' ? 'bg-emerald-500/10 text-emerald-400' :
-                            task.status === 'InProgress' ? 'bg-amber-500/10 text-amber-400' :
+                            task.status === 'Done' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-950 dark:text-emerald-400' :
+                            task.status === 'InProgress' ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-950 dark:text-amber-400' :
                             'bg-secondary/50 text-muted-foreground'
                           }`}>
                             {task.status === 'InProgress' ? 'In Progress' : task.status}
@@ -446,14 +446,14 @@ export function GoalsPage() {
                 {selectedGoal.milestones && selectedGoal.milestones.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <Trophy className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Milestones</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {selectedGoal.milestones.map(m => (
-                        <div key={m.threshold} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                          <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                          <span className="text-sm font-bold text-amber-400">{m.threshold}%</span>
+                        <div key={m.threshold} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/10">
+                          <Trophy className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{m.threshold}%</span>
                           <span className="text-[11px] text-muted-foreground">
                             {format(new Date(m.achieved_at), 'MMM d, yyyy')}
                           </span>
@@ -467,7 +467,7 @@ export function GoalsPage() {
                 {selectedGoal.progress_history && selectedGoal.progress_history.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <TrendingUp className="w-4 h-4 text-purple-400" />
+                      <TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                       <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Progress History</h3>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
@@ -588,7 +588,7 @@ export function GoalsPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!formTitle.trim()}
-                className="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] active:scale-95"
+                className="px-6 py-2.5 bg-indigo-900 border-indigo-900 text-indigo-50 hover:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 disabled:opacity-50 dark:text-white border dark:border-transparent rounded-xl font-bold transition-all shadow-md dark:shadow-[0_0_20px_rgba(99,102,241,0.3)] active:scale-95"
               >
                 {editingGoal ? 'Save Changes' : 'Create Goal'}
               </button>

@@ -20,17 +20,20 @@ export function Sidebar() {
   ];
 
   return (
-    <nav className="w-64 bg-card/60 backdrop-blur-xl border-r border-border flex flex-col pt-8 pb-6 px-4">
+    <nav className="w-64 m-3 mr-0 rounded-2xl glass-panel flex flex-col pt-8 pb-6 px-4 relative overflow-hidden">
+      {/* Ambient glow inside sidebar */}
+      <div className="absolute -top-16 -left-16 w-48 h-48 bg-primary/6 rounded-full blur-[60px] pointer-events-none" />
+
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-3 mb-10">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.3)]">
-            <span className="text-xl font-bold text-foreground font-['Outfit']">L</span>
+        <div className="flex items-center gap-3 px-3 mb-10 relative z-10">
+          <div className="w-10 h-10 bg-linear-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-[0_0_24px_rgba(245,158,11,0.25)]">
+            <span className="text-xl font-bold text-foreground font-['Outfit'] italic">L</span>
           </div>
-          <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground font-['Outfit'] tracking-tight">Life OS</span>
+          <span className="text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-foreground to-muted-foreground font-['Outfit'] tracking-tight">Life OS</span>
         </div>
 
         {/* Route Links */}
-        <div className="flex flex-col gap-2 flex-1 relative z-10">
+        <div className="flex flex-col gap-1.5 flex-1 relative z-10">
           {routes.map((route) => {
             const Icon = route.icon;
             return (
@@ -39,20 +42,20 @@ export function Sidebar() {
                 to={route.path}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 group relative overflow-hidden',
+                    'flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all duration-250 group relative overflow-hidden cursor-pointer',
                     isActive 
-                      ? 'bg-gradient-to-r from-primary/10 to-accent/5 text-primary shadow-[inset_0_1px_1px_var(--glass-rim-from)] border border-border/50' 
-                      : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground border border-transparent'
+                      ? 'bg-primary/8 text-primary border border-primary/15 shadow-[inset_0_1px_1px_var(--glass-rim-from)]' 
+                      : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent'
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
                     {isActive && (
-                      <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-gradient-to-b from-primary to-accent rounded-r-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                      <div className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-linear-to-b from-amber-400 to-orange-500 rounded-r-full shadow-[0_0_12px_rgba(245,158,11,0.4)]" />
                     )}
-                    <Icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-primary" : "")} />
-                    <span className="tracking-wide">{route.name}</span>
+                    <Icon className={cn("w-[18px] h-[18px] transition-all duration-250", isActive ? "text-primary" : "group-hover:text-foreground")} />
+                    <span className="text-sm tracking-wide">{route.name}</span>
                   </>
                 )}
               </NavLink>
@@ -61,18 +64,18 @@ export function Sidebar() {
         </div>
 
         {/* Theme Toggle + Profile Menu */}
-        <div className="mt-auto border-t border-border pt-4 space-y-2">
+        <div className="mt-auto border-t border-border pt-4 space-y-1.5 relative z-10">
           <button
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground border border-transparent transition-all duration-300 cursor-pointer"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-muted-foreground hover:bg-secondary/60 hover:text-foreground border border-transparent transition-all duration-250 cursor-pointer"
           >
             {theme === 'dark' ? (
-              <Sun className="w-5 h-5 text-amber-400" />
+              <Sun className="w-[18px] h-[18px] text-amber-400" />
             ) : (
-              <Moon className="w-5 h-5 text-indigo-400" />
+              <Moon className="w-[18px] h-[18px] text-indigo-400" />
             )}
-            <span className="tracking-wide font-medium">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            <span className="tracking-wide text-sm font-medium">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
           <ProfileMenu />
         </div>

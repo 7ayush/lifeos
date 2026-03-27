@@ -217,7 +217,7 @@ export function WeeklyReviewPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-500 font-['Outfit'] tracking-tight">
+      <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-amber-400 via-orange-400 to-primary font-['Outfit'] tracking-tight">
         Weekly Review
       </h1>
 

@@ -9,11 +9,11 @@ import { MarkdownEditor } from '../components/MarkdownEditor';
 import { stripMarkdown } from '../utils/stripMarkdown';
 
 const MOOD_EMOJIS = [
-  { value: 1, emoji: '😔', label: 'Rough', color: 'from-rose-600 to-rose-400' },
-  { value: 2, emoji: '😕', label: 'Meh', color: 'from-orange-600 to-orange-400' },
-  { value: 3, emoji: '😐', label: 'Okay', color: 'from-amber-600 to-amber-400' },
-  { value: 4, emoji: '🙂', label: 'Good', color: 'from-emerald-600 to-emerald-400' },
-  { value: 5, emoji: '🤩', label: 'Amazing', color: 'from-violet-600 to-violet-400' },
+  { value: 1, emoji: '😔', label: 'Rough', color: 'from-rose-500 to-rose-400 dark:from-rose-600 dark:to-rose-400' },
+  { value: 2, emoji: '😕', label: 'Meh', color: 'from-orange-500 to-orange-400 dark:from-orange-600 dark:to-orange-400' },
+  { value: 3, emoji: '😐', label: 'Okay', color: 'from-amber-500 to-amber-400 dark:from-amber-600 dark:to-amber-400' },
+  { value: 4, emoji: '🙂', label: 'Good', color: 'from-emerald-500 to-emerald-400 dark:from-emerald-600 dark:to-emerald-400' },
+  { value: 5, emoji: '🤩', label: 'Amazing', color: 'from-violet-500 to-violet-400 dark:from-violet-600 dark:to-violet-400' },
 ];
 
 const SMART_PROMPTS = [
@@ -188,15 +188,15 @@ export function JournalPage() {
                   onClick={() => startEditing(entry)}
                   className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 border relative overflow-hidden group ${
                     isActive 
-                      ? 'bg-fuchsia-500/10 border-fuchsia-500/30' 
+                      ? 'bg-fuchsia-50 dark:bg-fuchsia-500/10 border-fuchsia-200 dark:border-fuchsia-500/30' 
                       : 'bg-secondary/50 border-transparent hover:bg-secondary/50 hover:-translate-y-0.5'
                   }`}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-gradient-to-b from-fuchsia-400 to-transparent rounded-r-full shadow-[0_0_10px_rgba(217,70,239,0.5)]" />
+                    <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-linear-to-b from-fuchsia-400 to-transparent rounded-r-full shadow-[0_0_10px_rgba(217,70,239,0.5)]" />
                   )}
                   <div className="flex items-center justify-between mb-1">
-                    <p className={`font-bold text-sm ${isActive ? 'text-fuchsia-400' : 'text-foreground'}`}>
+                    <p className={`font-bold text-sm ${isActive ? 'text-fuchsia-600 dark:text-fuchsia-400' : 'text-foreground'}`}>
                       {format(dateObj, 'MMM d, yyyy')}
                     </p>
                     {moodEmoji && (
@@ -239,7 +239,7 @@ export function JournalPage() {
                 <button 
                   onClick={handleSave}
                   disabled={!currentContent.trim()}
-                  className="flex items-center gap-2 px-5 py-2 bg-fuchsia-500 hover:bg-fuchsia-400 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(217,70,239,0.3)]"
+                  className="flex items-center gap-2 px-5 py-2 bg-fuchsia-900 border border-fuchsia-900 text-fuchsia-50 hover:bg-fuchsia-800 dark:bg-fuchsia-500 disabled:opacity-50 dark:hover:bg-fuchsia-400 dark:text-white dark:border-transparent rounded-xl font-bold transition-all shadow-md dark:shadow-[0_0_15px_rgba(217,70,239,0.3)]"
                 >
                   <Save className="w-4 h-4" />
                   <span className="hidden sm:inline">Save Entry</span>
@@ -257,7 +257,7 @@ export function JournalPage() {
                     onClick={() => setCurrentMood(currentMood === mood.value ? undefined : mood.value)}
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all duration-200 border ${
                       currentMood === mood.value
-                        ? `bg-gradient-to-br ${mood.color} border-border scale-110 shadow-lg`
+                        ? `bg-linear-to-br ${mood.color} border-border scale-110 shadow-lg text-white`
                         : 'bg-secondary/50 border-transparent hover:bg-secondary/50 hover:scale-105'
                     }`}
                     title={mood.label}
@@ -282,7 +282,7 @@ export function JournalPage() {
                 }}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all border ${
                   showPrompts 
-                    ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' 
+                    ? 'bg-violet-100 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/30 text-violet-950 dark:text-violet-400' 
                     : 'bg-secondary/50 border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
@@ -296,7 +296,7 @@ export function JournalPage() {
                     <button
                       key={i}
                       onClick={() => applyPrompt(prompt)}
-                      className="px-3 py-2 rounded-xl bg-secondary/50 hover:bg-violet-500/10 text-muted-foreground hover:text-violet-300 text-sm font-medium border border-border hover:border-violet-500/20 transition-all"
+                      className="px-3 py-2 rounded-xl bg-secondary/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 text-muted-foreground hover:text-violet-600 dark:hover:text-violet-300 text-sm font-medium border border-border hover:border-violet-200 dark:hover:border-violet-500/20 transition-all"
                     >
                       {prompt}
                     </button>
@@ -339,7 +339,7 @@ export function JournalPage() {
         {isComposing && editingId && (
           <button
             onClick={() => handleDelete(editingId)}
-            className="absolute bottom-6 right-6 lg:bottom-8 lg:right-8 w-12 h-12 rounded-full bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white flex items-center justify-center transition-all group border border-rose-500/20"
+            className="absolute z-50 bottom-6 right-6 lg:bottom-8 lg:right-8 w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-900 dark:hover:bg-rose-500 text-rose-950 dark:text-rose-400 hover:text-rose-50 dark:hover:text-white flex items-center justify-center transition-all group border border-rose-200 dark:border-rose-500/20 shadow-lg"
             title="Delete Entry"
           >
             <Trash2 className="w-5 h-5" />

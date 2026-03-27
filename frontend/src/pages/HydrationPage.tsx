@@ -175,7 +175,7 @@ export function HydrationPage() {
               />
               <button
                 onClick={handleGoalSave}
-                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-bold text-sm transition-all"
+                className="px-4 py-2 bg-indigo-900 border-indigo-900 text-indigo-50 hover:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white border dark:border-transparent rounded-xl font-bold text-sm transition-all"
               >
                 Save
               </button>
@@ -207,7 +207,7 @@ export function HydrationPage() {
             Daily Progress — {selectedDate === today ? 'Today' : format(new Date(selectedDate + 'T00:00:00'), 'MMM d, yyyy')}
           </h2>
           {goalReached && (
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-950 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-500/20">
               <Trophy className="w-3.5 h-3.5" />
               Goal Reached!
             </div>
@@ -238,7 +238,7 @@ export function HydrationPage() {
             <button
               key={amount}
               onClick={() => handleAddEntry(amount)}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl font-bold text-sm transition-all border border-indigo-500/20 hover:border-indigo-500/40 active:scale-95"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-950 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 dark:text-indigo-400 rounded-xl font-bold text-sm transition-all border border-indigo-200 dark:border-indigo-500/20 hover:border-indigo-300 dark:hover:border-indigo-500/40 active:scale-95"
             >
               <Plus className="w-4 h-4" />
               {amount} ml
@@ -260,7 +260,7 @@ export function HydrationPage() {
           />
           <button
             onClick={handleCustomAdd}
-            className="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-bold text-sm transition-all active:scale-95"
+            className="px-4 py-2.5 bg-indigo-900 border-indigo-900 text-indigo-50 hover:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white border dark:border-transparent rounded-xl font-bold text-sm transition-all active:scale-95"
           >
             Add
           </button>

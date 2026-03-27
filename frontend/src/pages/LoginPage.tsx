@@ -73,33 +73,34 @@ export function LoginPage() {
   }, [isAuthenticated, navigate, handleCredentialResponse]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden font-['Inter']">
-      {/* Ambient background effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent" />
-      <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[120px]" />
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden font-['Jost'] noise-texture">
+      {/* Cinematic ambient background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-primary/6 via-transparent to-transparent" />
+      <div className="ambient-orb w-[700px] h-[700px] bg-primary/4 top-[-15%] left-[-10%]" />
+      <div className="ambient-orb w-[500px] h-[500px] bg-accent/3 bottom-[-10%] right-[-10%]" style={{ animationDelay: '-10s' }} />
+      <div className="ambient-orb w-[300px] h-[300px] bg-primary/3 top-[60%] left-[60%]" style={{ animationDelay: '-5s' }} />
 
       {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="bg-secondary/50 backdrop-blur-2xl border border-border rounded-3xl p-10 shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 w-full max-w-md mx-4 animate-fade-up">
+        <div className="glass-panel rounded-3xl p-10 shadow-[0_0_80px_rgba(0,0,0,0.4)]">
           {/* Brand */}
           <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(52,211,153,0.3)] mb-5">
-              <span className="text-3xl font-bold text-white font-['Outfit']">L</span>
+            <div className="w-16 h-16 bg-linear-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.25)] mb-5">
+              <span className="text-3xl font-bold text-white font-['Outfit'] italic">L</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground font-['Outfit'] tracking-tight">
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-linear-to-r from-foreground to-muted-foreground font-['Outfit'] tracking-tight">
               Life OS
             </h1>
-            <p className="text-muted-foreground text-sm mt-2 font-medium">
-              Your personal management system
+            <p className="text-muted-foreground text-sm mt-2 font-medium tracking-wide">
+              Your personal command center
             </p>
           </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-            <span className="text-muted-foreground text-xs uppercase tracking-widest font-medium">Sign in to continue</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <div className="flex-1 h-px bg-linear-to-r from-transparent via-border to-transparent" />
+            <span className="text-muted-foreground text-xs uppercase tracking-[0.2em] font-medium">Sign in to continue</span>
+            <div className="flex-1 h-px bg-linear-to-r from-transparent via-border to-transparent" />
           </div>
 
           {/* Google Sign-In Button */}
@@ -108,7 +109,7 @@ export function LoginPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-muted-foreground text-xs text-center mt-10 leading-relaxed">
+          <p className="text-muted-foreground text-xs text-center mt-10 leading-relaxed opacity-60">
             By signing in, you agree to allow Life OS to manage your personal data securely.
           </p>
         </div>

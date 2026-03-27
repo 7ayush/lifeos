@@ -161,10 +161,10 @@ export function QuickCaptureButton() {
       {/* FAB Button */}
       <button
         onClick={() => { setIsOpen(!isOpen); setActiveCapture(null); setTitle(''); }}
-        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-90 ${
+        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-90 cursor-pointer ${
           isOpen
             ? 'bg-secondary/50 border border-border rotate-45'
-            : 'bg-linear-to-br from-emerald-500 to-cyan-500 border border-emerald-400/30 shadow-[0_0_40px_rgba(52,211,153,0.3)] hover:shadow-[0_0_50px_rgba(52,211,153,0.5)] hover:scale-105'
+            : 'bg-linear-to-br from-amber-500 to-orange-500 border border-amber-400/30 shadow-[0_0_40px_rgba(245,158,11,0.3)] hover:shadow-[0_0_50px_rgba(245,158,11,0.5)] hover:scale-105'
         }`}
       >
         {isOpen ? (
