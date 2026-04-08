@@ -10,3 +10,4 @@ hypothesis
 python-jose[cryptography]
 google-auth
 google-auth-httplib2
+slowapi

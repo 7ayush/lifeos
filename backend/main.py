@@ -1,12 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from .database import engine
 from . import models
+from .rate_limit import limiter, rate_limit_exceeded_handler
 from .routers import users, goals, habits, tasks, journal, analytics, auth, dashboard, notes, sync, notifications, tags, weekly_review, export, water
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Life OS Core API", version="0.1.0")
+
+# ---------------------------------------------------------------------------
+# Rate Limiting  (slowapi)
+# ---------------------------------------------------------------------------
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # Register Routers
 app.include_router(auth.router)
