@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 
 from .. import crud, models, schemas
 from ..database import get_db
+from ..auth import get_current_user
 from ..progress_engine import batch_compute_progress
 
 router = APIRouter(
@@ -12,8 +13,19 @@ router = APIRouter(
     tags=["dashboard"],
 )
 
+
+def _verify_owner(current_user: models.User, user_id: int):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+
 @router.get("/stats")
-def get_dashboard_stats(user_id: int, db: Session = Depends(get_db)):
+def get_dashboard_stats(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    _verify_owner(current_user, user_id)
     user = crud.get_user(db, user_id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -82,7 +94,12 @@ def get_dashboard_stats(user_id: int, db: Session = Depends(get_db)):
     }
 
 @router.get("/today")
-def get_dashboard_today(user_id: int, db: Session = Depends(get_db)):
+def get_dashboard_today(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    _verify_owner(current_user, user_id)
     today = datetime.date.today()
     
     # Fetch Habits that have started

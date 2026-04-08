@@ -4,9 +4,15 @@ from typing import Optional
 
 from .. import crud, models, schemas
 from ..database import get_db
+from ..auth import get_current_user
 from ..week_summary_engine import build_weekly_review, get_current_week_identifier, get_week_boundaries
 
 router = APIRouter(tags=["weekly-review"])
+
+
+def _verify_owner(current_user: models.User, user_id: int):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
 
 
 def _validate_week(week: str):
@@ -28,7 +34,9 @@ def get_weekly_review(
     user_id: int,
     week: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
+    _verify_owner(current_user, user_id)
     if week is None:
         week = get_current_week_identifier()
     try:
@@ -50,7 +58,9 @@ def upsert_reflection(
     week: str,
     body: schemas.WeeklyReflectionIn,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
+    _verify_owner(current_user, user_id)
     _validate_week(week)
     reflection = crud.upsert_weekly_reflection(db, user_id, week, body.content)
     return reflection
@@ -65,7 +75,9 @@ def add_focus_task(
     week: str,
     body: schemas.FocusTaskIn,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
+    _verify_owner(current_user, user_id)
     _validate_week(week)
 
     # Check task exists
@@ -119,7 +131,9 @@ def remove_focus_task(
     week: str,
     task_id: int,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
+    _verify_owner(current_user, user_id)
     _validate_week(week)
 
     # Check focus task exists before removing
@@ -151,7 +165,9 @@ def create_and_add_focus_task(
     week: str,
     task_data: schemas.TaskCreate,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
+    _verify_owner(current_user, user_id)
     _validate_week(week)
 
     # Check focus task limit

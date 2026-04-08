@@ -1,7 +1,12 @@
 from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Text, UniqueConstraint, Table
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from .database import Base
+
+
+def _utc_now():
+    """Timezone-aware UTC timestamp, compatible with SQLAlchemy defaults."""
+    return datetime.now(timezone.utc)
 
 class User(Base):
     __tablename__ = "users"
@@ -11,7 +16,7 @@ class User(Base):
     password_hash = Column(String, nullable=True)
     google_id = Column(String, unique=True, nullable=True, index=True)
     avatar_url = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
     theme_preference = Column(String, default="dark")
 
     goals = relationship("Goal", back_populates="user")
@@ -37,7 +42,7 @@ class Goal(Base):
     category = Column(String, default="Project")  # P.A.R.A.: Project, Area, Resource, Archive
     priority = Column(String, default="Medium")  # High, Medium, Low
     target_date = Column(Date, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
 
     user = relationship("User", back_populates="goals")
     habits = relationship("Habit", back_populates="goal")
@@ -96,7 +101,7 @@ class Task(Base):
     target_date = Column(Date, nullable=True)
     priority = Column(String, default="None")  # High, Medium, Low, None
     sort_order = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
 
     # Recurrence fields (used when task_type = "recurring" and parent_task_id is null, i.e. template)
     frequency_type = Column(String, nullable=True)  # daily, weekly, monthly, annually, custom
@@ -130,7 +135,7 @@ class JournalEntry(Base):
     entry_date = Column(Date, nullable=False)
     content = Column(Text, nullable=False)
     mood = Column(Integer, nullable=True)  # 1-5 scale
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
 
     user = relationship("User", back_populates="journal_entries")
     tags = relationship("JournalTag", back_populates="journal_entry")
@@ -151,8 +156,8 @@ class Note(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=True, default="")
     folder = Column(String, default="Resource")  # Project, Area, Resource, Archive
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 
     user = relationship("User", back_populates="notes")
 
@@ -165,7 +170,7 @@ class Notification(Base):
     message = Column(String, nullable=False)
     is_read = Column(Integer, default=0)  # 0 = unread, 1 = read (SQLite boolean)
     dismissed = Column(Integer, default=0)  # 0 = active, 1 = dismissed
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
 
     user = relationship("User", back_populates="notifications")
     task = relationship("Task", back_populates="notifications")
@@ -199,7 +204,7 @@ class GoalMilestone(Base):
     id = Column(Integer, primary_key=True, index=True)
     goal_id = Column(Integer, ForeignKey("goals.id"), nullable=False)
     threshold = Column(Integer, nullable=False)
-    achieved_at = Column(DateTime, default=datetime.utcnow)
+    achieved_at = Column(DateTime, default=_utc_now)
     __table_args__ = (UniqueConstraint("goal_id", "threshold", name="uq_milestone_goal_threshold"),)
 
     goal = relationship("Goal", back_populates="milestones")
@@ -229,8 +234,8 @@ class WeeklyReflection(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     week_identifier = Column(String, nullable=False)
     content = Column(Text, nullable=False, default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 
     __table_args__ = (
         UniqueConstraint("user_id", "week_identifier", name="uq_reflection_user_week"),
@@ -245,7 +250,7 @@ class FocusTask(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
     week_identifier = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utc_now)
 
     __table_args__ = (
         UniqueConstraint("user_id", "task_id", "week_identifier", name="uq_focus_user_task_week"),
@@ -260,7 +265,7 @@ class WaterEntry(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     amount_ml = Column(Integer, nullable=False)  # 1–5000
-    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
+    timestamp = Column(DateTime, default=_utc_now, nullable=False)
 
     user = relationship("User", back_populates="water_entries")
 
@@ -270,7 +275,7 @@ class WaterGoal(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     amount_ml = Column(Integer, nullable=False, default=2000)  # 500–10000
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 
     user = relationship("User", back_populates="water_goal")
 

@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import date, timedelta
 
 from .. import models, schemas
 from ..database import get_db
+from ..auth import get_current_user
 
 router = APIRouter(
     prefix="/analytics",
@@ -12,9 +13,13 @@ router = APIRouter(
 )
 
 @router.get("/leaderboard")
-def get_leaderboard(db: Session = Depends(get_db)):
+def get_leaderboard(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     """
     Computes and returns the 'Contest View' leaderboard.
+    Requires authentication.
     """
     users = db.query(models.User).all()
     leaderboard = []
@@ -80,8 +85,15 @@ def get_leaderboard(db: Session = Depends(get_db)):
 
 
 @router.get("/users/{user_id}/personal")
-def get_personal_stats(user_id: int, db: Session = Depends(get_db)):
+def get_personal_stats(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     """Personal analytics with breakdown scores for radar chart."""
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     # Goals
     goals = db.query(models.Goal).filter(models.Goal.user_id == user_id).all()
     total_goals = len(goals)
@@ -145,8 +157,15 @@ def get_personal_stats(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/users/{user_id}/year-in-pixels")
-def get_year_in_pixels(user_id: int, db: Session = Depends(get_db)):
+def get_year_in_pixels(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     """Returns 365-day data for mood and habit completion."""
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     today = date.today()
     start_date = today - timedelta(days=364)
 
@@ -194,4 +213,3 @@ def get_year_in_pixels(user_id: int, db: Session = Depends(get_db)):
         })
 
     return {"pixels": pixels, "start_date": str(start_date), "end_date": str(today)}
-

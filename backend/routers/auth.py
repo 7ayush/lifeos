@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
 from ..auth import verify_google_token, create_access_token, get_current_user
+from ..rate_limit import limiter
 
 router = APIRouter(
     prefix="/auth",
@@ -12,9 +13,10 @@ router = APIRouter(
 
 
 @router.post("/google", response_model=schemas.TokenResponse)
-def google_login(request: schemas.GoogleAuthRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def google_login(request: Request, body: schemas.GoogleAuthRequest, db: Session = Depends(get_db)):
     """Authenticate with Google OAuth. Creates a new user if first login."""
-    google_info = verify_google_token(request.credential)
+    google_info = verify_google_token(body.credential)
 
     google_id = google_info["sub"]
     email = google_info.get("email", "")

@@ -1,6 +1,7 @@
 import os
+import sys
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 # Load .env from the backend directory
@@ -17,10 +18,20 @@ from google.auth.transport import requests as google_requests
 from .database import get_db
 from . import models
 
-# JWT Configuration
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "lifeos-dev-secret-change-in-production")
+# JWT Configuration — secret MUST be set via environment variable
+_secret = os.environ.get("JWT_SECRET_KEY", "")
+if not _secret:
+    # Allow a dev fallback ONLY when running tests
+    if "pytest" in sys.modules:
+        _secret = "test-only-secret-do-not-use-in-prod"
+    else:
+        raise RuntimeError(
+            "JWT_SECRET_KEY environment variable is required. "
+            "Set it in your .env file or environment before starting the server."
+        )
+SECRET_KEY: str = _secret
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 30
+ACCESS_TOKEN_EXPIRE_DAYS = 7  # reduced from 30 for tighter security
 
 # Google OAuth
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
@@ -30,12 +41,14 @@ security = HTTPBearer()
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-BYPASS_GOOGLE_AUTH = os.environ.get("BYPASS_GOOGLE_AUTH", "false").lower() == "true"
+_bypass_env = os.environ.get("BYPASS_GOOGLE_AUTH", "false").lower() == "true"
+# Only allow auth bypass when running inside the test suite
+BYPASS_GOOGLE_AUTH = _bypass_env and "pytest" in sys.modules
 
 
 def verify_google_token(token: str) -> dict:

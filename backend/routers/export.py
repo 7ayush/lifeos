@@ -9,6 +9,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..auth import get_current_user
+from .. import models
 from ..export_engine import (
     EXPORTABLE_TYPES,
     query_export_data,
@@ -20,6 +22,11 @@ from ..export_engine import (
 router = APIRouter(prefix="/users/{user_id}/export", tags=["export"])
 
 
+def _verify_owner(current_user: models.User, user_id: int):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+
 @router.get("/")
 def export_data(
     user_id: int,
@@ -28,7 +35,10 @@ def export_data(
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
+    _verify_owner(current_user, user_id)
+
     # Validate format
     if format not in ("json", "csv"):
         raise HTTPException(
