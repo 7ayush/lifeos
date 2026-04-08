@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: lifeos-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - db-data:/app/data
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: "sqlite:///./data/lifeos.db"
+      BYPASS_GOOGLE_AUTH: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:8001"
+    container_name: lifeos-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:

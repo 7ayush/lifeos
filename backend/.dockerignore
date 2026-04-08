@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+.pytest_cache/
+.hypothesis/
+*.db
+*.sqlite3
+*.db.bak
+.env
+tests/
+test.db
+lifeos.db.bak
