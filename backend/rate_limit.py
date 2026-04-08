@@ -1,18 +1,13 @@
-"""
-API Rate Limiting configuration using slowapi.
-
-Provides:
-- A global default rate limit applied to all endpoints.
-- Stricter limits for sensitive routes (auth, login).
-- A reusable dependency for per-route overrides.
-- Key function that uses user ID for authenticated requests, IP for anonymous.
-"""
+import os
 
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+
+# Configurable via env — use "redis://host:6379" in production
+_storage_uri = os.environ.get("RATE_LIMIT_STORAGE_URI", "memory://")
 
 
 def _get_rate_limit_key(request: Request) -> str:
@@ -30,7 +25,7 @@ def _get_rate_limit_key(request: Request) -> str:
 limiter = Limiter(
     key_func=_get_rate_limit_key,
     default_limits=["30/minute"],           # default for normal use
-    storage_uri="memory://",                # in-process; swap for redis:// in prod
+    storage_uri=_storage_uri,
 )
 
 

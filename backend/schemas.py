@@ -10,7 +10,7 @@ PriorityLevel = Literal["High", "Medium", "Low", "None"]
 # ============================
 
 class GoogleAuthRequest(BaseModel):
-    credential: str  # Google ID token
+    credential: str = Field(..., max_length=4096)  # Google ID token
 
 
 class UserProfile(BaseModel):
@@ -56,8 +56,8 @@ class User(UserBase):
 # ============================
 
 class GoalBase(BaseModel):
-    title: str
-    description: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=2000)
     category: Optional[str] = "Project"  # Project, Area, Resource, Archive
     priority: Optional[str] = "Medium"  # High, Medium, Low
     target_date: Optional[date] = None
@@ -66,8 +66,8 @@ class GoalCreate(GoalBase):
     pass
 
 class GoalUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: Optional[str] = Field(default=None, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=2000)
     status: Optional[str] = None
     category: Optional[str] = None
     priority: Optional[str] = None
@@ -122,7 +122,7 @@ class HabitLog(HabitLogBase):
 # ============================
 
 class HabitBase(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1, max_length=200)
     target_x: Optional[int] = None
     target_y_days: Optional[int] = None
     start_date: date
@@ -138,7 +138,7 @@ class HabitCreate(HabitBase):
     goal_id: Optional[int] = None
 
 class HabitUpdate(BaseModel):
-    title: Optional[str] = None
+    title: Optional[str] = Field(default=None, max_length=200)
     target_x: Optional[int] = None
     target_y_days: Optional[int] = None
     start_date: Optional[date] = None
@@ -237,8 +237,8 @@ class TagOut(TagBase):
 # ============================
 
 class TaskBase(BaseModel):
-    title: str
-    description: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=5000)
     target_date: Optional[date] = None
     goal_id: Optional[int] = None
     habit_id: Optional[int] = None
@@ -258,8 +258,8 @@ class TaskCreate(TaskBase):
     tag_ids: Optional[List[int]] = None
 
 class TaskUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: Optional[str] = Field(default=None, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=5000)
     status: Optional[str] = None
     target_date: Optional[date] = None
     goal_id: Optional[int] = None
@@ -278,7 +278,7 @@ class TaskUpdate(BaseModel):
     tag_ids: Optional[List[int]] = None
 
 class SubTaskBase(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1, max_length=200)
     is_complete: Optional[int] = 0
 
 class SubTaskCreate(SubTaskBase):
@@ -325,7 +325,7 @@ class ReorderRequest(BaseModel):
 
 class JournalEntryBase(BaseModel):
     entry_date: date
-    content: str
+    content: str = Field(..., min_length=1, max_length=50000)
     mood: Optional[int] = None  # 1-5 scale
 
 class JournalEntryCreate(JournalEntryBase):
@@ -343,16 +343,16 @@ class JournalEntry(JournalEntryBase):
 # ============================
 
 class NoteBase(BaseModel):
-    title: str
-    content: Optional[str] = ""
-    folder: Optional[str] = "Resource"  # Project, Area, Resource, Archive
+    title: str = Field(..., min_length=1, max_length=200)
+    content: Optional[str] = Field(default="", max_length=100000)
+    folder: Optional[str] = Field(default="Resource", max_length=50)  # Project, Area, Resource, Archive
 
 class NoteCreate(NoteBase):
     pass
 
 class NoteUpdate(BaseModel):
     title: Optional[str] = None
-    content: Optional[str] = None
+    content: Optional[str] = Field(default=None, max_length=100000)
     folder: Optional[str] = None
 
 class Note(NoteBase):
@@ -407,7 +407,7 @@ class ReminderConfigUpdate(BaseModel):
 # ============================
 
 class WeeklyReflectionIn(BaseModel):
-    content: str
+    content: str = Field(..., min_length=1, max_length=10000)
 
 class WeeklyReflectionOut(BaseModel):
     id: int
