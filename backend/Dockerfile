@@ -14,8 +14,11 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 # Copy application source
 COPY . ./backend/
 
-# Create data directory for SQLite volume mount
-RUN mkdir -p /app/data
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash appuser && \
+    mkdir -p /app/data && \
+    chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 8001
 
