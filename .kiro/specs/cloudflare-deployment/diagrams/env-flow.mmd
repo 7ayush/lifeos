@@ -1,0 +1,24 @@
+graph LR
+    subgraph "Build Time (Frontend)"
+        VITE_API_URL["VITE_API_URL"]
+        VITE_GOOGLE_CLIENT_ID["VITE_GOOGLE_CLIENT_ID"]
+    end
+
+    subgraph "Runtime (Backend)"
+        JWT_SECRET["JWT_SECRET_KEY"]
+        GOOGLE_CID["GOOGLE_CLIENT_ID"]
+        DB_URL["DATABASE_URL"]
+        CORS["CORS_ORIGINS"]
+    end
+
+    subgraph "Runtime (Tunnel)"
+        TUNNEL_TOKEN["CLOUDFLARE_TUNNEL_TOKEN"]
+    end
+
+    VITE_API_URL -->|"Wrangler CLI or Pages settings"| CF_Pages_Build["Cloudflare Pages Build"]
+    VITE_GOOGLE_CLIENT_ID -->|"Wrangler CLI or Pages settings"| CF_Pages_Build
+    JWT_SECRET -->|"backend/.env"| Backend_Container["Backend Container"]
+    GOOGLE_CID -->|"backend/.env"| Backend_Container
+    DB_URL -->|"backend/.env"| Backend_Container
+    CORS -->|"docker-compose env"| Backend_Container
+    TUNNEL_TOKEN -->|"root .env"| Cloudflared_Container["Cloudflared Container"]

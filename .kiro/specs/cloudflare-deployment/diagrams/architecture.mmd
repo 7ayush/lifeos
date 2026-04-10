@@ -1,0 +1,22 @@
+graph TB
+    subgraph "Cloudflare Edge"
+        CF_Pages["Cloudflare Pages<br/>(Frontend CDN)"]
+        CF_Edge["Cloudflare Edge<br/>(TLS Termination)"]
+    end
+
+    subgraph "User Browser"
+        Browser["Browser"]
+    end
+
+    subgraph "Local/Self-Hosted Machine"
+        subgraph "Docker Compose"
+            Backend["backend<br/>FastAPI :8001"]
+            Cloudflared["cloudflared<br/>Tunnel Daemon"]
+        end
+    end
+
+    Browser -->|"HTTPS"| CF_Pages
+    Browser -->|"HTTPS API calls<br/>with Bearer JWT"| CF_Edge
+    CF_Edge -->|"Secure Tunnel"| Cloudflared
+    Cloudflared -->|"HTTP :8001<br/>(Docker network)"| Backend
+    CF_Pages -.->|"VITE_API_URL<br/>(baked at build)"| Browser

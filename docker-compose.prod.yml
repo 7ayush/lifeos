@@ -1,0 +1,16 @@
+services:
+  backend:
+    environment:
+      BYPASS_GOOGLE_AUTH: "false"
+      CORS_ORIGINS: ${CORS_ORIGINS}
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: lifeos-tunnel
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

@@ -1,18 +1,10 @@
 services:
-  # ---------------------------------------------------------------
-  # Backend — FastAPI + Supabase PostgreSQL
-  # ---------------------------------------------------------------
   backend:
     build:
       context: ./backend
     container_name: lifeos-backend
-    expose:
-      - "8001"
     env_file:
       - ./backend/.env
-    environment:
-      BYPASS_GOOGLE_AUTH: "false"
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/"]
       interval: 10s
@@ -21,23 +13,8 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  # ---------------------------------------------------------------
-  # Cloudflare Tunnel — Exposes backend to the internet via HTTPS
-  # No open ports needed. Cloudflare handles TLS termination.
-  #
-  # Setup:
-  #   1. Go to Cloudflare Zero Trust → Networks → Tunnels
-  #   2. Create a tunnel, copy the token
-  #   3. Set CLOUDFLARE_TUNNEL_TOKEN in .env
-  #   4. In tunnel config, route your domain to http://backend:8001
-  # ---------------------------------------------------------------
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: lifeos-tunnel
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-    depends_on:
-      backend:
-        condition: service_healthy
+  frontend:
+    build:
+      context: ./frontend
+    container_name: lifeos-frontend
     restart: unless-stopped

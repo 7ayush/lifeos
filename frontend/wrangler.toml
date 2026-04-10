@@ -1,0 +1,6 @@
+name = "lifeos"                          # Cloudflare Pages project name
+pages_build_output_dir = "./dist"        # Vite build output
+compatibility_date = "2025-06-01"        # Cloudflare Workers compatibility date
+
+[build]
+command = "npm run build"

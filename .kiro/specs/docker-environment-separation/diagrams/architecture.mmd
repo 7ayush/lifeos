@@ -1,0 +1,31 @@
+graph TD
+    subgraph "File Structure"
+        BASE["docker-compose.yml<br/>(base: backend + frontend)"]
+        LOCAL["docker-compose.local.yml<br/>(ports, auth bypass)"]
+        PROD["docker-compose.prod.yml<br/>(tunnel, no ports)"]
+        ENVL[".env.local"]
+        ENVP[".env.prod"]
+    end
+
+    subgraph "Local Environment"
+        LF["Frontend :3000<br/>(Nginx + SPA)"]
+        LB["Backend :8001<br/>(FastAPI)"]
+        LF -->|"/api → backend:8001"| LB
+    end
+
+    subgraph "Production Environment"
+        PF["Frontend<br/>(Nginx, no host port)"]
+        PB["Backend<br/>(FastAPI, no host port)"]
+        PT["cloudflared<br/>(Tunnel)"]
+        PT -->|"http://backend:8001"| PB
+    end
+
+    BASE --> LOCAL
+    BASE --> PROD
+    LOCAL --> LF
+    LOCAL --> LB
+    PROD --> PF
+    PROD --> PB
+    PROD --> PT
+    ENVL -.-> LOCAL
+    ENVP -.-> PROD
