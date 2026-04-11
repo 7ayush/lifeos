@@ -5,7 +5,7 @@ import { NotificationCenter } from './NotificationCenter';
 
 export function Layout() {
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden font-['Jost'] noise-texture">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden font-['Jost']">
       <Sidebar />
       <main className="flex-1 overflow-y-auto bg-background relative">
         <div className="relative z-10 p-8">
