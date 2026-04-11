@@ -149,16 +149,6 @@ html.theme-transitioning {
 /* ===================== */
 /* Custom Keyframes      */
 /* ===================== */
-@keyframes float {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-12px) scale(1.02); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-}
-
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -249,17 +239,6 @@ html.theme-transitioning {
   }
 
   /* ===================== */
-  /* Ambient Orbs          */
-  /* ===================== */
-  .ambient-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-    animation: float 20s ease-in-out infinite;
-  }
-
-  /* ===================== */
   /* Card Hover Glow       */
   /* ===================== */
   .card-glow {
@@ -307,9 +286,6 @@ html.theme-transitioning {
   .noise-texture::after {
     animation: none !important;
     display: none;
-  }
-  .ambient-orb {
-    animation: none !important;
   }
   .card-glow:hover {
     transform: none !important;

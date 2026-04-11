@@ -74,11 +74,8 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden font-['Jost'] noise-texture">
-      {/* Cinematic ambient background */}
+      {/* Background gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-primary/6 via-transparent to-transparent" />
-      <div className="ambient-orb w-[700px] h-[700px] bg-primary/4 top-[-15%] left-[-10%]" />
-      <div className="ambient-orb w-[500px] h-[500px] bg-accent/3 bottom-[-10%] right-[-10%]" style={{ animationDelay: '-10s' }} />
-      <div className="ambient-orb w-[300px] h-[300px] bg-primary/3 top-[60%] left-[60%]" style={{ animationDelay: '-5s' }} />
 
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md mx-4 animate-fade-up">
