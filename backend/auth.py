@@ -54,6 +54,9 @@ BYPASS_GOOGLE_AUTH = _bypass_env and "pytest" in sys.modules
 def verify_google_token(token: str) -> dict:
     """Verify a Google OAuth ID token and return user info.
     When BYPASS_GOOGLE_AUTH is true, returns a dev user without contacting Google."""
+    import logging
+    logger = logging.getLogger("lifeos")
+
     if BYPASS_GOOGLE_AUTH:
         return {
             "sub": "dev-user-001",
@@ -67,15 +70,18 @@ def verify_google_token(token: str) -> dict:
             token,
             google_requests.Request(),
             GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=10,
         )
         if idinfo["iss"] not in ("accounts.google.com", "https://accounts.google.com"):
             raise ValueError("Wrong issuer.")
         return idinfo
     except ValueError as e:
+        logger.error("Google token verification failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid Google token: {str(e)}",
         )
+
 
 
 def get_current_user(

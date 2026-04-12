@@ -100,3 +100,24 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Life OS API"}
+
+@app.get("/health")
+def health_check():
+    """Verify the server is up and the database is reachable."""
+    try:
+        from sqlalchemy import text
+        # Perform a simple query to check DB connectivity
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "environment": os.environ.get("ENV", "production")
+        }
+    except Exception as e:
+        logger.error("Health check failed: %s", str(e))
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "detail": str(e)
+        }, 500
