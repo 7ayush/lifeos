@@ -5,6 +5,7 @@ from typing import List
 from .. import crud, models, schemas
 from ..database import get_db
 from ..auth import get_current_user
+from ..ownership import require_ownership
 from ..progress_engine import recalculate_goal_progress
 
 router = APIRouter(
@@ -128,17 +129,14 @@ def toggle_subtask(
     user_id: int,
     task_id: int,
     subtask_id: int,
+    subtask: models.SubTask = Depends(require_ownership("subtask", error_detail="SubTask not found")),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
     _verify_owner(current_user, user_id)
-    # Verify task belongs to user before toggling its subtask
-    task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user_id == user_id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    subtask = crud.toggle_subtask(db, subtask_id=subtask_id)
-    if not subtask:
-        raise HTTPException(status_code=404, detail="SubTask not found")
+    subtask.is_complete = 0 if subtask.is_complete else 1
+    db.commit()
+    db.refresh(subtask)
     return subtask
 
 @router.delete("/{task_id}/subtasks/{subtask_id}")
@@ -146,15 +144,11 @@ def delete_subtask(
     user_id: int,
     task_id: int,
     subtask_id: int,
+    subtask: models.SubTask = Depends(require_ownership("subtask", error_detail="SubTask not found")),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
     _verify_owner(current_user, user_id)
-    # Verify task belongs to user before deleting its subtask
-    task = db.query(models.Task).filter(models.Task.id == task_id, models.Task.user_id == user_id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    success = crud.delete_subtask(db, subtask_id=subtask_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="SubTask not found")
+    db.delete(subtask)
+    db.commit()
     return {"status": "success"}

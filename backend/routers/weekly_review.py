@@ -85,6 +85,10 @@ def add_focus_task(
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
+    # Verify task belongs to the authenticated user (IDOR protection)
+    if task.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     # Check focus task limit
     count = crud.count_focus_tasks(db, user_id, week)
     if count >= 7:

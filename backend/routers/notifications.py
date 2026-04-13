@@ -5,6 +5,7 @@ from typing import List
 from ..database import get_db
 from .. import crud, models, schemas
 from ..auth import get_current_user
+from ..ownership import require_ownership
 
 router = APIRouter(
     prefix="/users/{user_id}",
@@ -59,13 +60,13 @@ def mark_all_notifications_read(
 def mark_notification_read(
     user_id: int,
     notification_id: int,
+    notification: models.Notification = Depends(require_ownership("notification")),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    _verify_owner(current_user, user_id)
-    notification = crud.mark_notification_read(db, notification_id)
-    if not notification:
-        raise HTTPException(status_code=404, detail="Notification not found")
+    notification.is_read = 1
+    db.commit()
+    db.refresh(notification)
     return notification
 
 
@@ -73,13 +74,13 @@ def mark_notification_read(
 def dismiss_notification(
     user_id: int,
     notification_id: int,
+    notification: models.Notification = Depends(require_ownership("notification")),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    _verify_owner(current_user, user_id)
-    notification = crud.dismiss_notification(db, notification_id)
-    if not notification:
-        raise HTTPException(status_code=404, detail="Notification not found")
+    notification.dismissed = 1
+    db.commit()
+    db.refresh(notification)
     return notification
 
 

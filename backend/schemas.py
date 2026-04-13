@@ -495,11 +495,24 @@ class WeeklyReviewResponse(BaseModel):
 
 
 # ============================
+# PROFILE VISIBILITY SCHEMAS
+# ============================
+
+class ProfileVisibilityUpdate(BaseModel):
+    profile_visibility: Literal["public", "private"]
+
+class ProfileVisibilityOut(BaseModel):
+    profile_visibility: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ============================
 # USER SETTINGS SCHEMAS
 # ============================
 
 class UserSettingsOut(BaseModel):
     theme_preference: str
+    profile_visibility: str
     model_config = ConfigDict(from_attributes=True)
 
 class UserSettingsUpdate(BaseModel):

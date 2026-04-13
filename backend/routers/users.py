@@ -39,6 +39,21 @@ def update_user_settings(
     return current_user
 
 
+@router.put("/{user_id}/settings/profile-visibility", response_model=schemas.ProfileVisibilityOut)
+def update_profile_visibility(
+    user_id: int,
+    body: schemas.ProfileVisibilityUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    current_user.profile_visibility = body.profile_visibility
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
 @router.get("/{user_id}", response_model=schemas.User)
 def read_user(
     user_id: int,

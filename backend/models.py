@@ -18,6 +18,7 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=_utc_now)
     theme_preference = Column(String, default="dark")
+    profile_visibility = Column(String, default="public")
 
     goals = relationship("Goal", back_populates="user")
     habits = relationship("Habit", back_populates="user")
