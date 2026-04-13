@@ -225,27 +225,27 @@ function DiagramSVG() {
 /* ------------------------------------------------------------------ */
 function ValueDiagram() {
   return (
-    <div className="relative w-full h-full overflow-hidden select-none flex flex-col" aria-hidden="true">
+    <div className="relative w-full h-full overflow-hidden select-none" aria-hidden="true">
       {/* Ambient glows */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-accent/8 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-[40%] left-[45%] w-48 h-48 bg-amber-500/5 rounded-full blur-[60px] pointer-events-none" />
 
-      {/* Header — logo left-aligned, heading centered and pushed down */}
-      <div className="relative z-20 shrink-0 px-[5%]">
-        <div className="flex items-center gap-2.5 pt-5 mb-5">
-          <div className="w-8 h-8 bg-linear-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.25)]">
-            <span className="text-sm font-bold text-white font-['Outfit'] italic">L</span>
+      {/* Header — in flow on mobile to avoid overlap, overlaid on desktop */}
+      <div className="relative lg:absolute lg:top-0 lg:left-0 lg:right-0 z-20 px-[5%] pt-4 lg:pt-5">
+        <div className="flex items-center gap-2.5 mb-2 lg:mb-5">
+          <div className="w-7 h-7 lg:w-8 lg:h-8 bg-linear-to-br from-amber-400 to-orange-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+            <span className="text-xs lg:text-sm font-bold text-white font-['Outfit'] italic">L</span>
           </div>
-          <span className="text-lg font-bold text-foreground font-['Outfit'] tracking-tight">LifeOS</span>
+          <span className="text-base lg:text-lg font-bold text-foreground font-['Outfit'] tracking-tight">LifeOS</span>
         </div>
-        <h1 className="text-[2.6rem] xl:text-5xl font-bold text-foreground font-['Outfit'] tracking-tight leading-[1.05] text-center mt-10 pb-4">
+        <h1 className="text-2xl sm:text-3xl lg:text-[2.6rem] xl:text-5xl font-bold text-foreground font-['Outfit'] tracking-tight leading-[1.05] text-center lg:mt-6">
           Your Life, <span className="text-gradient">Organized.</span>
         </h1>
       </div>
 
-      {/* Diagram SVG fills remaining space */}
-      <div className="flex-1 min-h-0 relative z-10">
+      {/* Diagram SVG — fills remaining space on mobile, full area on desktop */}
+      <div className="relative lg:absolute lg:inset-0 w-full h-full min-h-[300px] z-10">
         <DiagramSVG />
       </div>
     </div>
@@ -315,7 +315,7 @@ export function LoginPage() {
 
       {/* ===== Left Panel — visible on all screens ===== */}
       {/* On mobile/tablet: stacked on top, fixed height. On desktop: side-by-side. */}
-      <div className="w-full h-[45vh] sm:h-[50vh] lg:h-full lg:w-1/2 xl:w-[55%] relative bg-background shrink-0">
+      <div className="w-full h-[55vh] sm:h-[50vh] lg:h-full lg:w-1/2 xl:w-[55%] relative bg-background shrink-0 overflow-hidden">
         <ValueDiagram />
       </div>
 
@@ -327,7 +327,7 @@ export function LoginPage() {
 
         {/* Card — absolutely centered */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="relative z-10 w-full max-w-[520px] mx-3 sm:mx-6 animate-fade-up">
+          <div className="relative z-10 w-full max-w-none lg:max-w-[520px] mx-0 lg:mx-6 px-3 sm:px-4 lg:px-0 animate-fade-up">
           <div
             className="rounded-2xl sm:rounded-3xl p-6 sm:p-10 xl:p-14 relative overflow-hidden"
             style={{
