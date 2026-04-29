@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List
 
 from .. import crud, models, schemas
-from ..database import get_db
+from ..database import SessionLocal, get_db
 from ..auth import get_current_user
 from ..ownership import require_ownership
 from ..progress_engine import recalculate_goal_progress
@@ -63,11 +63,21 @@ def reorder_tasks_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+def _recalc_progress_in_bg(goal_id: int) -> None:
+    """Run goal progress recalc on a fresh session so it doesn't block the request."""
+    db = SessionLocal()
+    try:
+        recalculate_goal_progress(db, goal_id)
+    finally:
+        db.close()
+
+
 @router.put("/{task_id}", response_model=schemas.Task)
 def update_task(
     user_id: int,
     task_id: int,
     task_update: schemas.TaskUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
@@ -84,9 +94,10 @@ def update_task(
             raise HTTPException(status_code=400, detail=error_msg)
         raise HTTPException(status_code=422, detail=error_msg)
 
-    # Trigger progress recalculation if task has a goal and status changed
+    # Schedule progress recalculation in the background if task has a goal and status changed.
+    # This removes ~1 second from the request critical path.
     if updated_task.goal_id and task_update.status is not None and task_update.status != old_status:
-        recalculate_goal_progress(db, updated_task.goal_id)
+        background_tasks.add_task(_recalc_progress_in_bg, updated_task.goal_id)
 
     return updated_task
 

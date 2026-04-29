@@ -13,7 +13,7 @@ export function Layout() {
             <div className="flex justify-end mb-4">
               <NotificationCenter />
             </div>
-            <div className="flex-1 animate-fade-up">
+            <div className="flex-1">
               <Outlet />
             </div>
           </div>

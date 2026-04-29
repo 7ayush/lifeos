@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getTasks, updateTask, createTask, deleteTask, getGoals, createSubTask, toggleSubTask, deleteSubTask, syncRecurringTasks, getTaskById, syncNotifications, reorderTasks, getTags } from '../api';
+import { getTasks, updateTask, createTask, deleteTask, getGoals, createSubTask, toggleSubTask, deleteSubTask, syncRecurringTasks, syncHabits, getTaskById, syncNotifications, reorderTasks, getTags } from '../api';
 import type { Task, Goal, TaskCreate, Tag } from '../types';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
@@ -96,10 +97,15 @@ export function KanbanBoard() {
     }
   }, [user, selectedDate, view]);
 
-  // Sync recurring tasks on mount before loading tasks
+  // Sync recurring tasks + habit tasks on mount before loading tasks
   useEffect(() => {
     if (!user || hasSynced.current) return;
     hasSynced.current = true;
+    // Generate today's habit-tasks (daily/weekly/monthly habits that hit today).
+    // Fire-and-forget — the periodic task load will pick up whatever was created.
+    syncHabits(user.id).catch((err) => {
+      console.error('Failed to sync habit tasks', err);
+    });
     syncRecurringTasks(user.id).catch((err) => {
       console.error('Failed to sync recurring tasks', err);
       setSyncError('Recurring task sync failed');
@@ -214,9 +220,11 @@ export function KanbanBoard() {
 
     let statusUpdated = false;
     try {
-      await updateTask(user.id, taskId, { status: newStatus });
-      statusUpdated = true;
-      await reorderTasks(user.id, newStatus, destOrderedIds);
+      // Fire status update and reorder in parallel — they're independent.
+      const [, ] = await Promise.all([
+        updateTask(user.id, taskId, { status: newStatus }).then(() => { statusUpdated = true; }),
+        reorderTasks(user.id, newStatus, destOrderedIds),
+      ]);
     } catch (err) {
       console.error('Failed to move task', err);
       // Partial failure: if status was updated on server but reorder failed, revert the status change
@@ -435,7 +443,7 @@ export function KanbanBoard() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col animate-in fade-in duration-500 relative z-10">
+    <div className="flex flex-col relative z-10">
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 relative z-30">
 
         <div>
@@ -682,7 +690,7 @@ export function KanbanBoard() {
             const cStyle = colStyles[colConfig] || colStyles['Todo'];
 
             return (
-              <div key={colConfig} className={`flex flex-col h-full max-h-full ${cStyle.bg} backdrop-blur-3xl border ${cStyle.border} rounded-4xl p-5 pb-2 ${cStyle.glow} relative overflow-hidden transition-all duration-500`}>
+              <div key={colConfig} className={`flex flex-col ${cStyle.bg} backdrop-blur-3xl border ${cStyle.border} rounded-4xl p-5 pb-2 ${cStyle.glow} relative transition-all duration-500`}>
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-linear-to-r from-transparent ${cStyle.topGlare} to-transparent opacity-60`} />
                 <div className="flex items-center justify-between mb-6 relative z-10 px-1 shrink-0">
                   <div className="flex items-center gap-2">
@@ -699,7 +707,7 @@ export function KanbanBoard() {
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className={`flex-1 overflow-y-auto pr-1 -mr-1 custom-scrollbar min-h-0 transition-colors rounded-xl p-1 ${
+                      className={`flex-1 min-h-0 transition-colors rounded-xl p-1 ${
                         snapshot.isDraggingOver ? 'bg-secondary/50' : ''
                       }`}
                     >
@@ -708,12 +716,13 @@ export function KanbanBoard() {
                           const style = statusStyles[task.status] || statusStyles['Todo'];
                           return (
                             <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                              {(provided, snapshot) => (
+                              {(provided, snapshot) => {
+                                const card = (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  className={`p-4 rounded-2xl group relative select-none transition-all duration-300 border backdrop-blur-md border-l-4 ${style.bg} ${style.border} ${style.accent} ${
-                                    snapshot.isDragging ? 'shadow-2xl shadow-cyan-500/20 opacity-90 ring-1 ring-cyan-500/50 scale-[1.04] z-50' : 'hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(0,0,0,0.3)] hover:brightness-110'
+                                  className={`p-4 rounded-2xl group relative select-none transition-[box-shadow,filter,border-color] duration-300 border backdrop-blur-md border-l-4 ${style.bg} ${style.border} ${style.accent} ${
+                                    snapshot.isDragging ? 'shadow-2xl shadow-cyan-500/20 opacity-90 ring-1 ring-cyan-500/50 z-50' : 'hover:shadow-[0_8px_20px_rgba(0,0,0,0.3)] hover:brightness-110'
                                   }`}
                                 >
                                   <div className="flex gap-3">
@@ -918,7 +927,9 @@ export function KanbanBoard() {
                                     </div>
                                   </div>
                                 </div>
-                              )}
+                                );
+                                return snapshot.isDragging ? createPortal(card, document.body) : card;
+                              }}
                             </Draggable>
                           );
                         })}

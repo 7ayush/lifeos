@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getHabits, createHabit, logHabit, updateHabit, deleteHabit, getGoals } from '../api';
 import type { Habit, HabitCreate, HabitLog, Goal } from '../types';
@@ -327,7 +328,7 @@ export function HabitsPage() {
                         <h3 className="text-xl font-bold text-foreground font-['Outfit'] truncate leading-tight" title={habit.title}>
                           {habit.title}
                         </h3>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           <button 
                             onClick={(e) => { e.stopPropagation(); openEditModal(habit); }}
                             className="p-1.5 bg-secondary/50 hover:bg-secondary/50 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
@@ -555,9 +556,9 @@ export function HabitsPage() {
         )}
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-card/60 backdrop-blur-sm animate-in fade-in" onClick={() => setIsModalOpen(false)}>
-          <div className="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border" onClick={(e) => e.stopPropagation()}>
+      {isModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}>
+          <div className="relative bg-popover w-full max-w-md rounded-3xl p-8 shadow-2xl border border-border" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-2xl font-bold text-foreground mb-2 font-['Outfit']">
               {editingHabit ? 'Edit Habit' : 'Create New Habit'}
             </h2>
@@ -879,7 +880,8 @@ export function HabitsPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <ConfirmModal

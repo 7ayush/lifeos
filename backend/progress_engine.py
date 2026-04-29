@@ -1,15 +1,107 @@
 """Progress Engine — computes goal progress from linked tasks and habits."""
 
+from __future__ import annotations
+
 import datetime
+from typing import Optional
+
 from sqlalchemy.orm import Session, joinedload
 
 from . import models
 
 
+def _habit_adherence_pct(db: Session, habit: "models.Habit") -> Optional[float]:
+    """Compute a 0-100 adherence score for a habit based on its schedule.
+
+    Returns None if the habit hasn't started yet (so it doesn't drag the goal
+    down before the sprint begins) or if no adherence can be computed.
+
+    Rules:
+      • flexible:   done_count / expected_by_ratio, where
+                    expected = (days_elapsed / target_y_days) * target_x
+      • daily:      done_count_on_scheduled / scheduled_days_elapsed
+                    (respects repeat_days if set; otherwise every day is scheduled)
+      • weekly / custom:
+                    same as daily, restricted to weekdays in repeat_days
+      • monthly:    done_count / (distinct months elapsed)
+      • annually:   done_count / max(1, years elapsed)
+    """
+    today = datetime.date.today()
+    start = habit.start_date
+    if start is None or today < start:
+        return None  # habit hasn't started yet
+
+    freq = (habit.frequency_type or "flexible").lower()
+
+    done_count = (
+        db.query(models.HabitLog)
+        .filter(
+            models.HabitLog.habit_id == habit.id,
+            models.HabitLog.status == "Done",
+        )
+        .count()
+    )
+
+    # ----- flexible (legacy X in Y days system) -----
+    if freq == "flexible":
+        if not habit.target_y_days or habit.target_y_days <= 0:
+            return None
+        days_elapsed = (today - start).days + 1
+        expected = (days_elapsed / habit.target_y_days) * (habit.target_x or 0)
+        if expected <= 0:
+            return None
+        return min(done_count / expected, 1.0) * 100
+
+    # Helper: enumerate dates from start to today
+    def _dates_in_range():
+        d = start
+        while d <= today:
+            yield d
+            d += datetime.timedelta(days=1)
+
+    # Helper: weekday set using 0=Sun..6=Sat convention
+    def _scheduled_weekday_set():
+        if not habit.repeat_days:
+            return None  # all days scheduled
+        try:
+            return {int(x) for x in habit.repeat_days.split(",") if x.strip()}
+        except ValueError:
+            return None
+
+    def _is_scheduled_weekday(d: datetime.date) -> bool:
+        wset = _scheduled_weekday_set()
+        if wset is None:
+            return True
+        our_weekday = (d.weekday() + 1) % 7  # Mon=0..Sun=6 -> Sun=0..Sat=6
+        return our_weekday in wset
+
+    # ----- daily / weekly / custom: count scheduled days in range -----
+    if freq in ("daily", "weekly", "custom"):
+        scheduled_days = sum(1 for d in _dates_in_range() if _is_scheduled_weekday(d))
+        if scheduled_days <= 0:
+            return None
+        return min(done_count / scheduled_days, 1.0) * 100
+
+    # ----- monthly: one expected per calendar month elapsed -----
+    if freq == "monthly":
+        months = (today.year - start.year) * 12 + (today.month - start.month) + 1
+        if months <= 0:
+            return None
+        return min(done_count / months, 1.0) * 100
+
+    # ----- annually -----
+    if freq == "annually":
+        years = max(1, today.year - start.year + 1)
+        return min(done_count / years, 1.0) * 100
+
+    # Unknown frequency — don't penalise
+    return None
+
+
 def compute_goal_progress(db: Session, goal_id: int) -> int:
     """Compute goal progress as integer 0-100.
 
-    Weighted average of task completion ratio and habit success rate.
+    Weighted average of task completion ratio and habit adherence rate.
     Returns 0 when the goal has no linked tasks and no linked habits.
     Clamps result to 0-100 range.
     """
@@ -22,31 +114,19 @@ def compute_goal_progress(db: Session, goal_id: int) -> int:
 
     components: list[float] = []
 
-    # Task completion ratio
-    if tasks:
-        done_tasks = sum(1 for t in tasks if t.status == "Done")
-        components.append((done_tasks / len(tasks)) * 100)
+    # Task completion ratio (manual + recurring instances; exclude habit-type
+    # tasks since they're already counted via the habit adherence path below).
+    countable_tasks = [t for t in tasks if t.task_type != "habit"]
+    if countable_tasks:
+        done_tasks = sum(1 for t in countable_tasks if t.status == "Done")
+        components.append((done_tasks / len(countable_tasks)) * 100)
 
-    # Habit success rate
+    # Habit adherence rate
     habit_scores: list[float] = []
     for h in habits:
-        # Guard against division by zero
-        if not h.target_y_days or h.target_y_days <= 0:
-            continue
-
-        done_count = (
-            db.query(models.HabitLog)
-            .filter(
-                models.HabitLog.habit_id == h.id,
-                models.HabitLog.status == "Done",
-            )
-            .count()
-        )
-
-        days_elapsed = max(1, (datetime.date.today() - h.start_date).days + 1)
-        expected = (days_elapsed / h.target_y_days) * h.target_x
-        if expected > 0:
-            habit_scores.append(min(done_count / expected, 1.0) * 100)
+        score = _habit_adherence_pct(db, h)
+        if score is not None:
+            habit_scores.append(score)
 
     if habit_scores:
         components.append(sum(habit_scores) / len(habit_scores))
@@ -56,6 +136,7 @@ def compute_goal_progress(db: Session, goal_id: int) -> int:
 
     progress = sum(components) / len(components)
     return int(round(max(0, min(progress, 100))))
+
 
 def batch_compute_progress(db: Session, goal_ids: list[int]) -> dict[int, int]:
     """Compute progress for multiple goals in a single batch. Returns {goal_id: progress}."""
@@ -75,30 +156,18 @@ def batch_compute_progress(db: Session, goal_ids: list[int]) -> dict[int, int]:
         habits = goal.habits
         components: list[float] = []
 
-        # Task completion ratio
-        if tasks:
-            done_tasks = sum(1 for t in tasks if t.status == "Done")
-            components.append((done_tasks / len(tasks)) * 100)
+        # Task completion ratio (exclude habit-type tasks to avoid double-counting)
+        countable_tasks = [t for t in tasks if t.task_type != "habit"]
+        if countable_tasks:
+            done_tasks = sum(1 for t in countable_tasks if t.status == "Done")
+            components.append((done_tasks / len(countable_tasks)) * 100)
 
-        # Habit success rate
+        # Habit adherence rate
         habit_scores: list[float] = []
         for h in habits:
-            if not h.target_y_days or h.target_y_days <= 0:
-                continue
-
-            done_count = (
-                db.query(models.HabitLog)
-                .filter(
-                    models.HabitLog.habit_id == h.id,
-                    models.HabitLog.status == "Done",
-                )
-                .count()
-            )
-
-            days_elapsed = max(1, (datetime.date.today() - h.start_date).days + 1)
-            expected = (days_elapsed / h.target_y_days) * h.target_x
-            if expected > 0:
-                habit_scores.append(min(done_count / expected, 1.0) * 100)
+            score = _habit_adherence_pct(db, h)
+            if score is not None:
+                habit_scores.append(score)
 
         if habit_scores:
             components.append(sum(habit_scores) / len(habit_scores))

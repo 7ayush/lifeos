@@ -311,7 +311,6 @@ export function LoginPage() {
 
   return (
     <div className="h-screen w-screen flex flex-col lg:flex-row bg-background relative overflow-hidden font-['Jost']">
-      <div className="noise-texture" />
 
       {/* ===== Left Panel — visible on all screens ===== */}
       {/* On mobile/tablet: stacked on top, fixed height. On desktop: side-by-side. */}

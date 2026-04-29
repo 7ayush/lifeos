@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from . import models, schemas
 
@@ -123,6 +124,7 @@ def delete_user_goal(db: Session, goal_id: int):
 # ============================
 
 def create_user_habit(db: Session, habit: schemas.HabitCreate, user_id: int):
+    import datetime as _dt
     data = habit.model_dump(exclude_none=True)
     # SQLite NOT NULL constraint on legacy columns — default to 0 for scheduled habits
     data.setdefault('target_x', 0)
@@ -132,18 +134,23 @@ def create_user_habit(db: Session, habit: schemas.HabitCreate, user_id: int):
     db.commit()
     db.refresh(db_habit)
 
-    # Auto-create a linked task for this habit
-    db_task = models.Task(
-        user_id=user_id,
-        title=f"🔁 {db_habit.title}",
-        habit_id=db_habit.id,
-        task_type="habit",
-        goal_id=db_habit.goal_id,
-        target_date=db_habit.start_date,
-        status="Todo",
-    )
-    db.add(db_task)
-    db.commit()
+    # Auto-create a linked task for this habit, but ONLY if the start date is
+    # today or in the past. For future-dated habits we defer task creation to
+    # sync_habit_tasks — which runs on the day itself — to avoid cluttering the
+    # Tasks view with long-horizon future tasks that do nothing.
+    today = _dt.date.today()
+    if db_habit.start_date <= today:
+        db_task = models.Task(
+            user_id=user_id,
+            title=f"🔁 {db_habit.title}",
+            habit_id=db_habit.id,
+            task_type="habit",
+            goal_id=db_habit.goal_id,
+            target_date=db_habit.start_date,
+            status="Todo",
+        )
+        db.add(db_task)
+        db.commit()
 
     return db_habit
 
@@ -456,13 +463,11 @@ def update_task(db: Session, task_id: int, task_update: schemas.TaskUpdate):
         for key, value in update_data.items():
             setattr(db_task, key, value)
         db.commit()
-        db.refresh(db_task)
 
     # Handle tag assignment when tag_ids is provided
     if tag_ids is not None:
         db_task.tags = _resolve_tag_ids(db, db_task.user_id, tag_ids)
         db.commit()
-        db.refresh(db_task)
 
     return db_task
 
@@ -541,13 +546,9 @@ def reorder_tasks(db: Session, user_id: int, status: str, ordered_task_ids: List
 
     db.commit()
 
-    # Refresh and return tasks in the requested order
-    result = []
-    for task_id in ordered_task_ids:
-        db.refresh(task_map[task_id])
-        result.append(task_map[task_id])
-
-    return result
+    # Return tasks in the requested order (SQLAlchemy already reflects the new
+    # sort_order values on the in-session objects; no need to round-trip per row).
+    return [task_map[task_id] for task_id in ordered_task_ids]
 
 
 # ============================
@@ -653,8 +654,20 @@ def sync_habit_tasks(db: Session, user_id: int):
     """
     Ensures every active habit has a linked task for the current period.
     Creates missing ones and removes orphaned habit-tasks.
+
+    Guarantees (so the Tasks view stays uncluttered):
+      • A habit's task is NEVER created before habit.start_date.
+      • For daily habits with repeat_days, a task is only created on days
+        listed in repeat_days.
+      • For weekly habits, a task is only created on the day(s) listed
+        in repeat_days. If repeat_days is empty, fall back to "any day
+        this week" (legacy behavior).
+      • For monthly habits, only one task per calendar month (created on
+        the first sync of that month).
     """
     today = datetime.date.today()
+    # Python weekday: Mon=0..Sun=6. repeat_days uses Sun=0..Sat=6 convention.
+    today_sun0 = (today.weekday() + 1) % 7
     habits = db.query(models.Habit).filter(models.Habit.user_id == user_id).all()
     habit_ids = {h.id for h in habits}
 
@@ -664,19 +677,34 @@ def sync_habit_tasks(db: Session, user_id: int):
         .all()
     )
 
+    def _repeat_day_set(csv):
+        if not csv:
+            return set()
+        return {int(d.strip()) for d in csv.split(",") if d.strip().isdigit()}
+
     # Create tasks for habits missing a task in the current period
     created = 0
     for habit in habits:
+        # Never create a task before the habit is active.
+        if habit.start_date and habit.start_date > today:
+            continue
+
         freq = habit.frequency_type or "flexible"
+        repeat_day_set = _repeat_day_set(habit.repeat_days)
 
         if freq in ("daily", "flexible"):
-            # Check if a task exists for today
+            # If repeat_days is specified, only create on listed weekdays.
+            if repeat_day_set and today_sun0 not in repeat_day_set:
+                continue
             has_current = any(
                 t for t in existing_habit_tasks
                 if t.habit_id == habit.id and t.target_date == today
             )
         elif freq == "weekly":
-            # Current week: Monday to Sunday
+            # Only create on days explicitly scheduled; if unscheduled, fall back
+            # to "any day this week" for legacy habits.
+            if repeat_day_set and today_sun0 not in repeat_day_set:
+                continue
             monday = today - datetime.timedelta(days=today.weekday())
             sunday = monday + datetime.timedelta(days=6)
             has_current = any(
@@ -716,7 +744,16 @@ def sync_habit_tasks(db: Session, user_id: int):
                 status="Todo",
             )
             db.add(db_task)
-            created += 1
+            try:
+                # Flush per-task so a concurrent insert (caught by the
+                # uq_habit_task_per_day unique index) raises here and we can
+                # skip this habit without losing the rest of the batch.
+                db.flush()
+                created += 1
+            except IntegrityError:
+                db.rollback()
+                # Another concurrent sync inserted the same habit-task; skip.
+                continue
 
     # Remove orphaned habit-tasks (habit was deleted)
     removed = 0

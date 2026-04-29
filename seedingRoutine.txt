@@ -1,0 +1,114 @@
+# LifeOS — Personal Seeding Routine (90-Day Sprint Edition)
+
+Target user:   ayush.kaushik711@gmail.com
+Sprint start:  Wed 29 Apr 2026
+Target date:   +180 days (Mon 26 Oct 2026) on every goal
+
+This file defines the personal routine that gets seeded into LifeOS as
+goals and habits. Each section maps cleanly onto a LifeOS model.
+
+===================================================================
+1. CAREER: SDE-2 SPRINT  (Goal — category: Area, priority: High)
+===================================================================
+Purpose: Secure a 50+ LPA SDE-2 offer within 90 days.
+
+Child habits (all daily):
+  • DSA practice (45 min)              — daily, min 80%
+        target: 1–2 Mediums/Hards per day
+  • System Design concept (20 min)     — daily, min 80%
+  • Mock Interview / HLD deep dive     — daily, min 90%
+
+
+===================================================================
+2. WEALTH & STARTUP  (Goal — category: Project, priority: High)
+===================================================================
+Purpose: Launch MVP infrastructure and manage personal finance.
+
+Child habits:
+  • Startup deep work (1 hour)         — daily, min 90%
+  • SOIC / F&O review — Mon/Wed/Fri/Sat/Sun — 5x / week, min 70%
+
+
+===================================================================
+3. GYM  (Goal — category: Area, priority: High)
+===================================================================
+Purpose: Execute the 7-day hybrid split consistently.
+Schedule: Push → Pull → Legs → Rest → Upper → Lower → Rest.
+
+Child habits (one per split day — tasks auto-generate on the matching weekday):
+  • Push day — Mon (hypertrophy)       — weekly, min 90%
+  • Pull day — Tue                     — weekly, min 90%
+  • Legs day + prehab — Wed            — weekly, min 90%
+  • Rest day — Thu (active recovery)   — weekly, min 80%
+  • Upper volume day — Fri             — weekly, min 90%
+  • Lower / shoulders & legs — Sat     — weekly, min 90%
+  • Rest day — Sun (core + conditioning) — weekly, min 80%
+
+Suggested notes:
+  • "7-Day Hybrid Split"  — detailed workout plan per day.
+
+
+===================================================================
+4. HALF MARATHON MASTERY  (Goal — category: Project, priority: High)
+===================================================================
+Purpose: Build endurance for a half marathon.
+
+Child habits:
+  • Daily 3–5 km run (Mon–Sat)         — 6x / week, min 80%
+  • Long run 15 km — Sun               — weekly (gym rest), min 90%
+
+
+===================================================================
+5. MORNING ROUTINE  (Goal — category: Area, priority: High)
+===================================================================
+Purpose: Bodyweight conditioning outside the gym — daily activation.
+
+Child habits (all daily):
+  • Skipping                           — daily, min 80%
+  • Squats                             — daily, min 80%
+  • Pullups                            — daily, min 70%
+  • Pushups                            — daily, min 80%
+  • Plank                              — daily, min 80%
+  • Jumping (box / broad)              — daily, min 75%
+
+
+===================================================================
+6. MIND, BODY & INTELLECT  (Goal — category: Area, priority: High)
+===================================================================
+Purpose: The foundation — recovery, movement, reading, grooming,
+journaling, and devotion. Holds everything else up.
+
+Movement + recovery:
+  • 10K steps                          — daily, min 80%
+  • Sleep cycle (10:00 PM — 5:30 AM)   — daily, min 85%
+  • Hydration (3000 ml)                — daily, min 80%
+    (water entries logged via Hydration widget)
+
+Mind + learning:
+  • Read 10 pages (pre-sleep)          — daily, min 80%
+        target: 1 book every 2 months
+  • Meditation (5 min, morning)        — daily, min 70%
+
+Grooming + discipline:
+  • Topical hair-care regimen          — daily (evening), min 90%
+  • Journal entry & mood log           — daily (evening), min 100%
+  • No cheat meal & no sugar           — daily, min 95%
+
+Devotion:
+  • Morning pooja                      — daily, min 85%
+  • Mandir visit                       — daily, min 70%
+
+
+===================================================================
+Seeding behaviour
+===================================================================
+• The seeder creates the target user if they don't exist (by email).
+• Re-running is idempotent: ALL of the user's data is wiped and
+  re-seeded by default. Pass `--keep-personal` to preserve journal
+  entries, notes, water entries, and tags across re-seeds.
+• All habits start on the sprint start date (29 Apr 2026).
+• Habit-tasks are NOT pre-created. They auto-generate on the day
+  itself via `POST /sync/habits/{user_id}`, which the Dashboard and
+  Tasks pages call on mount. This keeps the Tasks view uncluttered.
+• Water goal is set to 3000 ml.
+• Reminder config defaults to: 1 day before, on due date, when overdue.
