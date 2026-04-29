@@ -59,30 +59,37 @@ export function Dashboard() {
   const handleToggleHabit = async (habitId: number, currentLogs: any[]) => {
     if (!user) return;
     const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const hasLoggedToday = currentLogs?.some(l => l.log_date === todayStr && l.status === 'Done');
-    const newStatus = hasLoggedToday ? 'Missed' : 'Done';
+
+    // Tri-state cycle: unset (no log) → Done → Missed → unset (Clear)
+    const existing = currentLogs?.find(l => l.log_date === todayStr);
+    const current: 'none' | 'Done' | 'Missed' = !existing
+      ? 'none'
+      : existing.status === 'Done' ? 'Done' : 'Missed';
+    const nextApi: 'Done' | 'Missed' | 'Clear' =
+      current === 'none' ? 'Done' : current === 'Done' ? 'Missed' : 'Clear';
 
     setTodayData(prev => {
       if (!prev) return prev;
       return {
         ...prev,
         habits: prev.habits.map(h => {
-          if (h.id === habitId) {
-            let logs = [...(h.logs || [])];
-            if (hasLoggedToday) {
-              logs = logs.filter(l => !(l.log_date === todayStr && l.status === 'Done'));
-            } else {
-              logs.push({ id: Date.now(), habit_id: habitId, log_date: todayStr, status: 'Done' });
-            }
-            return { ...h, logs, current_streak: newStatus === 'Done' ? h.current_streak + 1 : Math.max(0, h.current_streak - 1) };
+          if (h.id !== habitId) return h;
+          let logs = [...(h.logs || [])];
+          logs = logs.filter(l => l.log_date !== todayStr);
+          if (nextApi !== 'Clear') {
+            logs.push({ id: Date.now(), habit_id: habitId, log_date: todayStr, status: nextApi });
           }
-          return h;
+          // Streak optimism: only bump on Done; reset to 0 on Missed; leave unchanged on Clear
+          const streak = nextApi === 'Done' ? h.current_streak + 1
+            : nextApi === 'Missed' ? 0
+            : h.current_streak;
+          return { ...h, logs, current_streak: streak };
         })
       };
     });
 
     try {
-      await logHabit(user.id, habitId, newStatus);
+      await logHabit(user.id, habitId, nextApi);
       loadDashboardData();
     } catch (err) {
       console.error('Failed to log habit', err);

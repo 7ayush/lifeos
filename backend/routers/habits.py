@@ -56,8 +56,8 @@ def log_habit_status(
     if log_date > datetime.date.today():
         raise HTTPException(status_code=400, detail="Cannot log status for future dates")
     
-    if status not in ["Done", "Missed"]:
-        raise HTTPException(status_code=400, detail="Status must be 'Done' or 'Missed'")
+    if status not in ["Done", "Missed", "Clear"]:
+        raise HTTPException(status_code=400, detail="Status must be 'Done', 'Missed', or 'Clear'")
 
     # Validate habit exists and belongs to user
     habit = db.query(models.Habit).filter(models.Habit.id == habit_id, models.Habit.user_id == user_id).first()

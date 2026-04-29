@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getHabits, createHabit, logHabit, updateHabit, deleteHabit, getGoals } from '../api';
 import type { Habit, HabitCreate, HabitLog, Goal } from '../types';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { Plus, Activity, CheckCircle2, Flame, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Target, TrendingUp, Repeat } from 'lucide-react';
+import { Plus, Activity, CheckCircle2, Flame, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Target, TrendingUp, Repeat, X as XIcon } from 'lucide-react';
 import { format, subDays, addDays, isSameDay, isAfter, isBefore, startOfDay } from 'date-fns';
 
 export function HabitsPage() {
@@ -169,30 +169,32 @@ export function HabitsPage() {
 
   const handleToggleLog = async (habitId: number, dateStr: string, currentLogs: HabitLog[]) => {
     if (!user) return;
-    
+
     // Safety check: prevent logging for future dates
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     if (dateStr > todayStr) return;
 
-    const isDone = currentLogs.some(l => l.log_date === dateStr && l.status === 'Done');
-    const newStatus = isDone ? 'Missed' : 'Done';
+    // Tri-state cycle: unset (no log) → Done → Missed → unset (Clear)
+    const existing = currentLogs.find(l => l.log_date === dateStr);
+    const current: 'none' | 'Done' | 'Missed' = !existing
+      ? 'none'
+      : existing.status === 'Done' ? 'Done' : 'Missed';
+    const nextApi: 'Done' | 'Missed' | 'Clear' =
+      current === 'none' ? 'Done' : current === 'Done' ? 'Missed' : 'Clear';
 
-    // Optimistic Update
+    // Optimistic update
     setHabits(prev => prev.map(h => {
-      if (h.id === habitId) {
-        let logs = [...(h.logs || [])];
-        if (isDone) {
-          logs = logs.filter(l => !(l.log_date === dateStr && l.status === 'Done'));
-        } else {
-          logs.push({ id: Date.now(), habit_id: habitId, log_date: dateStr, status: 'Done' });
-        }
-        return { ...h, logs };
+      if (h.id !== habitId) return h;
+      let logs = [...(h.logs || [])];
+      logs = logs.filter(l => l.log_date !== dateStr);
+      if (nextApi !== 'Clear') {
+        logs.push({ id: Date.now(), habit_id: habitId, log_date: dateStr, status: nextApi });
       }
-      return h;
+      return { ...h, logs };
     }));
 
     try {
-      await logHabit(user.id, habitId, newStatus, dateStr);
+      await logHabit(user.id, habitId, nextApi, dateStr);
       loadHabits();
     } catch (err) {
       console.error('Failed to log habit', err);
@@ -469,44 +471,60 @@ export function HabitsPage() {
                                 if (isFlexible) return true;
                                 const isToday = isSameDay(date, today);
                                 const dateStr = format(date, 'yyyy-MM-dd');
-                                const hasLog = logs.some(l => l.log_date === dateStr && l.status === 'Done');
+                                const hasLog = logs.some(l => l.log_date === dateStr);
                                 return isScheduledDay(date) || isToday || hasLog;
                               })
                               .map((date, idx) => {
                             const dateStr = format(date, 'yyyy-MM-dd');
-                            const isDone = logs.some(l => l.log_date === dateStr && l.status === 'Done');
+                            const existingLog = logs.find(l => l.log_date === dateStr);
+                            const logStatus: 'none' | 'Done' | 'Missed' = !existingLog
+                              ? 'none'
+                              : existingLog.status === 'Done' ? 'Done' : 'Missed';
                             const isFuture = isAfter(startOfDay(date), startOfDay(today));
                             const isBeforeStart = isBefore(startOfDay(date), habitStart);
                             const isDisabled = isFuture || isBeforeStart;
                             const isToday = isSameDay(date, today);
                             const isScheduled = isScheduledDay(date);
                             const isAdhoc = !isFlexible && !isScheduled && isToday;
-                            
+
+                            // Button styling per tri-state
+                            let buttonClass: string;
+                            if (isDisabled) {
+                              buttonClass = 'bg-secondary/50 border-border cursor-not-allowed';
+                            } else if (logStatus === 'Done') {
+                              buttonClass = 'bg-emerald-100 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] active:scale-95';
+                            } else if (logStatus === 'Missed') {
+                              buttonClass = 'bg-rose-100 dark:bg-rose-500/10 border-rose-300 dark:border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)] active:scale-95';
+                            } else if (isAdhoc) {
+                              buttonClass = 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/10 hover:border-amber-300 dark:hover:border-amber-500/30 active:scale-95';
+                            } else {
+                              buttonClass = 'bg-secondary/50 border-border hover:bg-secondary/80 hover:border-border active:scale-95';
+                            }
+
                             return (
                               <div key={idx} className={`flex flex-col items-center gap-2 min-w-[42px] snap-center transition-opacity duration-300 ${isDisabled ? 'opacity-20' : ''}`}>
                                 <span className={`text-[10px] uppercase font-bold transition-colors ${isToday ? 'text-indigo-600 dark:text-indigo-400 ring-1 ring-indigo-500/30 px-1 rounded' : isAdhoc ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
                                   {format(date, 'EEE')}
                                 </span>
                                 <button
-                                  onClick={(e) => { 
+                                  onClick={(e) => {
                                     if (isDisabled) return;
-                                    e.stopPropagation(); 
-                                    handleToggleLog(habit.id, dateStr, logs); 
+                                    e.stopPropagation();
+                                    handleToggleLog(habit.id, dateStr, logs);
                                   }}
                                   disabled={isDisabled}
-                                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${
-                                    isDisabled 
-                                      ? 'bg-secondary/50 border-border cursor-not-allowed' 
-                                      : isDone 
-                                        ? 'bg-emerald-100 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] active:scale-95' 
-                                        : isAdhoc
-                                          ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 hover:bg-amber-100 dark:hover:bg-amber-500/10 hover:border-amber-300 dark:hover:border-amber-500/30 active:scale-95'
-                                          : 'bg-secondary/50 border-border hover:bg-secondary/80 hover:border-border active:scale-95'
-                                  }`}
-                                  title={isAdhoc ? 'Not scheduled — adhoc tracking' : undefined}
+                                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border ${buttonClass}`}
+                                  title={
+                                    logStatus === 'Done' ? 'Done — click to mark Missed'
+                                    : logStatus === 'Missed' ? 'Missed — click to clear'
+                                    : isAdhoc ? 'Not scheduled — adhoc tracking'
+                                    : 'Click to mark Done'
+                                  }
                                 >
-                                  {isDone ? (
+                                  {logStatus === 'Done' ? (
                                     <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
+                                  ) : logStatus === 'Missed' ? (
+                                    <XIcon className="w-5 h-5 text-rose-600 dark:text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]" />
                                   ) : (
                                     <div className={`w-2.5 h-2.5 rounded-full transition-colors ${isDisabled ? 'bg-muted' : isAdhoc ? 'bg-amber-500/40' : 'bg-muted'}`} />
                                   )}

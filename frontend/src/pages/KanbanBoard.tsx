@@ -17,7 +17,7 @@ import { filterByTags } from '../utils/tagFilter';
 
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getDaysInMonth, addDays, addMonths, addYears } from 'date-fns';
 
-const ALL_COLUMNS = ['Todo', 'InProgress', 'Done', 'Archived'] as const;
+const ALL_COLUMNS = ['Todo', 'InProgress', 'Done', 'Failed', 'Archived'] as const;
 type TimeframeView = 'Daily' | 'Weekly' | 'Monthly' | 'Annual' | 'All';
 
 const getNormalizedDateRange = (date: Date, view: TimeframeView): { start?: string, end?: string } => {
@@ -41,7 +41,7 @@ export function KanbanBoard() {
   const [view, setView] = useState<TimeframeView>('Daily');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(['Todo', 'InProgress', 'Done']);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(['Todo', 'InProgress', 'Done', 'Failed']);
   const [isColMenuOpen, setIsColMenuOpen] = useState(false);
   const colMenuRef = useRef<HTMLDivElement>(null);
 
@@ -432,6 +432,7 @@ export function KanbanBoard() {
     Todo: { bg: 'bg-card/40', border: 'border-border hover:border-border', glow: '', text: 'text-foreground', topGlare: 'via-foreground/30' },
     InProgress: { bg: 'bg-cyan-50 dark:bg-cyan-500/5', border: 'border-cyan-200 dark:border-cyan-500/20 hover:border-cyan-300 dark:hover:border-cyan-500/40', glow: 'shadow-[0_0_40px_rgba(34,211,238,0.05)]', text: 'text-cyan-700 dark:text-cyan-500', topGlare: 'via-cyan-500/40' },
     Done: { bg: 'bg-emerald-50 dark:bg-emerald-500/5', border: 'border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-300 dark:hover:border-emerald-500/40', glow: 'shadow-[0_0_40px_rgba(16,185,129,0.05)]', text: 'text-emerald-700 dark:text-emerald-500', topGlare: 'via-emerald-500/40' },
+    Failed: { bg: 'bg-rose-50 dark:bg-rose-500/5', border: 'border-rose-200 dark:border-rose-500/20 hover:border-rose-300 dark:hover:border-rose-500/40', glow: 'shadow-[0_0_40px_rgba(244,63,94,0.05)]', text: 'text-rose-700 dark:text-rose-500', topGlare: 'via-rose-500/40' },
     Archived: { bg: 'bg-card/20', border: 'border-border hover:border-border', glow: '', text: 'text-muted-foreground', topGlare: 'via-muted-foreground/20' },
   };
 
@@ -439,6 +440,7 @@ export function KanbanBoard() {
     Todo: { bg: 'bg-card/80', border: 'border-border', accent: 'border-l-foreground/30', text: 'text-foreground', line: '' },
     InProgress: { bg: 'bg-cyan-50 dark:bg-cyan-500/5', border: 'border-cyan-200 dark:border-cyan-500/20', accent: 'border-l-cyan-500', text: 'text-foreground', line: '' },
     Done: { bg: 'bg-emerald-50 dark:bg-emerald-500/5', border: 'border-emerald-200 dark:border-emerald-500/20', accent: 'border-l-emerald-400 dark:border-l-emerald-500/50', text: 'text-muted-foreground', line: 'line-through' },
+    Failed: { bg: 'bg-rose-50 dark:bg-rose-500/5', border: 'border-rose-200 dark:border-rose-500/20', accent: 'border-l-rose-400 dark:border-l-rose-500/60', text: 'text-muted-foreground', line: 'line-through' },
     Archived: { bg: 'bg-card/40', border: 'border-border', accent: 'border-l-muted-foreground', text: 'text-muted-foreground', line: '' },
   };
 

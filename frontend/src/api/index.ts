@@ -123,7 +123,7 @@ export const createHabit = async (userId: number, habit: HabitCreate): Promise<H
   return res.data;
 };
 
-export const logHabit = async (userId: number, habitId: number, status: 'Done' | 'Missed', logDate?: string): Promise<Habit> => {
+export const logHabit = async (userId: number, habitId: number, status: 'Done' | 'Missed' | 'Clear', logDate?: string): Promise<Habit> => {
   const params = { status, log_date: logDate };
   const res = await api.post(`/users/${userId}/habits/${habitId}/log`, null, { params });
   return res.data;

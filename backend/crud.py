@@ -158,20 +158,52 @@ def get_user_habits(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Habit).filter(models.Habit.user_id == user_id).offset(skip).limit(limit).all()
 
 def log_habit(db: Session, habit_id: int, status: str, log_date):
-    # Check if a log already exists for this date
+    """Log or update a habit's status for a given date.
+
+    status values:
+      • "Done"   — habit was completed
+      • "Missed" — habit was explicitly skipped/failed
+      • "Clear"  — delete any existing log for that date (pseudo-status)
+
+    Also keeps the linked habit-task in sync:
+      • Done  → task.status = "Done"
+      • Missed → task.status = "Failed"
+      • Clear → task.status = "Todo"
+    """
+    import datetime as _dt
+
+    # Find existing log (if any)
     existing_log = db.query(models.HabitLog).filter(
         models.HabitLog.habit_id == habit_id,
         models.HabitLog.log_date == log_date
     ).first()
 
-    if existing_log:
-        existing_log.status = status
-        db_log = existing_log
+    if status == "Clear":
+        if existing_log:
+            db.delete(existing_log)
+        db_log = None
     else:
-        db_log = models.HabitLog(habit_id=habit_id, status=status, log_date=log_date)
-        db.add(db_log)
-    
+        if existing_log:
+            existing_log.status = status
+            db_log = existing_log
+        else:
+            db_log = models.HabitLog(habit_id=habit_id, status=status, log_date=log_date)
+            db.add(db_log)
+
     db.commit()
+
+    # Sync the corresponding habit-task (same habit, same target_date) to match
+    task_status_map = {"Done": "Done", "Missed": "Failed", "Clear": "Todo"}
+    task_status = task_status_map.get(status)
+    if task_status is not None:
+        linked_task = db.query(models.Task).filter(
+            models.Task.habit_id == habit_id,
+            models.Task.task_type == "habit",
+            models.Task.target_date == log_date,
+        ).first()
+        if linked_task and linked_task.status != task_status:
+            linked_task.status = task_status
+            db.commit()
 
     # Recalculate streak using centralized function
     recalculate_habit_streak(db, habit_id)
@@ -734,6 +766,19 @@ def sync_habit_tasks(db: Session, user_id: int):
             )
 
         if not has_current:
+            # If a log already exists for today, seed the task's status to match
+            # (so a freshly-synced task reflects a pre-existing Done/Missed).
+            existing_log = db.query(models.HabitLog).filter(
+                models.HabitLog.habit_id == habit.id,
+                models.HabitLog.log_date == today,
+            ).first()
+            initial_status = "Todo"
+            if existing_log:
+                if existing_log.status == "Done":
+                    initial_status = "Done"
+                elif existing_log.status == "Missed":
+                    initial_status = "Failed"
+
             db_task = models.Task(
                 user_id=user_id,
                 title=f"🔁 {habit.title}",
@@ -741,7 +786,7 @@ def sync_habit_tasks(db: Session, user_id: int):
                 task_type="habit",
                 goal_id=habit.goal_id,
                 target_date=today,
-                status="Todo",
+                status=initial_status,
             )
             db.add(db_task)
             try:
