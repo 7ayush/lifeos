@@ -225,27 +225,27 @@ function DiagramSVG() {
 /* ------------------------------------------------------------------ */
 function ValueDiagram() {
   return (
-    <div className="relative w-full h-full overflow-hidden select-none" aria-hidden="true">
+    <div className="relative w-full h-full overflow-hidden select-none flex flex-col" aria-hidden="true">
       {/* Ambient glows */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-accent/8 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-[40%] left-[45%] w-48 h-48 bg-amber-500/5 rounded-full blur-[60px] pointer-events-none" />
 
-      {/* Header — in flow on mobile to avoid overlap, overlaid on desktop */}
-      <div className="relative lg:absolute lg:top-0 lg:left-0 lg:right-0 z-20 px-[5%] pt-4 lg:pt-5">
-        <div className="flex items-center gap-2.5 mb-2 lg:mb-5">
+      {/* Header — stacked in flow so it reserves space and never overlaps the diagram */}
+      <div className="relative z-20 px-[5%] pt-4 lg:pt-5 shrink-0">
+        <div className="flex items-center gap-2.5 mb-2 lg:mb-3">
           <div className="w-7 h-7 lg:w-8 lg:h-8 bg-linear-to-br from-amber-400 to-orange-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.25)]">
             <span className="text-xs lg:text-sm font-bold text-white font-['Outfit'] italic">L</span>
           </div>
           <span className="text-base lg:text-lg font-bold text-foreground font-['Outfit'] tracking-tight">LifeOS</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl lg:text-[2.6rem] xl:text-5xl font-bold text-foreground font-['Outfit'] tracking-tight leading-[1.05] text-center lg:mt-6">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground font-['Outfit'] tracking-tight leading-[1.05] text-center">
           Your Life, <span className="text-gradient">Organized.</span>
         </h1>
       </div>
 
-      {/* Diagram SVG — fills remaining space on mobile, full area on desktop */}
-      <div className="relative lg:absolute lg:inset-0 w-full h-full min-h-[300px] z-10">
+      {/* Diagram SVG — takes the remaining vertical space. min-h-0 lets flex shrink it when the viewport is short. */}
+      <div className="relative flex-1 min-h-0 w-full z-10">
         <DiagramSVG />
       </div>
     </div>

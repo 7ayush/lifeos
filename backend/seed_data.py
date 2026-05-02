@@ -74,6 +74,28 @@ def seed_habit_logs(conn):
     c.executemany("INSERT INTO habit_logs (habit_id, log_date, status) VALUES (?,?,?)", logs)
     print(f"  ✓ Inserted {len(logs)} habit logs")
 
+    # Keep linked habit-tasks in sync with the logs we just inserted.
+    # Same mapping used by crud.log_habit: Done → Done, Missed → Failed.
+    # This avoids the "logs exist but task is still Todo" drift seen when
+    # logs are written directly to the DB without going through the API.
+    status_to_task = {"Done": "Done", "Missed": "Failed"}
+    synced = 0
+    for habit_id, log_date, log_status in logs:
+        task_status = status_to_task.get(log_status)
+        if task_status is None:
+            continue
+        c.execute(
+            """UPDATE tasks
+                 SET status = ?
+               WHERE habit_id = ?
+                 AND task_type = 'habit'
+                 AND target_date = ?
+                 AND status != ?""",
+            (task_status, habit_id, log_date, task_status),
+        )
+        synced += c.rowcount
+    print(f"  ✓ Synced {synced} linked habit-task statuses")
+
 
 def seed_tasks(conn):
     c = conn.cursor()

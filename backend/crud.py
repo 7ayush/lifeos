@@ -169,6 +169,12 @@ def log_habit(db: Session, habit_id: int, status: str, log_date):
       • Done  → task.status = "Done"
       • Missed → task.status = "Failed"
       • Clear → task.status = "Todo"
+
+    Backfill behavior: if a user logs Done/Missed for a date that has no
+    linked habit-task yet (common when backfilling past days that were
+    missed by sync_habit_tasks), a task is created retroactively so the
+    Tasks view and Weekly Review stay consistent with the Habits log.
+    "Clear" never creates a task — it only removes signal.
     """
     import datetime as _dt
 
@@ -201,9 +207,30 @@ def log_habit(db: Session, habit_id: int, status: str, log_date):
             models.Task.task_type == "habit",
             models.Task.target_date == log_date,
         ).first()
-        if linked_task and linked_task.status != task_status:
-            linked_task.status = task_status
-            db.commit()
+
+        if linked_task:
+            if linked_task.status != task_status:
+                linked_task.status = task_status
+                db.commit()
+        elif status in ("Done", "Missed"):
+            # Backfill: no task exists for this date but the user is recording
+            # a real status. Create the missing task so Tasks/Weekly Review
+            # reflect reality. Skip Clear — we don't want to create a Todo
+            # just because someone cleared a non-existent log. Also skip if
+            # the date is before the habit started.
+            habit = db.query(models.Habit).filter(models.Habit.id == habit_id).first()
+            if habit and (habit.start_date is None or log_date >= habit.start_date):
+                db_task = models.Task(
+                    user_id=habit.user_id,
+                    title=f"🔁 {habit.title}",
+                    habit_id=habit.id,
+                    task_type="habit",
+                    goal_id=habit.goal_id,
+                    target_date=log_date,
+                    status=task_status,
+                )
+                db.add(db_task)
+                db.commit()
 
     # Recalculate streak using centralized function
     recalculate_habit_streak(db, habit_id)

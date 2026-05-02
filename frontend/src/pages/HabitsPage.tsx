@@ -36,6 +36,19 @@ export function HabitsPage() {
 
   const [viewOffset, setViewOffset] = useState(0);
 
+  // Debounced habit log writes: key = `${habitId}|${dateStr}` → { timer, status }
+  // We update UI optimistically on every click, but only send the FINAL status
+  // after 500ms of inactivity to prevent race conditions from rapid toggling.
+  const pendingLogsRef = useRef<Map<string, { timer: ReturnType<typeof setTimeout>; status: 'Done' | 'Missed' | 'Clear' }>>(new Map());
+
+  // Flush all pending writes on unmount
+  useEffect(() => {
+    return () => {
+      pendingLogsRef.current.forEach(({ timer }) => clearTimeout(timer));
+      pendingLogsRef.current.clear();
+    };
+  }, []);
+
   const loadHabits = useCallback(async () => {
     if (!user) return;
     try {
@@ -167,7 +180,9 @@ export function HabitsPage() {
     }
   };
 
-  const handleToggleLog = async (habitId: number, dateStr: string, currentLogs: HabitLog[]) => {
+  const LOG_DEBOUNCE_MS = 500;
+
+  const handleToggleLog = (habitId: number, dateStr: string, currentLogs: HabitLog[]) => {
     if (!user) return;
 
     // Safety check: prevent logging for future dates
@@ -182,7 +197,7 @@ export function HabitsPage() {
     const nextApi: 'Done' | 'Missed' | 'Clear' =
       current === 'none' ? 'Done' : current === 'Done' ? 'Missed' : 'Clear';
 
-    // Optimistic update
+    // Optimistic UI update — always immediate so the user sees instant feedback
     setHabits(prev => prev.map(h => {
       if (h.id !== habitId) return h;
       let logs = [...(h.logs || [])];
@@ -193,13 +208,30 @@ export function HabitsPage() {
       return { ...h, logs };
     }));
 
-    try {
-      await logHabit(user.id, habitId, nextApi, dateStr);
-      loadHabits();
-    } catch (err) {
-      console.error('Failed to log habit', err);
-      loadHabits();
-    }
+    // Debounce the API call: cancel any pending write for this (habit, date)
+    // and schedule a new one with the latest status. This prevents race conditions
+    // when the user rapidly cycles through states.
+    const key = `${habitId}|${dateStr}`;
+    const pending = pendingLogsRef.current.get(key);
+    if (pending) clearTimeout(pending.timer);
+
+    const timer = setTimeout(async () => {
+      pendingLogsRef.current.delete(key);
+      try {
+        await logHabit(user.id, habitId, nextApi, dateStr);
+        // Refetch only when no other pending writes exist, so server-computed
+        // fields like current_streak stay fresh without clobbering in-flight edits.
+        if (pendingLogsRef.current.size === 0) {
+          loadHabits();
+        }
+      } catch (err) {
+        console.error('Failed to log habit', err);
+        // On failure, refetch to resync UI with server truth
+        loadHabits();
+      }
+    }, LOG_DEBOUNCE_MS);
+
+    pendingLogsRef.current.set(key, { timer, status: nextApi });
   };
 
   const getPastDays = (numDays: number, offset: number = 0) => {
